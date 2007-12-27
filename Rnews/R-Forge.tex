@@ -1,0 +1,136 @@
+\title{Collaborative Software Development using R-Forge}
+\author{Stefan Theu\ss{}l and Achim Zeileis}
+
+\maketitle
+
+
+\section*{Preface}
+
+%% Why should software developers use source code management tools?
+
+In science people want to work together and exchange knowledge and
+this is also true when developing software. Most often it is
+sufficient to have a shared storage for source code but sometimes it
+is better to have more than that. One can think of a situation where one has
+written code, updated it and then decides that some junks of the
+original code where better but are lost now. To overcome this one can
+make use of version control. This is very important as in each stage
+one can retrieve all historical code.
+
+Further important stuff regarding collaborative development: easy
+communication through various channels (forums, tracker, \ldots).
+
+Advantages: useRs may participate and give feedback, larger software
+projects can be better managed 
+
+%% difference maintainer, developers, users
+Typically, users need to have read access to the data associated with
+a certain project. Some of them (the developers) have write access to
+the data. Usually there is a maintainer of the code. This person is the project
+leader or has registered the project. Contributers can make use of the
+provided facilities or email any changes to the code
+that they developed---bug fixes, additional functionality---which the
+maintainer adds to the code after verification.
+
+
+%% What is GForge
+GForge is a fork of the 2.61 SourceForge code. Since the codebase of
+SourceForge has not been released over a certain time the GForge
+project was formed. One of the authors of the original SourceForge
+code, Tim Perdue, now maintains the GForge project.
+
+%%important not only to the Open
+%%Source community, but to the wider business community.
+
+\section*{R-Forge}
+%% what is R-Forge?
+R-Forge (\url{http://R-Forge.R-project.org}) is a set of tools based
+on the open source software GForge (\cite{manual:gforge})%% or: a system
+ for collabortavie development of R Packages or R
+related software. It provides source code management facilities
+through Subversion (citation MISSING) and various web-based features. 
+
+R-Forge hosts nearly 100 Projects and has around 250 registered users at the
+time of this writing.
+
+%R-Forge is a tool which helps package developers to collaborate
+
+%%Features provided by the open source GForge
+%%system~\cite{manual:gforge} it can be obtained
+%%from~\url{http://gforge.org} 
+%%maintained and supported by the GForgeGroup
+%%a php - postgresql framework for collaboration and source code management
+
+%% not itemized but described in more details
+
+Features for the R community are 
+
+
+The most important feature is source code management with
+Subversion. Each project has a repository which are fully backuped
+daily. The developers can use the repository
+freely except two predefined directories (pkg and www). %% connection
+                                %% to below missing 
+
+Interestng for the R community is the possibility to have daily built
+of their packages for Unix/Linux (the source tarball), Windows
+(32~bit binary) and MacOS X (universal binary). These packages can be
+downloaded via a download link from the website or are installable
+directly in R via install.packages. They are built from the ``pkg''
+directory.
+
+Every project can have an own project websites (ie.,
+\url{http://package.R-Forge.R-project.org}). Basic html is
+supported. It is checked out hourly from ``www'' directory of the
+project's repository.
+
+A file release system provides an
+alternative way for submitting packages to CRAN. 
+
+It is possible to have check results automatically delivered. 
+
+%% sharing of documentation
+
+%% A small guide through R-Forge---TODO: detailed description 
+
+on the main page of R-Forge one can
+
+\begin{itemize}
+
+\item create an account, login, or create a new project
+
+\item download the documentation
+
+\item examine the latest news (also available as RSS feed)
+
+\item search for projects either with the search function or through an
+  alphabetically listing using the 'Project Tree' tab 
+
+\item see some R-Forge statistics
+
+\end{itemize}
+
+
+on the project main page, so what can be done here?
+
+\begin{itemize}
+
+\item examine the project details
+
+\item through the download link you get to the download page
+
+\item there is also a link to the project homepage
+
+\item developers and admins (maintainer) of the project are listed 
+
+\item you'll find the latest news announcements
+
+\end{itemize}
+
+
+for more info see~\cite{theussl07:r_forge_users_manual}.
+
+\section*{Summary}
+
+
+\bibliography{R-Forge}
