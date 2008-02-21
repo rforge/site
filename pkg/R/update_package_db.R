@@ -1,0 +1,36 @@
+## update package repository
+## OLD way:
+## When using a binary distribution (Windows, Mac) we don't need to
+## install every package from source, we keep a complete local CRAN
+## install updated
+update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, ...){
+  ## first update all installed packages if necessary
+  update.packages(lib = lib, repos = repository_url, ask = FALSE)
+  
+
+  ##source("${R_scripts_dir}/packages.R")
+  ##source("${R_scripts_dir}/R_Forge_utils.R")
+  ##dir <- file_path_as_absolute(getwd())
+
+  ## create PACKAGES from R-Forge source dirs
+  write_PACKAGES(dir = path_to_pkg_src, type = "source", fields = tools:::.get_standard_repository_db_fields(), unpacked = TRUE) 
+  ## look ou for available packages
+  avail_cran <- available.packages(contriburl= contrib.url(repository_url))
+  avail_rforge <- available.packages(contriburl = sprintf("file:///%s", path_to_pkg_src))
+  avail <- rbind(avail_rforge,avail_cran)
+  ## What packages do we need from external repository
+  pkgs <- pkgs[pkgs %in% rownames(avail_rforge)]
+  pkgs_suggested <- resolve_suggests(pkgs, avail)
+  pkgs_suggested <- pkgs_suggested[pkgs_suggested %in% rownames(avail)]
+  pkgs_to_resolve_deps <- unique(c(pkgs, pkgs_suggested))
+  pkgs_all <- resolve_dependencies(pkgs_to_resolve_deps, avail)
+  pkgs_cran <- setdiff(pkgs_all, pkgs)
+  
+  ##DL <- utils:::.make_dependency_list(pkgs_all, avail)
+  ##pkgs_install_order <- utils:::.find_install_order(pkgs_all, DL)
+
+  ## install missing packages
+  pkgs_installed <- installed.packages(lib = lib)
+  pkgs_to_install <- setdiff(pkgs_cran, pkgs_installed)
+  install.packages(pkgs_to_install, lib = lib, repos = repository_url, ...)
+}
