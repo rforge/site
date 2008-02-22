@@ -62,14 +62,14 @@ build_packages <- function(email,
   if(!check_directory(path_to_pkg_src))
     stop("Directory", path_to_pkg_src, "missing!")
   ## test for build log dir and clean it
-  if(!check_directory(path_to_pkg_log, fix=TRUE))
-    stop(paste("There is no directory", dir,"!"))
-  setwd(path_to_pkg_log)
-  system(paste("rm -f *"))
+  check_log_directory(path_to_pkg_log, path_separator, type = "build")
   ## check if package root directory (the directory containing
   ## the src/contrib or bin/windows/contrib) exists.
   if(!check_directory(path_to_pkg_root, fix=TRUE))
     stop(paste("There is no directory", dir,"!"))
+  ## get current working directory -> set back at FINALIZATION step
+  old_wd <- getwd()
+
 
   ## PACKAGE SIGHTING
   
@@ -96,7 +96,7 @@ build_packages <- function(email,
 
   ## FIXME: is it sufficient what we are doing here?
 
-  update_package_library(cran.url = cran.url, libdir = libdir)
+  update_package_library(pkgs, path_to_pkg_src, cran_url, lib)
 
   ## LAST PREPARATION BEFORE PACKAGE BUILD
   
@@ -118,16 +118,15 @@ build_packages <- function(email,
       stop(paste("There is no directory", dir,"!"))
   ## delete 00LOCK, sometimes this interrupted the build process ...
   check_local_library(path_to_local_library)
+  ## where is our R binary?
+  R <- paste(R.home(), "bin", "R", sep=path_separator)
+  setwd(path_to_pkg_src)
+  ## Set environment variables which are necessary for building (or creating vignettes)
+  Sys.setenv(R_LIBS = path_to_local_lib)
   
   ## PACKAGE BUILDING
 
   ## TODO: Timings
-  
-  ## where is our R binary?
-  R <- paste(R.home(),"bin","R", sep=path_separator)
-  setwd(path_to_pkg_src)
-  ## Set environment variables which are necessary for building (or creating vignettes)
-  Sys.setenv(R_LIBS=path_to_local_lib)
   ## LINUX BUILDS
   if(platform=="Linux"){
     ## We need a virtual framebuffer
@@ -171,5 +170,7 @@ build_packages <- function(email,
   pkgs_provided <- provide_packages_in_contrib(path_to_pkg_src, path_to_contrib_dir, platform)
   ## send email to R-Forge maintainer which packages successfully were built
   notify_admins(pkgs_provided, donotcompile, email, platform, control)
+  ## go back to old working directory
+  setwd(old_wd)
   TRUE
 }

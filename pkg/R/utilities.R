@@ -90,6 +90,19 @@ check_local_library <- function(lib){
      system(paste("rm -rf", lock))
 }
 
+## check, if packages can be installed to local library
+## TODO: rotate (gzip and copy to backup location) old logs
+##       to keep track of history
+check_log_directory <- function(dir, path_separator, type = c("build", "check")){
+  type <- match.arg(type)
+  if(!check_directory(dir, fix=TRUE))
+    stop(paste("There is no directory", dir, "!"))
+  if(type == "build"){
+    suffix = "buildlog.txt"
+  }else suffix = "checklog.txt"
+  system(paste("rm -f ", dir, path_separator, "*", suffix, sep = ""))
+}
+
 ## Start a virtual framebuffer X server and use this for DISPLAY so that
 ## we can run package tcltk and friends.  We use a random PID
 ## as the server number so that the checks for different flavors
