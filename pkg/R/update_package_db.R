@@ -15,7 +15,11 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, .
   ## install missing packages
   pkgs_installed <- installed.packages(lib = lib)
   pkgs_to_install <- setdiff(pkgs_dep[["CRAN"]], pkgs_installed)
-  install.packages(pkgs_to_install, lib = lib, repos = repository_url, ...)
+  if(.Platform$OS.type == "windows"){
+    warning("No new packages are going to be installed, install.packages only works interactively on windows")
+    return()
+  }
+  install.packages(pkgs_to_install, lib = lib, contriburl = contrib.url(repository_url), ...)
 }
 
 

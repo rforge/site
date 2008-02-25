@@ -83,7 +83,7 @@ build_packages <- function(email,
   ## can be exported from SVN repository (indicator for Windows or Mac package ?)
   pkgs_other = ""
   if(platform != "Linux"){
-    avail_rforge <- available.packages(contriburl = contrib.url(rforge_url))
+    avail_rforge <- available.packages(contriburl = contrib.url(rforge_url, type = "source"))
     pkgs <- avail_rforge[, 1]
     pkgs_other <- setdiff(pkgs_all, pkgs)
   }
@@ -144,7 +144,7 @@ build_packages <- function(email,
   }else if(platform=="Windows"){
     ## WINDOWS BUILDS
     for( pkg in pkgs ){
-      system(paste(R,"CMD INSTALL --build", pkg, ">",
+      system(paste(paste(R, "cmd", sep=""), "INSTALL --build", pkg, ">",
                    paste(path_to_pkg_log, path_separator, pkg, "-win-",
                          architecture, "-buildlog.txt", sep=""),
                    "2>&1"),
@@ -152,7 +152,7 @@ build_packages <- function(email,
     }
     ## build binaries which are not available as src tarball (maybe Windows binaries)
     for( i in pkgs_other ){
-      system(paste(R, "CMD INSTALL --build", pkg, ">",
+      system(paste(paste(R, "cmd", sep=""), "INSTALL --build", pkg, ">",
                    paste(path_to_pkg_log, path_separator, pkg, "-mac-",
                          architecture, "-buildlog.txt", sep=""),
                    "2>&1"),

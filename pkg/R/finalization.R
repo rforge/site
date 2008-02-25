@@ -11,8 +11,12 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   setwd(build_dir)
   files <- dir()
   files <- files[grep(file_type,files)]
-  for(i in files)
+  for(i in files){
+    ## copy package to contrib directory
     file.copy(i, contrib_dir, overwrite = TRUE)
+    ## delete package from build directory
+    system(paste("rm -f", i))
+  }
   ## remove old PACKAGES file
   setwd(contrib_dir)
   system(paste("rm -f PACKAGES*"))
