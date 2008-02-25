@@ -1,0 +1,36 @@
+#!/bin/sh
+## R-Forge package building
+## just calls R and the R-Forge infrastructure package which includes
+## all the necessary functions
+## theussl 2008-02
+##
+
+## R build flavor
+R_flavor='R-patched'
+R_dir=/srv/R
+R_bin=${R_dir}/bin/${R_flavor}
+
+${R_bin} --vanilla --slave <<-EOF
+library("RForgeTools")
+## IMPORTANT:
+## setup control file
+control <- list()
+control\$path_to_pkg_src            <- "/srv/R/pkgs"             ## R-Forge pkg sourced
+control\$path_to_pkg_log            <- "/srv/R/logs"             ## Log directory
+control\$path_to_pkg_root           <- "/srv/R/R-Forge"          ## R-Forge root (contains /src ,/bin)
+control\$path_to_local_texmf        <- "/srv/R/share/texmf"      ## path to local texmf
+control\$path_to_local_library      <- Sys.getenv("R_LIBS")      ## path to local pkg library
+control\$stoplist                   <- ""                      ## path to stoplist
+## mail configuration
+control\$mail_domain_name_of_sender <- system("hostname -f", intern = TRUE) ## "xmaragorn64.wu-wien.ac.at" 
+control\$mail_relay_server <- "statmath.wu-wien.ac.at"           ## only necessary with sendEmail
+control\$mail_programme <- "mail"                                ## on Windows: sendEmail
+
+## start building ...
+build_packages(email        = "stefan.theussl@wu-wien.ac.at",
+               platform     = "Linux",
+               architecture = "x86_64",
+               control      = control)
+EOF
+
+exit 0

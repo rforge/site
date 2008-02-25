@@ -33,8 +33,8 @@ library("tools")
 build_packages <- function(email,
                            platform           = c("Linux", "Windows", "MacOSX"),
                            architecture       = c("x86_32", "x86_64"),
-                           rforge_contrib_url = "http://r-forge.r-project.org/src/contrib",
-                           cran_url           = "http://cran.r-project.org",
+                           rforge_url         = "http://R-Forge.R-project.org",
+                           cran_url           = "http://CRAN.R-project.org",
                            control=list()){
 
   ## INITIALIZATION
@@ -70,7 +70,6 @@ build_packages <- function(email,
   ## get current working directory -> set back at FINALIZATION step
   old_wd <- getwd()
 
-
   ## PACKAGE SIGHTING
   
   ## STOP LIST: packages which should not be compiled
@@ -84,7 +83,7 @@ build_packages <- function(email,
   ## can be exported from SVN repository (indicator for Windows or Mac package ?)
   pkgs_other = ""
   if(platform != "Linux"){
-    avail_rforge <- available.packages(contriburl = rforge_contrib.url)
+    avail_rforge <- available.packages(contriburl = contrib.url(rforge_url))
     pkgs <- avail_rforge[, 1]
     pkgs_other <- setdiff(pkgs_all, pkgs)
   }
@@ -96,7 +95,7 @@ build_packages <- function(email,
 
   ## FIXME: is it sufficient what we are doing here?
 
-  update_package_library(pkgs, path_to_pkg_src, cran_url, lib)
+  update_package_library(pkgs, path_to_pkg_src, cran_url, path_to_local_library)
 
   ## LAST PREPARATION BEFORE PACKAGE BUILD
   
@@ -122,7 +121,7 @@ build_packages <- function(email,
   R <- paste(R.home(), "bin", "R", sep=path_separator)
   setwd(path_to_pkg_src)
   ## Set environment variables which are necessary for building (or creating vignettes)
-  Sys.setenv(R_LIBS = path_to_local_lib)
+  Sys.setenv(R_LIBS = path_to_local_library)
   
   ## PACKAGE BUILDING
 

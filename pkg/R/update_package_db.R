@@ -11,10 +11,10 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, .
   ##source("${R_scripts_dir}/R_Forge_utils.R")
   ##dir <- file_path_as_absolute(getwd())
 
-  pkgs_dep <- resolve_dependency_structure(pkgs, cran_url, path_to_pkg_src)
+  pkgs_dep <- resolve_dependency_structure(pkgs, repository_url, path_to_pkg_src)
   ## install missing packages
   pkgs_installed <- installed.packages(lib = lib)
-  pkgs_to_install <- setdiff(pkgs_dep[CRAN], pkgs_installed)
+  pkgs_to_install <- setdiff(pkgs_dep[["CRAN"]], pkgs_installed)
   install.packages(pkgs_to_install, lib = lib, repos = repository_url, ...)
 }
 
@@ -41,7 +41,5 @@ resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
   DL <- utils:::.make_dependency_list(pkgs_all, avail)
   pkgs_install_order <- utils:::.find_install_order(pkgs_all, DL)
   ## return a vector with packages and install order
-  c(ALL = pkgs_all, CRAN = pkgs_cran, INSTALL_ORDER = pkgs_install_order)
+  list(ALL = pkgs_all, CRAN = pkgs_cran, INSTALL_ORDER = pkgs_install_order)
 }
-
-  

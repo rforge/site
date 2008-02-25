@@ -38,8 +38,8 @@
 check_packages <- function(email,
                            platform           = c("Linux", "Windows", "MacOSX"),
                            architecture       = c("x86_32", "x86_64"),
-                           rforge_contrib_url = "http://r-forge.r-project.org/src/contrib",
-                           cran_url           = "http://cran.r-project.org",
+                           rforge_url = "http://R-Forge.R-project.org",
+                           cran_url           = "http://CRAN.R-project.org",
                            control=list()
                            ){
   ## INITIALIZATION
@@ -57,10 +57,14 @@ check_packages <- function(email,
   path_to_pkg_src <- control$path_to_pkg_src
   path_to_pkg_log <- control$path_to_pkg_log
   path_to_pkg_root <- control$path_to_pkg_root
+  path_to_check_dir <- control$path_to_check_dir
   path_to_local_library <- control$path_to_local_library
   stoplist <- control$stoplist
   ## local package library
   if(!check_directory(path_to_local_library, fix=TRUE))
+    stop(paste("There is no directory", dir,"!"))
+  ## check directory, this is where the work is done
+  if(!check_directory(path_to_check_dir, fix=TRUE))
     stop(paste("There is no directory", dir,"!"))
   ## R-Forge package sources
   if(!check_directory(path_to_pkg_src))
@@ -94,38 +98,17 @@ check_packages <- function(email,
   R <- paste(R.home(), "bin", "R", sep=path_separator)
   setwd(path_to_pkg_src)
   ## Set environment variables which are necessary for checking
-  Sys.setenv(R_LIBS = path_to_local_lib)
-
-  ## PACKAGE CHECKING
-  
-  pkg_install_order <- resolve_dependency_structure(pkgs, cran_url, path_to_pkg_src)[INSTALL_ORDER]
-
-      ## copy and extract packages not on R-Forge to local dir
-    pkgs_cran=`cat cran_pkgs_ol.dat`
-    pkgs_cran_install_yes=`echo "${pkgs_cran}" \
-  | egrep -v "${pkgs_install_fake_regexp}" \
-  | egrep -v "${pkgs_install_no_regexp}"`
-    pkgs_cran_install_fake=`echo "${pkgs_cran}" | egrep "${pkgs_install_fake_regexp}"`
-    pkgs_cran_install_no=`echo "${pkgs_cran}" | egrep "${pkgs_install_no_regexp}"`
-    for p in ${pkgs_cran_install_yes} ${pkgs_cran_install_fake}; do tar zxf ${CRAN_dir}/${p}_*.tar.gz; done
-
-    ## install packages considering install order
-    pkgs_install=`cat rforge_pkgs_ol.dat` 
-    pkgs_install_yes=`echo "${pkgs_install}" \
-  | egrep -v "${pkgs_install_fake_regexp}" \
-  | egrep -v "${pkgs_install_no_regexp}"`
-    pkgs_install_fake=`echo "${pkgs_install}" | egrep "${pkgs_install_fake_regexp}"`
-    pkgs_install_no=`echo "${pkgs_install}" | egrep "${pkgs_install_no_regexp}"`
-
-    ## custom install dir of packages
-    pkgs_library=${check_dir}/${R_flavor}/library
-    ## clean and setup testing library
-    rm -rf ${pkgs_library} 
-    mkdir ${pkgs_library}
-
+  Sys.setenv(R_LIBS = path_to_local_library)
+  ## Calculate dependency structure
+  dep_struct <- resolve_dependency_structure(pkgs, cran_url, path_to_pkg_src)
+  pkgs_cran <- dep_struct["CRAN"]
+  pkgs_to_install <- dep_struct["INSTALL_ORDER"]
   ## Start a virtual framebuffer X server and use this for DISPLAY so that
   ## we can run package tcltk and friends.  
-  pid <- start_virtual_fb()
+  pid <- start_virtual_X11_fb()
+ 
+  ## PACKAGE CHECKING
+   
   ## Installation first ...
   ## Note that installing to the default library tree updates the HTML
   ## indices, which is very time consuming (as we install one package at a
@@ -149,10 +132,12 @@ check_packages <- function(email,
                          architecture, "-checklog.txt", sep=""),
                  "2>&1"))
   }
+  ## better implementation necessary:
+  pkgs_checked <- pkgs
 
   ## FINALIZATION
   
-  close_virtual_fb(pid)
+  close_virtual_X11_fb(pid)
   ## send email to R-Forge maintainer which packages successfully were built
   notify_admins(pkgs_checked, donotcompile, email, platform, control)
   ## go back to old working directory
