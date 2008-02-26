@@ -10,7 +10,7 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   old_dir <- file_path_as_absolute(getwd())
   setwd(build_dir)
   files <- dir()
-  files <- files[grep(file_type,files)]
+  files <- files[grep(file_type, files)]
   for(i in files){
     ## copy package to contrib directory
     file.copy(i, contrib_dir, overwrite = TRUE)
