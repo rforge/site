@@ -14,12 +14,11 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, .
   pkgs_dep <- resolve_dependency_structure(pkgs, repository_url, path_to_pkg_src)
   ## install missing packages
   pkgs_installed <- installed.packages(lib = lib)
-  pkgs_to_install <- setdiff(pkgs_dep[["CRAN"]], pkgs_installed)
-  if(.Platform$OS.type == "windows"){
-    warning("No new packages are going to be installed, install.packages only works interactively on windows")
-    return()
-  }
-  install.packages(pkgs_to_install, lib = lib, contriburl = contrib.url(repository_url), ...)
+  ## Temporarily All packages are installed
+  ## TODO: install only those packages which are only available from R-Forge, the rest should be installed from R-Forge considering the install order
+  pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], pkgs_installed)
+  if(length(pkgs_to_install) >= 2)
+    install.packages(pkgs_to_install, lib = lib, contriburl = contrib.url(repository_url), ...)
 }
 
 

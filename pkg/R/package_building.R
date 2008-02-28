@@ -104,9 +104,13 @@ build_packages <- function(email,
   ## set up CONTRIB directory
   ## If we use a BINARY distribution like WINDOWS or MAC we have to append
   ## the major version of R to the contrib directory otherwise use /src/contrib
-  if(platform!="Linux"){
+  if(platform == "Windows"){
     ##if(!any(dir("c:\\srv\\rsync\\R-Forge\\bin\\windows\\contrib\\")==maj.version))
     path_to_contrib_dir <- paste(path_to_pkg_root, "bin", .Platform$OS.type,
+                                 "contrib", maj.version,
+                                 sep=path_separator)
+  }else if(platform == "MacOSX"){
+    path_to_contrib_dir <- paste(path_to_pkg_root, "bin", "macosx", "universal",
                                  "contrib", maj.version,
                                  sep=path_separator)
   }else {
@@ -153,14 +157,52 @@ build_packages <- function(email,
     ## build binaries which are not available as src tarball (maybe Windows binaries)
     for( i in pkgs_other ){
       system(paste(paste(R, "cmd", sep=""), "INSTALL --build", pkg, ">",
-                   paste(path_to_pkg_log, path_separator, pkg, "-mac-",
+                   paste(path_to_pkg_log, path_separator, pkg, "-win-",
                          architecture, "-buildlog.txt", sep=""),
                    "2>&1"),
              invisible = TRUE)
     }
-  }else if(platform=="MacOSX"){
+  }else if(platform == "MacOSX"){
     ## MacOSX BUILDS
-    stop("Not implemented yet!")
+    ## Do we need a virtual framebuffer?
+    ##pid <- start_virtual_X11_fb()
+    ## Set TEXMFLOCAL environment variables in case we have
+    ## personalized style files (building vignettes)
+    path_to_local_texmf <- control$path_to_local_texmf
+    if(file.exists(path_to_local_texmf))
+      Sys.setenv(TEXMFLOCAL = path_to_local_texmf)
+    for(pkg in pkgs){
+      ## look out for version number	
+      pkg_version <- packageDescription(pkg, lib.loc = ".")$Version
+      ## make temporary directory
+      tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
+      check_directory(tmpdir, fix = TRUE)
+      ## first look if there is a src directory
+      if(file.exists(paste(".", pkg, "src", sep = path_separator))){
+      	## create x86_32 binary
+      	system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, pkg, ">",
+                   paste(path_to_pkg_log, path_separator, pkg, "-mac-buildlog.txt" , sep=""),
+                   "2>&1"))
+      	## create PPC binary
+      	system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", pkg, ">",
+                   paste(path_to_pkg_log, path_separator, pkg, "-mac-buildlog.txt" , sep=""),
+                   "2>&1"))
+
+      }else {
+        ## R only packages can be installed in one rush
+        system(paste(R, "CMD INSTALL -l", tmpdir, pkg, ">",
+                   paste(path_to_pkg_log, path_separator, pkg, "-mac-buildlog.txt", sep=""),
+                   "2>&1"))
+        
+      }
+      ## combine to universal binary
+      if(file.exists(paste(tmpdir, pkg, sep=path_separator))){
+        system(paste("tar czf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), "-C", tmpdir, pkg))
+      }	
+      ## remove temporary directory	
+      system(paste("rm -rf", tmpdir))
+    }
+    ##close_virtual_X11_fb(pid)
   }else stop(paste("Strange platform: ", platform, "! I'm confused ...", sep = ""))
 
   ## FINAL STEPS
