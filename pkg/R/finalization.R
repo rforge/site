@@ -58,13 +58,13 @@ notify_admins <- function(packages, donotcompile, email, platform, control){
                 "packages are now available on R-Forge:"), " ",
           unique(packages)),
         file = attachment)
-  mail_prog <- control$mail_programme
+  mail_prog <- control$mail_program
   send_host <- control$mail_domain_name_of_sender
-  relay_host <- control$mail_relay_host
+  relay_host <- control$mail_relay_server
   
   if(mail_prog == "sendEmail")
     system(paste(mail_prog, "-f", send_host, "-t", email,
-                 "-u \"R-Forge: Nightly build\" -m LOG -a", attachment,
+                 "-u \"R-Forge: Nightly build\" -m Summary -a", attachment,
                  "-s", relay_host))
   if(mail_prog == "mail")
     system(paste("cat", attachment, "|", mail_prog, 
