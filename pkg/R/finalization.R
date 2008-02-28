@@ -68,6 +68,6 @@ notify_admins <- function(packages, donotcompile, email, platform, control){
                  "-s", relay_host))
   if(mail_prog == "mail")
     system(paste("cat", attachment, "|", mail_prog, 
-                 "-s \"R-Forge: Nightly build\" -a", attachment, email))
+                 "-s \"R-Forge: Nightly build\"", email))
   system(paste("rm -f", attachment))  
 }

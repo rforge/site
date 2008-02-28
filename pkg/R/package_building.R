@@ -196,7 +196,7 @@ build_packages <- function(email,
         
       }
       ## combine to universal binary
-      if(file.exists(paste(tmpdir, pkg, sep=path_separator))){
+      if(file.exists(paste(tmpdir, pkg, DESCRIPTION, sep=path_separator))){
         system(paste("tar czf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), "-C", tmpdir, pkg))
       }	
       ## remove temporary directory	
