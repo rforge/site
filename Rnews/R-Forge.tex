@@ -9,11 +9,14 @@
 
 %% Open source and its advantages
 The source code of open source software is by definition accessible to
-users. Open source development is claimed to produce more bug free
-code, is available faster than closed source code. Open source
+users. Open source development is generally claimed to produce more bug free
+code and to be available faster than closed source code. Open source
 developers are said to work not for monetary returns, are generally
-volunteers working together on a project. This team members often come
-from around the world and rarely meet. This open source movement can
+volunteers working together on a project. These members of such a
+team may come from around the world and rarely meet.
+
+This open source
+movement can
 be seen as an self-organizing process which releases prototype code
 frequently which is reviewed by hundreds of peers.  
 
@@ -31,7 +34,10 @@ interesting projects, exchange knowledge and so forth.
 In science people want to work together and exchange knowledge and
 this is also true when developing software. Most often it is
 sufficient to have a shared storage for source code but sometimes it
-is better to have more than that. One can think of a situation where one has
+is better to have more than that. 
+
+
+One can think of a situation where one has
 written code, updated it and then decides that some junks of the
 original code where better but are lost now. To overcome this one can
 make use of version control. This is very important as in each stage
@@ -53,7 +59,7 @@ that they developed---bug fixes, additional functionality---which the
 maintainer adds to the code after verification.
 
 
-%% What is GForge
+%% What is GForge !!!! CITATION !!!!
 GForge is a fork of the 2.61 SourceForge code. Since the codebase of
 SourceForge has not been released over a certain time the GForge
 project was formed. One of the authors of the original SourceForge
@@ -66,11 +72,12 @@ code, Tim Perdue, now maintains the GForge project.
 %% what is R-Forge?
 R-Forge (\url{http://R-Forge.R-project.org}) is a set of tools based
 on the open source software GForge (\cite{manual:gforge})%% or: a system
- for collaborativi development of R Packages or R
-related software. It provides source code management facilities
+ for collaborative development of \proglang{R} Packages, \proglang{R}
+related software or other projects which are somehow related to our
+all beloved language \proglang{R}. It provides source code management facilities
 through Subversion (\cite{subversion07}) and various web-based features. 
 
-R-Forge hosts nearly 100 Projects and has around 250 registered users at the
+R-Forge hosts nearly 150 Projects and has around 350 registered users at the
 time of this writing.
 
 %R-Forge is a tool which helps package developers to collaborate
@@ -83,8 +90,9 @@ time of this writing.
 
 %% not itemized but described in more details
 
-Features for the R community are 
 
+%% Summarize features
+Features for the R community are 
 
 The most important feature is source code management with
 Subversion. Each project has a repository which are fully backuped
@@ -110,47 +118,130 @@ alternative way for submitting packages to CRAN.
 It is possible to have check results automatically delivered. 
 
 %% sharing of documentation
+\section{Howto get started}
+%%A small guide through R-Forge---TODO: detailed description 
 
-%% A small guide through R-Forge---TODO: detailed description 
+What has to be done in the first place to get started with an project
+on R-Forge is to register a username on R-Forge. There is a link on
+the main web site called ``New Account'' on the top right of the page.
 
-on the main page of R-Forge one can
+Further things one can do on the main page are:
 
 \begin{itemize}
-
-\item create an account, login, or create a new project
-
+\item login or create a new project
 \item download the documentation
-
 \item examine the latest news (also available as RSS feed)
-
-\item search for projects either with the search function or through an
-  alphabetically listing using the 'Project Tree' tab 
-
-\item see some R-Forge statistics
-
+\item search for projects either with the R-Forge's search
+  functionality or through an 
+  alphabetically listing using the 'Project Tree' tab. 
+\item see some R-Forge specific statistics (how many projects/users,
+  activity percentage, \ldots{})
 \end{itemize}
 
+After submitting the form (filled with your name, email address, and
+some other information) an email has been sent to the given mail
+address containing a link to activate your account. After you
+activated your account you are able to join an existing project or
+create a new one.
 
-on the project main page, so what can be done here?
+The latter is probably more of interest if you decided to migrate an
+existing package to R-Forge and therefore we now explain the creation
+of a project in more details. For joining an existing project we refer
+to the user's manual.
+
+\section{Registering a Project}
+
+To achieve this either go to the main page and click on ``Register
+Your Project'' or go to the ``My Page'' tab and click on ``Register
+Project''. You are presented with a new form which you have to fill
+out in order to register your project. Some remarks: Only the Project
+Public Description will get visible on the project's homepage, whereas
+the Project Purpose And Summarization only is an information for
+us---the R-Forge administrators. The Project Unix Name is a name which
+uniquely defines your project (e.g., it can be the name of your
+package). There are several restrictions to it which are explained on this
+page. E.g., according to the UNIX
+filesystem conventions these names have to be in lower case (and will
+be converted to it automatically in case you typed in upper case
+characters).
+
+After filling out the form and submitting it, the R-Forge
+administrators decides whether this project gets approved or not. This
+is only to prevent fake projects to get registered. After approval a
+confirmation email is sent to the project administrator and the svn
+repositories are created (note: this is done every hour on a fixed
+time, so it is possible that you have to wait until you can check out
+your repository).
+
+To manage your project the administrator has several
+possibilities. But first I want to explain what is important to know
+about the project main page.
+
+Every project has some sort of a own web area on R-Forge. Actually
+there are two of them. A standardized one (which is the same for every
+project on R-Forge) and a personalized one. The latter is accessible
+through <Project Unix Name>.R-Forge.R-project.org and is managed via
+the SVN repository (www directory). For useRs and developeRs the first
+one may be more important and is therefore explained here in more
+details.
+
+On the Project Summary Page (typically the initial one when entering a
+project) you see the following
 
 \begin{itemize}
+\item some details about the project (a short description,
+  administrators, developers, \ldots{})
 
-\item examine the project details
+\item a download link which leads directly to the available packages
+  of the project.
+\item a link leading to the (personal) project homepage
 
-\item through the download link you get to the download page
+\item links to activated features of the project (like tracker,
+  Forums, Mailing Lists, \ldots{})
 
-\item there is also a link to the project homepage
-
-\item developers and admins (maintainer) of the project are listed 
-
-\item you'll find the latest news announcements
+\item you'll find the latest news announcements (if made any)
 
 \end{itemize}
 
+In the project area each available feature is organized in a separate
+tab. For example if you like to ask a question or discuss something
+with the developers of the project you may click on the ``Forums'' tab
+and enter the corresponding forum. The same is possible with mailing
+lists. Actually, there is setup an initial mailing list called
+<name>-commits which can be used to get commit message to the SVN
+repository delivered (this has to be activated separately). New
+mailing lists can be easily set up.
+
+One of the most important tab is the R Packages tab. But before that
+let us explain a bit the build process of R-Forge.
+
+Every night a script parses the pkgs directories and exports the
+packages found to a specific place. From this place the build machines
+(currently a linux, mac und windows machine) sync these packages and
+start to build them. Meanwhile the links to the source and the
+binaries in the R packages tab get updated. After building is finished
+the builds get synced back to R-Forge. They are available for download
+then. Furthermore logs have been produced and are also available for
+examination.
+
+Another feature is the quality check we run every day. Check results
+are also provided on the R tab.
+
+%% some remarks to the build process
 
 for more info see~\cite{theussl07:r_forge_users_manual}.
 
-\section*{Summary}
+\section*{Outlook}
 
+Many things are still on our wishlist but not yet implemented. Be it 
+
+\section{Acknowledgements}
+
+Many thanks to the Douglas Bates and the University of Wisconsin
+for providing us with a server for hosting this platform and one of
+the build machines. Furthermore, we have to thank the Computer Center
+of the Vienna University of Economics and Business Administration for
+their support and for providing us with hardware as well as a
+professional server infrastructure.
 
 \bibliography{R-Forge}
