@@ -1,25 +1,20 @@
 ## Various utilities
 
 ## Function definition of version ordering functions
-## decompose given version number (character) in numeric major and minor part
-decompose_version <- function(x){
-  splitted <- as.numeric(unlist(strsplit(x, "-")))
-  if(length(splitted) == 1)
-     return(c(major = splitted, minor = NA))
-  c(major = splitted[1], minor = splitted[2])
-}
-
-## given two version number this function returns the order of them
+## given two version number, this function returns the order of them
 version_order <- function(x){
   if(!is.character(x))
     stop("A version number has to be of type character!")
   if(! length(x) == 2)
     warning("More than 2 version numbers detected: The order is calculated only from the first 2 elements in the vector!")
-  x_decomposed <- decompose_version(x[1])
-  y_decomposed <- decompose_version(x[2])
-  if(x_decomposed["major"] != y_decomposed["major"])
-    return(order(c(x_decomposed["major"],y_decomposed["major"])))
-  order(c(x_decomposed["minor"],y_decomposed["minor"]))
+  ## coerce to numeric version
+  y <- numeric_version(x[1])
+  z <- numeric_version(x[2])
+  
+  if(y <= z){
+    return(c(1,2))
+  } else
+    return(c(2,1))
 }
 
 ## resolve dependencies helper 
@@ -109,7 +104,7 @@ check_log_directory <- function(dir, path_separator, type = c("build", "check"))
 ## get different servers.
 start_virtual_X11_fb <- function(){
   ## FIXME: if /usr/bin/X11 exists -> then setting path not necessary
-  Sys.setenv(PATH=paste(Sys.getenv("PATH"), ":/usr/bin/X11"), sep="")
+  Sys.setenv(PATH=paste(Sys.getenv("PATH"), ":/usr/bin/X11", sep=""))
   xvfb_screen <- floor(runif(1,1000,9999))
   system(paste("Xvfb :", xvfb_screen, " -screen 0 1280x1024x24 &", sep=""))
   pid <- as.integer(system(paste("ps auxw | grep \"Xvfb :", xvfb_screen,
