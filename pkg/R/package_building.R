@@ -83,7 +83,11 @@ build_packages <- function(email,
   ## can be exported from SVN repository (indicator for Windows or Mac package ?)
   pkgs_other = ""
   if(platform != "Linux"){
-    avail_rforge <- available.packages(contriburl = contrib.url(rforge_url, type = "source"))
+    ## where are the source tarballs already available from R-Forge?
+    path_to_pkg_tarballs <- control$path_to_pkg_tarballs
+    if(!check_directory(path_to_pkg_tarballs))
+      stop("Directory", path_to_pkg_tarballs, "missing!") 
+    avail_rforge <- available.packages(contriburl = contrib.url(paste("file:", path_to_pkg_tarballs, sep = ""), type = "source"))
     avail_src_pkgs <- avail_rforge[, 1]
     pkgs_other <- setdiff(pkgs_all, avail_src_pkgs)
   }
@@ -148,14 +152,15 @@ build_packages <- function(email,
   }else if(platform=="Windows"){
     ## WINDOWS BUILDS
     for( pkg in avail_src_pkgs ){
-      system(paste(paste(R, "cmd", sep=""), "INSTALL --build", pkg, ">",
+      system(paste(paste(R, "cmd", sep=""), "INSTALL --build", paste(path_to_pkg_tarballs, "src", "contrib", 
+             paste(pkg, "_", avail_rforge[Package = pkg, "Version"], ".tar.gz", sep = ""), sep = path_separator), ">",
                    paste(path_to_pkg_log, path_separator, pkg, "-win-",
                          architecture, "-buildlog.txt", sep=""),
                    "2>&1"),
              invisible = TRUE)
     }
     ## build binaries which are not available as src tarball (maybe Windows binaries)
-    for( i in pkgs_other ){
+    for( pkg in pkgs_other ){
       system(paste(paste(R, "cmd", sep=""), "INSTALL --build", pkg, ">",
                    paste(path_to_pkg_log, path_separator, pkg, "-win-",
                          architecture, "-buildlog.txt", sep=""),
