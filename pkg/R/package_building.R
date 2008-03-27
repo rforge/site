@@ -84,8 +84,8 @@ build_packages <- function(email,
   pkgs_other = ""
   if(platform != "Linux"){
     avail_rforge <- available.packages(contriburl = contrib.url(rforge_url, type = "source"))
-    pkgs <- avail_rforge[, 1]
-    pkgs_other <- setdiff(pkgs_all, pkgs)
+    avail_src_pkgs <- avail_rforge[, 1]
+    pkgs_other <- setdiff(pkgs_all, avail_src_pkgs)
   }
   ## Sort out packages that are on the exclude list
   pkgs <- remove_excluded_pkgs(pkgs, donotcompile)
@@ -147,7 +147,7 @@ build_packages <- function(email,
     close_virtual_X11_fb(pid)
   }else if(platform=="Windows"){
     ## WINDOWS BUILDS
-    for( pkg in pkgs ){
+    for( pkg in avail_src_pkgs ){
       system(paste(paste(R, "cmd", sep=""), "INSTALL --build", pkg, ">",
                    paste(path_to_pkg_log, path_separator, pkg, "-win-",
                          architecture, "-buildlog.txt", sep=""),
@@ -171,7 +171,7 @@ build_packages <- function(email,
     path_to_local_texmf <- control$path_to_local_texmf
     if(file.exists(path_to_local_texmf))
       Sys.setenv(TEXMFLOCAL = path_to_local_texmf)
-    for(pkg in pkgs){
+    for(pkg in avail_src_pkgs){
       ## look out for version number	
       pkg_version <- packageDescription(pkg, lib.loc = ".")$Version
       ## make temporary directory
