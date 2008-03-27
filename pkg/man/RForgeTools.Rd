@@ -33,7 +33,7 @@ check_packages (email,
 \value{
   \code{TRUE} if process was successful.
 }
-}
+
 \references{
   R-Forge
   (\url{http://R-Forge.R-project.org}).
