@@ -116,7 +116,7 @@ check_packages <- function(email,
     if(!is.null(check_args))
       check_arg <- check_args[which(check_args["Package"] == pkg), "check_args"]
     timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, paste(path_to_pkg_src, pkg, sep = file_separator), ">",
-                   paste(path_to_pkg_log, file_separator, pkg, "-source-",
+                   paste(path_to_pkg_log, file_separator, pkg, "-", platform, "-",
                          architecture, "-checklog.txt", sep=""),
                  "2>&1")))["elapsed"]
   }
