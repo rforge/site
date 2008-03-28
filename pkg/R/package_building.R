@@ -161,12 +161,25 @@ build_packages <- function(email,
     }
     ## build binaries which are not available as src tarball (maybe Windows binaries)
     for( pkg in pkgs_other ){
-      system(paste(paste(R, "cmd", sep=""), "INSTALL --build", pkg, ">",
-                   paste(path_to_pkg_log, path_separator, pkg, "-win-",
-                         architecture, "-buildlog.txt", sep=""),
+     ## look out for version number	
+     pkg_version <- packageDescription(pkg, lib.loc = ".")$Version
+     ## first we have to build the tarball (important for vignettes)
+     system(paste(paste(R, "cmd", sep = ""), "build", pkg, ">",
+                  paste(path_to_pkg_log, path_separator, pkg, "-win-", 
+                        architecture, "-buildlog.txt" , sep = ""),
+                   "2>&1"))
+     system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
+                        paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), ">>",
+                  paste(path_to_pkg_log, path_separator, pkg, "-win-",
+                        architecture, "-buildlog.txt", sep = ""),
                    "2>&1"),
              invisible = TRUE)
     }
+    ## if 00LOCK does not get deleted, do manually:                                          
+    lockdir <- paste(path_to_local_library, "00LOCK", sep = path_separator)                  
+    if(file.exists(lockdir))                                                                 
+      system(paste("rm -rf", lockdir))                                                       
+     
   }else if(platform == "MacOSX"){
     ## MacOSX BUILDS
     ## Do we need a virtual framebuffer?
