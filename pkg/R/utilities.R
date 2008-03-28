@@ -80,7 +80,7 @@ check_directory <- function(dir, fix = FALSE, ...){
 ## check, if packages can be installed to local library
 check_local_library <- function(lib){
   ## look, if library is locked
-  lock <- paste(lib,"00LOCK", sep="/")
+  lock <- paste(lib, "00LOCK", sep = get_file_separator())
   if(file.exists(lock))
      system(paste("rm -rf", lock))
 }
@@ -88,14 +88,14 @@ check_local_library <- function(lib){
 ## check, if packages can be installed to local library
 ## TODO: rotate (gzip and copy to backup location) old logs
 ##       to keep track of history
-check_log_directory <- function(dir, path_separator, type = c("build", "check")){
+check_log_directory <- function(dir, type = c("build", "check")){
   type <- match.arg(type)
   if(!check_directory(dir, fix=TRUE))
     stop(paste("There is no directory", dir, "!"))
   if(type == "build"){
-    suffix = "buildlog.txt"
-  }else suffix = "checklog.txt"
-  system(paste("rm -f ", dir, path_separator, "*", suffix, sep = ""))
+    suffix <- "buildlog.txt"
+  }else suffix <- "checklog.txt"
+  system(paste("rm -f ", dir, get_file_separator(), "*", suffix, sep = ""))
 }
 
 ## Start a virtual framebuffer X server and use this for DISPLAY so that
@@ -116,4 +116,10 @@ start_virtual_X11_fb <- function(){
 close_virtual_X11_fb <- function(pid){
   system(paste("kill -9", pid))
   Sys.unsetenv("DISPLAY")
+}
+
+get_file_separator <- function(){
+  file_separators <- c(unix = "/", windows = "\\")
+  file_separator <- file_separators[.Platform$OS.type]
+  file_separator
 }

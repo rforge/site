@@ -1,39 +1,6 @@
-## code for checking packages with R
+## code for checking R packages 
 ## originally based on kurt hornik's check-R
-## theussl 2007-02
-
-## from check-R
-## R-flavors
-#R_flavors='R-devel R-patched R-release'
-#CRAN_rsync=${R_dir}/CRAN
-## CRAN's src/contrib directory
-#CRAN_dir=${CRAN_rsync}/src/contrib
-## local R-Forge mirror
-#R_FORGE=${R_dir}/pkgs
-## provide R-Forge packages in
-#R_Forge_contrib_dir=${R_dir}/R-Forge/src/contrib 
-
-## R profile for checking.
-#R_profile=${R_scripts_dir}/check_profile.R
-## where the work is done
-#check_dir=${R_dir}/R.check
-## Check date in ISO 8601 format.  GNU specific ...
-#check_date=`date -Idate`
-## Check result files
-#check_results_files="SUMMARY check.csv summary.rds time_c.out time_i.out"
-
-## Set permissions right
-#umask 022
-
-##if test -n "${BASH_VERSION}"; then
-  ## No process is allowed more than 10 minutes
- # ulimit -t 600
-#fi
-
-##export _R_CHECK_WEAVE_VIGNETTES_=no
-##export _R_CHECK_SUBDIRS_STRICT_=yes
-## We really need 'false' for R < 2.4.0 ...
-##export _R_CHECK_FORCE_SUGGESTS_=false
+## completely rewritten in R by theussl 2008-03
 
 check_packages <- function(email,
                            platform           = c("Linux", "Windows", "MacOSX"),
@@ -47,12 +14,13 @@ check_packages <- function(email,
   ## match arguments
   platform <- match.arg(platform) ## FIXME: automat. use info from .Platform?
   architecture <- match.arg(architecture)
+  maj.version <- paste(R.Version()$maj,unlist(strsplit(R.Version()$min,"[.]"))[1],sep=".")
+  flavor <- R.Version$status
   ## x86_32 on x86_64 allowed but not the other way round
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
     stop("Building x86_64 binaries not possible on an x86_32 architecture") 
-  ## handle different path separators
-  path_separator <- c(unix = "/", windows = "\\")
-  path_separator <- path_separator[.Platform$OS.type]
+  ## handle different file separators
+  file_separator <- get_file_separator()
   ## check for necessary directories---create them if possible
   path_to_pkg_src <- control$path_to_pkg_src
   path_to_pkg_log <- control$path_to_pkg_log
@@ -70,9 +38,9 @@ check_packages <- function(email,
   if(!check_directory(path_to_pkg_src))
     stop("Directory", path_to_pkg_src, "missing!")
   ## test for check log dir and clean it
-  check_log_directory(path_to_pkg_log, path_separator, type = "build")
-  ## check if the package check directory (the directory where the check
-  ## process takes place) exists.
+  check_log_directory(path_to_pkg_log, type = "check")
+  ## check if package root directory (the directory containing
+  ## the src/contrib or bin/windows/contrib) exists.
   if(!check_directory(path_to_pkg_root, fix=TRUE))
     stop(paste("There is no directory", dir,"!"))
   ## get current working directory -> set back at FINALIZATION step
@@ -81,32 +49,49 @@ check_packages <- function(email,
   ## PACKAGE SIGHTING
   
   ## STOP LIST: packages which should not be compiled
-  donotcompile <- if(file.exists(stoplist)){
-    scan(stoplist, what = character(0)) 
-  }else ""
+  ## when checking packages the stoplist includes additional arguments to check process
+  check_args <- if(file.exists(stoplist)){
+    check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
+  }else NULL
   ## sourcepackages available from R-Forge---exported svn reps
   avail_src <- dir(path_to_pkg_src)
   pkgs <- avail_src
-  ## Sort out packages that are on the exclude list
+  ## Sort out packages that are on the exclude list (TODO: not hardcoding in function!)
+  donotcompile <- c("seriation")
   pkgs <- remove_excluded_pkgs(pkgs, donotcompile)
   
+  ## PACKAGE DB UPDATE
+
+  ## FIXME: is it sufficient what we are doing here?
+
+  update_package_library(pkgs, path_to_pkg_src, cran_url, path_to_local_library)
+
   ## LAST PREPARATION BEFORE CHECKING
 
+  ## change to directory where the check output should go
   setwd(path_to_check_dir)
-  ## Further steps currently missing
+  ## delete 00LOCK, sometimes this interrupted the build process ...
+  check_local_library(path_to_local_library)
   ## where is our R binary?
-  R <- paste(R.home(), "bin", "R", sep=path_separator)
-  setwd(path_to_pkg_src)
+  R <- paste(R.home(), "bin", "R", sep = file_separator)
   ## Set environment variables which are necessary for checking
   Sys.setenv(R_LIBS = path_to_local_library)
-  ## Calculate dependency structure
-  dep_struct <- resolve_dependency_structure(pkgs, cran_url, path_to_pkg_src)
-  pkgs_cran <- dep_struct["CRAN"]
-  pkgs_to_install <- dep_struct["INSTALL_ORDER"]
-  ## Start a virtual framebuffer X server and use this for DISPLAY so that
-  ## we can run package tcltk and friends.  
-  pid <- start_virtual_X11_fb()
- 
+  ## Calculate dependency structure - Do we need package installation as we already have
+  ## done an update of package db?
+  ##dep_struct <- resolve_dependency_structure(pkgs, cran_url, path_to_pkg_src)
+  ##pkgs_cran <- dep_struct["CRAN"]
+  ##pkgs_to_install <- dep_struct["INSTALL_ORDER"]
+  ## Set TEXMFLOCAL environment variables in case we have
+  ## personalized style files (building vignettes)
+  path_to_local_texmf <- control$path_to_local_texmf
+  if(file.exists(path_to_local_texmf))
+    Sys.setenv(TEXMFLOCAL=path_to_local_texmf)
+  if(platform == "Linux"){
+    ## Start a virtual framebuffer X server and use this for DISPLAY so that
+    ## we can run package tcltk and friends.  
+    pid <- start_virtual_X11_fb()
+  }
+  
   ## PACKAGE CHECKING
    
   ## Installation first ...
@@ -115,38 +100,39 @@ check_packages <- function(email,
   ## time to safeguard against limits on the size of the command line).
   ## Hence, we install the packages to a different library tree
   ## (${R_HOME}/Packages).
-  ## TODO: Timings
-  ##       fake install and checking
-  for(pkg in pkgs_to_install){
+  #for(pkg in pkgs_to_install){
     #echo -n "${p}: " >> ../time_i.out
     #/usr/bin/time -o ../time_i.out -a \
-    system(paste(R, "CMD INSTALL ", pkg, ">",
-                   paste(path_to_pkg_log, path_separator, pkg, "-test-",
-                         architecture, "-install.txt", sep=""),
-                   "2>&1"))
-  }
+  #  system(paste(R, "CMD INSTALL ", pkg, ">",
+  #                 paste(path_to_pkg_log, file_separator, pkg, "-test-",
+  #                       architecture, "-install.txt", sep=""),
+  #                 "2>&1"))
+  #}
   ## And now the testing ... (only R-Forge pkgs)
+  timings <- numeric(length(pkgs))
+  names(timings) <- pkgs
   for(pkg in pkgs){
-    system(paste(R, "CMD check --library=", path_to_local_library, pkg, ">",
-                   paste(path_to_pkg_log, path_separator, pkg, "-test-",
+    check_arg <- character()
+    if(!is.null(check_args))
+      check_arg <- check_args[which(check_args["Package"] == pkg), "check_args"]
+    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, paste(path_to_pkg_src, pkg, sep = file_separator), ">",
+                   paste(path_to_pkg_log, file_separator, pkg, "-source-",
                          architecture, "-checklog.txt", sep=""),
-                 "2>&1"))
+                 "2>&1")))["elapsed"]
   }
   ## better implementation necessary:
-  pkgs_checked <- pkgs
+  pkgs_checked <- " "
 
   ## FINALIZATION
+
+  if(platform == "Linux"){
+    ## Close the virtual framebuffer X server 
+    close_virtual_X11_fb(pid)
+  }
   
-  close_virtual_X11_fb(pid)
   ## send email to R-Forge maintainer which packages successfully were built
-  notify_admins(pkgs_checked, donotcompile, email, platform, control)
+  notify_admins(pkgs_checked, donotcompile, email, platform, control, timings = timings, about = "check")
   ## go back to old working directory
   setwd(old_wd)
   TRUE
 }
-
-
-
-
-
-

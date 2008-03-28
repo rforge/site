@@ -45,18 +45,33 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   unique(packages)
 }
 
-notify_admins <- function(packages, donotcompile, email, platform, control){
+notify_admins <- function(packages, donotcompile, email, platform, control, timings = NULL, about = c("build", "check")){
+  about <- match.arg(about)
+  proc_time_minutes <- round(proc.time()["elapsed"]/60, 2)
   attachment <- "Rnightlybuildmail.txt"
   donotcompiletxt <- paste(donotcompile, collapse="\n")
-  write(c(paste("R-Forge", platform, "Build Log:"), " ",
+  if(about == "build"){
+    pkg_txt <- paste("The binaries/sources of the following",
+                     length(unique(packages)),
+                     "packages are now available on R-Forge (Build time:", proc_time_minutes, "minutes):")
+  } else{
+    pkg_txt <- paste("The following",
+                     length(unique(names(timings))),
+                     "packages have been checked in", proc_time_minutes, "minutes:")
+  }
+
+  if(!is.null(timings)){
+    timings <- apply(matrix(c(names(timings), timings),ncol =2), 1, function(x) {paste(c(names(x), x), collapse = " ")})
+  }
+  
+  write(c(paste("R-Forge", platform, about, "log:"), " ",
           "Disk status:", " ",
           system("df -h", intern = TRUE), " ",
           "This packages have been kept back (stop list):", " ",
           donotcompiletxt, " ",
-          paste("The binaries/sources of the following",
-                length(unique(packages)),
-                "packages are now available on R-Forge:"), " ",
-          unique(packages)),
+          pkg_txt, " ",
+          unique(packages), " ",
+          "Timings [sec]:", " ", timings),
         file = attachment)
   mail_prog <- control$mail_program
   send_host <- control$mail_domain_name_of_sender

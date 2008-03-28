@@ -26,8 +26,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, .
 ## building package vignettes
 resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
   ## different file separators according to platform
-  path_separator <- c(unix = "/", windows = "\\")
-  path_separator <- path_separator[.Platform$OS.type]
+  file_separator <- get_file_separator()
 
   ## build pkg database out of DESCRIPTION files
   pkg_db <- tools:::.build_repository_package_db(path_to_pkg_src, unpacked = TRUE)
@@ -35,7 +34,7 @@ resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
   pkgs_defunct <- NULL
   ## which packages have bad DESCRIPTION files?
   for(pkg in pkgs){
-    pkg_DESCRIPTION <- paste(path_to_pkg_src, pkg, "DESCRIPTION", sep = path_separator)
+    pkg_DESCRIPTION <- paste(path_to_pkg_src, pkg, "DESCRIPTION", sep = file_separator)
     if(file.exists(pkg_DESCRIPTION)){
       checked <- tools:::.check_package_description(pkg_DESCRIPTION)
       if(length(checked) > 0)
@@ -47,7 +46,7 @@ resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
     pkg_db <- pkg_db[!is.element(names(pkg_db), pkgs_defunct)]
    
   ## create PACKAGES in source dir
-  write.dcf(do.call(rbind, pkg_db), file = paste(path_to_pkg_src, "PACKAGES", sep = path_separator))
+  write.dcf(do.call(rbind, pkg_db), file = paste(path_to_pkg_src, "PACKAGES", sep = file_separator))
  
   ## look out for available packages
   avail_cran <- available.packages(contriburl =

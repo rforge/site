@@ -47,8 +47,7 @@ build_packages <- function(email,
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
     stop("Building x86_64 binaries not possible on an x86_32 architecture") 
   ## handle different path separators
-  path_separator <- c(unix = "/", windows = "\\")
-  path_separator <- path_separator[.Platform$OS.type]
+  file_separator <- get_file_separator()
   ## check for necessary directories---create them if possible
   path_to_pkg_src <- control$path_to_pkg_src
   path_to_pkg_log <- control$path_to_pkg_log
@@ -62,7 +61,7 @@ build_packages <- function(email,
   if(!check_directory(path_to_pkg_src))
     stop("Directory", path_to_pkg_src, "missing!")
   ## test for build log dir and clean it
-  check_log_directory(path_to_pkg_log, path_separator, type = "build")
+  check_log_directory(path_to_pkg_log, type = "build")
   ## check if package root directory (the directory containing
   ## the src/contrib or bin/windows/contrib) exists.
   if(!check_directory(path_to_pkg_root, fix=TRUE))
@@ -112,22 +111,21 @@ build_packages <- function(email,
     ##if(!any(dir("c:\\srv\\rsync\\R-Forge\\bin\\windows\\contrib\\")==maj.version))
     path_to_contrib_dir <- paste(path_to_pkg_root, "bin", .Platform$OS.type,
                                  "contrib", maj.version,
-                                 sep=path_separator)
+                                 sep=file_separator)
   }else if(platform == "MacOSX"){
     path_to_contrib_dir <- paste(path_to_pkg_root, "bin", "macosx", "universal",
                                  "contrib", maj.version,
-                                 sep=path_separator)
+                                 sep=file_separator)
   }else {
     ## UNIX SOURCE directory
-    path_to_contrib_dir <- paste(path_to_pkg_root, "src/contrib", sep=path_separator)
+    path_to_contrib_dir <- paste(path_to_pkg_root, "src/contrib", sep=file_separator)
   }
   if(!check_directory(path_to_contrib_dir, fix=TRUE, recursive=TRUE))
       stop(paste("There is no directory", dir,"!"))
   ## delete 00LOCK, sometimes this interrupted the build process ...
   check_local_library(path_to_local_library)
   ## where is our R binary?
-  R <- paste(R.home(), "bin", "R", sep=path_separator)
-  setwd(path_to_pkg_src)
+  R <- paste(R.home(), "bin", "R", sep=file_separator)
   ## Set environment variables which are necessary for building (or creating vignettes)
   Sys.setenv(R_LIBS = path_to_local_library)
   
@@ -145,7 +143,7 @@ build_packages <- function(email,
       Sys.setenv(TEXMFLOCAL=path_to_local_texmf)
     for(pkg in pkgs){
       system(paste(R,"CMD build", pkg, ">",
-                   paste(path_to_pkg_log, path_separator, pkg, "-src-buildlog.txt" , sep=""),
+                   paste(path_to_pkg_log, file_separator, pkg, "-src-buildlog.txt" , sep=""),
                    "2>&1"))
     }
     close_virtual_X11_fb(pid)
@@ -153,8 +151,8 @@ build_packages <- function(email,
     ## WINDOWS BUILDS
     for( pkg in avail_src_pkgs ){
       system(paste(paste(R, "cmd", sep=""), "INSTALL --build", paste(path_to_pkg_tarballs, "src", "contrib", 
-             paste(pkg, "_", avail_rforge[Package = pkg, "Version"], ".tar.gz", sep = ""), sep = path_separator), ">",
-                   paste(path_to_pkg_log, path_separator, pkg, "-win-",
+             paste(pkg, "_", avail_rforge[Package = pkg, "Version"], ".tar.gz", sep = ""), sep = file_separator), ">",
+                   paste(path_to_pkg_log, file_separator, pkg, "-win-",
                          architecture, "-buildlog.txt", sep=""),
                    "2>&1"),
              invisible = TRUE)
@@ -165,21 +163,18 @@ build_packages <- function(email,
      pkg_version <- packageDescription(pkg, lib.loc = ".")$Version
      ## first we have to build the tarball (important for vignettes)
      system(paste(paste(R, "cmd", sep = ""), "build", pkg, ">",
-                  paste(path_to_pkg_log, path_separator, pkg, "-win-", 
+                  paste(path_to_pkg_log, file_separator, pkg, "-win-", 
                         architecture, "-buildlog.txt" , sep = ""),
                    "2>&1"))
      system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
                         paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), ">>",
-                  paste(path_to_pkg_log, path_separator, pkg, "-win-",
+                  paste(path_to_pkg_log, file_separator, pkg, "-win-",
                         architecture, "-buildlog.txt", sep = ""),
                    "2>&1"),
              invisible = TRUE)
     }
-    ## if 00LOCK does not get deleted, do manually:                                          
-    lockdir <- paste(path_to_local_library, "00LOCK", sep = path_separator)                  
-    if(file.exists(lockdir))                                                                 
-      system(paste("rm -rf", lockdir))                                                       
-     
+    ## delete 00LOCK, sometimes this interrupted the build process ...
+    check_local_library(path_to_local_library)
   }else if(platform == "MacOSX"){
     ## MacOSX BUILDS
     ## Do we need a virtual framebuffer?
@@ -196,25 +191,25 @@ build_packages <- function(email,
       tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
       check_directory(tmpdir, fix = TRUE)
       ## first look if there is a src directory
-      if(file.exists(paste(".", pkg, "src", sep = path_separator))){
+      if(file.exists(paste(".", pkg, "src", sep = file_separator))){
       	## create x86_32 binary
       	system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, pkg, ">",
-                   paste(path_to_pkg_log, path_separator, pkg, "-mac-buildlog.txt" , sep=""),
+                   paste(path_to_pkg_log, file_separator, pkg, "-mac-buildlog.txt" , sep = ""),
                    "2>&1"))
       	## create PPC binary
       	system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", pkg, ">",
-                   paste(path_to_pkg_log, path_separator, pkg, "-mac-buildlog.txt" , sep=""),
+                   paste(path_to_pkg_log, file_separator, pkg, "-mac-buildlog.txt" , sep = ""),
                    "2>&1"))
 
       }else {
         ## R only packages can be installed in one rush
         system(paste(R, "CMD INSTALL -l", tmpdir, pkg, ">",
-                   paste(path_to_pkg_log, path_separator, pkg, "-mac-buildlog.txt", sep=""),
+                   paste(path_to_pkg_log, file_separator, pkg, "-mac-buildlog.txt", sep = ""),
                    "2>&1"))
         
       }
       ## combine to universal binary
-      if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep=path_separator))){
+      if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep = file_separator))){
         system(paste("tar czf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), "-C", tmpdir, pkg))
       }	
       ## remove temporary directory	
@@ -228,7 +223,7 @@ build_packages <- function(email,
   ## provide built packages in corresponding contrib dir
   pkgs_provided <- provide_packages_in_contrib(path_to_pkg_src, path_to_contrib_dir, platform)
   ## send email to R-Forge maintainer which packages successfully were built
-  notify_admins(pkgs_provided, donotcompile, email, platform, control)
+  notify_admins(pkgs_provided, donotcompile, email, platform, control, about = "build")
   ## go back to old working directory
   setwd(old_wd)
   TRUE
