@@ -92,10 +92,16 @@ check_log_directory <- function(dir, type = c("build", "check")){
   type <- match.arg(type)
   if(!check_directory(dir, fix=TRUE))
     stop(paste("There is no directory", dir, "!"))
+  old_wd <- getwd()
+  setwd(dir)
   if(type == "build"){
     suffix <- "buildlog.txt"
-  }else suffix <- "checklog.txt"
-  system(paste("rm -f ", dir, get_file_separator(), "*", suffix, sep = ""))
+  }else {
+    suffix <- "checklog.txt"
+  }
+  files <- list.files(dir, pattern = suffix)
+  file.remove(files)
+  setwd(old_wd)
 }
 
 ## Start a virtual framebuffer X server and use this for DISPLAY so that

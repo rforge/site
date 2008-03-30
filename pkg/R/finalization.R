@@ -79,10 +79,10 @@ notify_admins <- function(packages, donotcompile, email, platform, control, timi
   
   if(mail_prog == "sendEmail")
     system(paste(mail_prog, "-f", send_host, "-t", email,
-                 "-u \"R-Forge: Nightly build\" -m Summary -a", attachment,
+                 paste("-u \"R-Forge: Nightly", about,"\" -m Summary -a"), attachment,
                  "-s", relay_host))
   if(mail_prog == "mail")
     system(paste("cat", attachment, "|", mail_prog, 
-                 "-s \"R-Forge: Nightly build\"", email))
+                 paste("-s \"R-Forge: Nightly", about, "\""), email))
   system(paste("rm -f", attachment))  
 }

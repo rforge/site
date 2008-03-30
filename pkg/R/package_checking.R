@@ -52,7 +52,7 @@ check_packages <- function(email,
   ## when checking packages the stoplist includes additional arguments to check process
   check_args <- if(file.exists(stoplist)){
     check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
-  }else NULL
+  }else check_args <- NULL
   ## sourcepackages available from R-Forge---exported svn reps
   avail_src <- dir(path_to_pkg_src)
   pkgs <- avail_src
