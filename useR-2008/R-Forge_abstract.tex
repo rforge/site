@@ -6,6 +6,7 @@
 \usepackage{ifpdf}
 \usepackage{url}
 \usepackage[round]{natbib}
+\usepackage{a4wide}
 %\usepackage{hyperref}
 
 %% commands, environments, etc.
@@ -17,7 +18,7 @@
 
 %\renewcommand{\title}[1]{\def\@title{#1}\newcommand{\Title}{#1}}
 
-\title{Collaborative Software Development using R-Forge}
+\title{Collaborative Software Development using \proglang{R}-Forge}
 \author{Stefan Theu\ss{}l and Achim Zeileis and Kurt Hornik}
 \date{\today}
 
@@ -30,63 +31,76 @@
 %% Why should software developers use source code management tools?
 
 %% Open source and its advantages
-The source code of open source software should by definition be accessible to
-everyone who is interested in it. Open source development is
-generally claimed to produce more bug free
-code and to be available faster than closed source code. Open source
-developers are said to work not for monetary returns, are generally
-volunteers working together on a project. These members of such a
-team may come from around the world and rarely meet.
+The source code of open source software is by definition accessible to
+everyone. One of the questions that may arise 
+in this context is how to provide code to other developers
+or even
+more important how to collaborate with others to contribute to an open
+source project. For this reason platforms for collaborative
+development are available which
+help users to find the software they like to download and allow developers to
+collaborate and provide their software on a centralized storage. The
+most famous example is SourceForge.net which is the world's largest
+open source software development web site.
 
-This open source
-movement can
-be seen as an self-organizing process which releases prototype code
-frequently which is reviewed by hundreds of peers.  
+For a decade the \proglang{R} Development Core Team has been using similar
+development tools like Subversion (SVN) or Concurrent Versions System
+(CVS) provided by ETH Z\"urich.  
+Furthermore, many \proglang{R} package developers around the world use their own
+infrastructure or have their own solutions for source code
+development. Therefore the \proglang{R}-project
+wants to provide infrastructure not only
+for the \proglang{R} Development Core Team but also for the entire \proglang{R} community
+which consists of hundreds or thousands of volunteers. 
 
+%%As
+%%collaborative development is a key factor for a lot of 
+%%successfull open source projects. 
 
-R-Forge (\url{http://R-Forge.R-project.org}) is a set of tools based
-on the open source software GForge (\cite{manual:gforge})---a fork of
+%%Open source development is
+%%generally claimed to produce more bug free
+%%code and to be available faster than closed source code. Open source
+%%developers are said to work not for monetary returns, are generally
+%%volunteers working together on a project. These members of such a
+%%team may come from around the world and rarely meet.
+%%This open source
+%%movement can
+%%be seen as an self-organizing process which releases prototype code
+%%frequently which is reviewed by hundreds of peers.  
+
+\proglang{R}-Forge (\url{http://R-Forge.R-project.org}) is a set of tools based
+on the open source software GForge---a fork of
 the open source version
-of SourceForge.net application that powers the world's largest open
-source software repository.%% or: a system
+of SourceForge.net. 
 It aims to provide a platform for collaborative development of
-\proglang{R} Packages, \proglang{R} 
-related software or other projects which are somehow related to our
-all beloved language \proglang{R}. It provides source code management facilities
-through Subversion (\cite{subversion07}) and various web-based features. 
+\proglang{R} packages, \proglang{R} 
+related software or other projects which are somehow related to \proglang{R}.
+%%our all beloved language \proglang{R}
+It offers source code management facilities
+through Subversion and various web-based features. 
 
-R-Forge hosts nearly 150 Projects and has around 350 registered users at the
-time of this writing.
+%%R-Forge hosts nearly 150 Projects and has around 350 registered users at the
+%%time of this writing.
 
-Typically, users need to have read access to the data associated with
-a certain project. Some of them (the developers) have write access to
-the data. Usually there is a maintainer of the code. This person is the project
-leader or has registered the project. Contributers can make use of the
-provided facilities or email any changes to the code
-that they developed---bug fixes, additional functionality---which the
-maintainer adds to the code after verification.
+%%Typically, users need to have read access to the data associated with
+%%a certain project. Some of them (the developers) have write access to
+%%the data. Usually there is a maintainer of the code. This person is the project
+%%leader or has registered the project. Contributers can make use of the
+%%provided facilities or email any changes to the code
+%%that they developed---bug fixes, additional functionality---which the
+%%maintainer adds to the code after verification.
 
-An outstanding feature exclusively provided for the R community is the
-possibility to have their packages daily built for Unix/Linux (the
-source tarball), Windows (32~bit binary) and MacOS X (universal
-binary). These packages can be 
-downloaded via a download link from the website or are installable
-directly in R via \code{install.packages()}.
+An outstanding feature is the 
+possibility to have packages built daily for  various platforms, i.e.,
+Linux, MacOSX and Windows (the latter two in binary form). These
+packages are accessible via download from the website and are installable
+directly in \proglang{R} via \code{install.packages()} then.
 
-It is shown how package developeRs are getting started with R-Forge
-. Specifically this means how useRs may
-
-\begin{itemize}
-\item Register a project, 
-\item Use R-Forge's version control facilities,
-\item provide their packages on R-Forge,
-\item host a project specific website,
-\item and finally submit a package to CRAN.
+In our talk we show how package developeRs are getting started with
+\proglang{R}-Forge. In particular we show how people can register a project, 
+use \proglang{R}-Forge's version control facilities, provide their
+packages on \proglang{R}-Forge, host a project specific website, and
+finally submit a package to CRAN.
 \end{itemize}
-
-
-
-
-\bibliography{R-Forge_abstract}
 
 \end{document}
