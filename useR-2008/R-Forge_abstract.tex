@@ -1,0 +1,92 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{graphicx}
+\usepackage{latexsym}
+%\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{ifpdf}
+\usepackage{url}
+\usepackage[round]{natbib}
+%\usepackage{hyperref}
+
+%% commands, environments, etc.
+\let\code=\texttt
+\let\email=\texttt
+\newcommand{\pkg}[1]{{\normalfont\fontseries{b}\selectfont #1}}
+\newcommand{\proglang}[1]{\textsf{#1}}
+\newcommand{\class}[1]{`\code{#1}'}
+
+%\renewcommand{\title}[1]{\def\@title{#1}\newcommand{\Title}{#1}}
+
+\title{Collaborative Software Development using R-Forge}
+\author{Stefan Theu\ss{}l and Achim Zeileis and Kurt Hornik}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+%%\section*{Introduction}
+
+%% Why should software developers use source code management tools?
+
+%% Open source and its advantages
+The source code of open source software should by definition be accessible to
+everyone who is interested in it. Open source development is
+generally claimed to produce more bug free
+code and to be available faster than closed source code. Open source
+developers are said to work not for monetary returns, are generally
+volunteers working together on a project. These members of such a
+team may come from around the world and rarely meet.
+
+This open source
+movement can
+be seen as an self-organizing process which releases prototype code
+frequently which is reviewed by hundreds of peers.  
+
+
+R-Forge (\url{http://R-Forge.R-project.org}) is a set of tools based
+on the open source software GForge (\cite{manual:gforge})---a fork of
+the open source version
+of SourceForge.net application that powers the world's largest open
+source software repository.%% or: a system
+It aims to provide a platform for collaborative development of
+\proglang{R} Packages, \proglang{R} 
+related software or other projects which are somehow related to our
+all beloved language \proglang{R}. It provides source code management facilities
+through Subversion (\cite{subversion07}) and various web-based features. 
+
+R-Forge hosts nearly 150 Projects and has around 350 registered users at the
+time of this writing.
+
+Typically, users need to have read access to the data associated with
+a certain project. Some of them (the developers) have write access to
+the data. Usually there is a maintainer of the code. This person is the project
+leader or has registered the project. Contributers can make use of the
+provided facilities or email any changes to the code
+that they developed---bug fixes, additional functionality---which the
+maintainer adds to the code after verification.
+
+An outstanding feature exclusively provided for the R community is the
+possibility to have their packages daily built for Unix/Linux (the
+source tarball), Windows (32~bit binary) and MacOS X (universal
+binary). These packages can be 
+downloaded via a download link from the website or are installable
+directly in R via \code{install.packages()}.
+
+It is shown how package developeRs are getting started with R-Forge
+. Specifically this means how useRs may
+
+\begin{itemize}
+\item Register a project, 
+\item Use R-Forge's version control facilities,
+\item provide their packages on R-Forge,
+\item host a project specific website,
+\item and finally submit a package to CRAN.
+\end{itemize}
+
+
+
+
+\bibliography{R-Forge_abstract}
+
+\end{document}
