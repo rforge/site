@@ -47,6 +47,7 @@ build_packages <- function(email,
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
     stop("Building x86_64 binaries not possible on an x86_32 architecture") 
   ## handle different path separators
+  ## FIXME: use file.path?
   file_separator <- get_file_separator()
   ## check for necessary directories---create them if possible
   path_to_pkg_src <- control$path_to_pkg_src
