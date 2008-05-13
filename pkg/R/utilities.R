@@ -129,3 +129,8 @@ get_file_separator <- function(){
   file_separator <- file_separators[.Platform$OS.type]
   file_separator
 }
+
+get_buildlog <- function(path_to_pkg_log, pkg, platform, architecture){
+paste(path_to_pkg_log, get_file_separator(), pkg, "-", platform,
+                               "-", architecture, "-buildlog.txt", sep = "")
+}

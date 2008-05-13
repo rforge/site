@@ -70,7 +70,6 @@ notify_admins <- function(packages, donotcompile, email, platform, control, timi
           "This packages have been kept back (stop list):", " ",
           donotcompiletxt, " ",
           pkg_txt, " ",
-          unique(packages), " ",
           "Timings [sec]:", " ", timings),
         file = attachment)
   mail_prog <- control$mail_program

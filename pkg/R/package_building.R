@@ -76,9 +76,14 @@ build_packages <- function(email,
   donotcompile <- if(file.exists(stoplist)){
     scan(stoplist, what = character(0)) 
   }else ""
+  ## write 
+  if(!is.null(donotcompile)){
+  
+  }
+  
   ## sourcepackages available from R-Forge---exported svn reps
-  avail_src <- dir(path_to_pkg_src)
-  pkgs_all <- pkgs <- avail_src
+  pkgs_all <- available.packages(contriburl =
+                                         sprintf("file:///%s", path_to_pkg_src))
   ## platform specific packages or pkgs not avail as src tarball but
   ## can be exported from SVN repository (indicator for Windows or Mac package ?)
   pkgs_other = ""
@@ -89,10 +94,12 @@ build_packages <- function(email,
       stop("Directory", path_to_pkg_tarballs, "missing!") 
     avail_rforge <- available.packages(contriburl = contrib.url(paste("file:", path_to_pkg_tarballs, sep = ""), type = "source"))
     avail_src_pkgs <- avail_rforge[, 1]
+    ## FIXME: what if there are packages as tarball available which doesn't exist as pure source?!
+    ##        see also Windows building below (the try construct)
     pkgs_other <- setdiff(pkgs_all, avail_src_pkgs)
   }
   ## Sort out packages that are on the exclude list
-  pkgs <- remove_excluded_pkgs(pkgs, donotcompile)
+  pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
   pkgs_other <- remove_excluded_pkgs(pkgs_other, donotcompile)
   
   ## PACKAGE DB UPDATE
@@ -129,11 +136,12 @@ build_packages <- function(email,
   R <- paste(R.home(), "bin", "R", sep=file_separator)
   ## Set environment variables which are necessary for building (or creating vignettes)
   Sys.setenv(R_LIBS = path_to_local_library)
-  
-  ## PACKAGE BUILDING
 
-  ## TODO: Timings
-  ## LINUX BUILDS
+  ##############################################################################
+  ## PACKAGE BUILDING
+  ##############################################################################
+
+  ## LINUX BUILDS ##############################################################
   if(platform=="Linux"){
     ## We need a virtual framebuffer
     pid <- start_virtual_X11_fb()
@@ -142,81 +150,123 @@ build_packages <- function(email,
     path_to_local_texmf <- control$path_to_local_texmf
     if(file.exists(path_to_local_texmf))
       Sys.setenv(TEXMFLOCAL=path_to_local_texmf)
+    ## Initialize timings
+    timings <- numeric(length(pkgs))
+    names(timings) <- pkgs
+    ## path to pkg buildlog 
+    pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
     for(pkg in pkgs){
-      system(paste(R,"CMD build", pkg, ">",
-                   paste(path_to_pkg_log, file_separator, pkg, "-src-buildlog.txt" , sep=""),
-                   "2>&1"))
+      timings[pkg] <- 
+        system.time(system(paste(R,"CMD build", pkg, 
+                           ">", pkg_buildlog, "2>&1"))
+                   )["elapsed"]
     }
     close_virtual_X11_fb(pid)
   }else if(platform=="Windows"){
-    ## WINDOWS BUILDS
+    ## WINDOWS BUILDS ##########################################################
+    ## Initialize timings
+    timings <- numeric(length(pkgs))
+    names(timings) <- pkgs
+    
     for( pkg in avail_src_pkgs ){
-      system(paste(paste(R, "cmd", sep=""), "INSTALL --build", paste(path_to_pkg_tarballs, "src", "contrib", 
-             paste(pkg, "_", avail_rforge[Package = pkg, "Version"], ".tar.gz", sep = ""), sep = file_separator), ">",
-                   paste(path_to_pkg_log, file_separator, pkg, "-win-",
-                         architecture, "-buildlog.txt", sep=""),
-                   "2>&1"),
-             invisible = TRUE)
+      ## timer start
+      proc_start <- proc.time()
+      ## path to pkg buildlog 
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+      ## look out for version number	
+      try(pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version, silent = TRUE)
+      if(inherits(pkg_version_local, "try-error"))
+        pkg_version_local <- "0.0"
+      pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
+      ## if the version of available src tarball is the same (or newer) than 
+      ## then build from it (as it already contains the package vignette).
+      if(package_version(pkg_version_src) >= package_version(pkg_version_local)){
+      system(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
+                   paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                         pkg_version_src, ".tar.gz", sep = ""), sep = file_separator),
+                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+      }else { 
+      ## Otherwise it is a brandnew version and we build it directly from source
+      ## first we have to build the tarball (important for vignettes)
+      system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
+                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+      system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
+                   paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+      }
+      ## save timing
+      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
     }
     ## build binaries which are not available as src tarball (maybe Windows binaries)
     for( pkg in pkgs_other ){
-     ## look out for version number	
-     pkg_version <- packageDescription(pkg, lib.loc = ".")$Version
-     ## first we have to build the tarball (important for vignettes)
-     system(paste(paste(R, "cmd", sep = ""), "build", pkg, ">",
-                  paste(path_to_pkg_log, file_separator, pkg, "-win-", 
-                        architecture, "-buildlog.txt" , sep = ""),
-                   "2>&1"))
-     system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
-                        paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), ">>",
-                  paste(path_to_pkg_log, file_separator, pkg, "-win-",
-                        architecture, "-buildlog.txt", sep = ""),
-                   "2>&1"),
-             invisible = TRUE)
+      ## timer start
+      proc_start <- proc.time()
+      ## path to pkg buildlog 
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+      ## does the pkg exist?
+      if(!file.exists(pkg))
+        next
+      ## look out for version number
+      pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version
+      
+      ## first we have to build the tarball (important for vignettes)
+      system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
+                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+      system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
+                   paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+      ## save timing
+      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
     }
     ## delete 00LOCK, sometimes this interrupted the build process ...
     check_local_library(path_to_local_library)
   }else if(platform == "MacOSX"){
-    ## MacOSX BUILDS
-    ## Do we need a virtual framebuffer?
-    ##pid <- start_virtual_X11_fb()
+    ## MacOSX BUILDS ###########################################################
     ## Set TEXMFLOCAL environment variables in case we have
     ## personalized style files (building vignettes)
     path_to_local_texmf <- control$path_to_local_texmf
     if(file.exists(path_to_local_texmf))
       Sys.setenv(TEXMFLOCAL = path_to_local_texmf)
+    ## Initialize timings
+    timings <- numeric(length(avail_src_pkgs))
+    names(timings) <- avail_src_pkgs
+    ## main loop - BUILDING
     for(pkg in avail_src_pkgs){
+      ## timer start
+      proc_start <- proc.time()
+      ## path to pkg buildlog 
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
       ## look out for version number	
       pkg_version <- packageDescription(pkg, lib.loc = ".")$Version
       ## make temporary directory
       tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
       check_directory(tmpdir, fix = TRUE)
-      ## first look if there is a src directory
+      ## first look if there is a src directory because then we know that we have
+      ## to compile something ...
       if(file.exists(paste(".", pkg, "src", sep = file_separator))){
-      	## create x86_32 binary
-      	system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, pkg, ">",
-                   paste(path_to_pkg_log, file_separator, pkg, "-mac-buildlog.txt" , sep = ""),
-                   "2>&1"))
-      	## create PPC binary
-      	system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", pkg, ">",
-                   paste(path_to_pkg_log, file_separator, pkg, "-mac-buildlog.txt" , sep = ""),
-                   "2>&1"))
+      	## compile an x86_32 binary
+      	system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, pkg, 
+                     ">", pkg_buildlog, "2>&1"))
+      	## compile a PPC binary
+      	system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", pkg, 
+                     ">>", pkg_buildlog, "2>&1"))
 
       }else {
         ## R only packages can be installed in one rush
-        system(paste(R, "CMD INSTALL -l", tmpdir, pkg, ">",
-                   paste(path_to_pkg_log, file_separator, pkg, "-mac-buildlog.txt", sep = ""),
-                   "2>&1"))
-        
+        system(paste(R, "CMD INSTALL -l", tmpdir, pkg, 
+                     ">", pkg_buildlog, "2>&1"))
       }
-      ## combine to universal binary
+      ## combine everything to universal binary
       if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep = file_separator))){
-        system(paste("tar czf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), "-C", tmpdir, pkg))
+        system(paste("tar czvf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), 
+                     "-C", tmpdir, pkg, 
+                     ">>", pkg_buildlog, "2>&1"))
       }	
       ## remove temporary directory	
       system(paste("rm -rf", tmpdir))
+      ## save timing
+      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
     }
-    ##close_virtual_X11_fb(pid)
   }else stop(paste("Strange platform: ", platform, "! I'm confused ...", sep = ""))
 
   ## FINAL STEPS
@@ -224,7 +274,8 @@ build_packages <- function(email,
   ## provide built packages in corresponding contrib dir
   pkgs_provided <- provide_packages_in_contrib(path_to_pkg_src, path_to_contrib_dir, platform)
   ## send email to R-Forge maintainer which packages successfully were built
-  notify_admins(pkgs_provided, donotcompile, email, platform, control, about = "build")
+  notify_admins(pkgs_provided, donotcompile, email, platform, control, 
+                about = "build", timings = timings)
   ## go back to old working directory
   setwd(old_wd)
   TRUE
