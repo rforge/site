@@ -83,7 +83,7 @@ build_packages <- function(email,
   
   ## sourcepackages available from R-Forge---exported svn reps
   pkgs_all <- available.packages(contriburl =
-                                         sprintf("file:///%s", path_to_pkg_src))
+                                         sprintf("file:///%s", path_to_pkg_src))[, 1]
   ## platform specific packages or pkgs not avail as src tarball but
   ## can be exported from SVN repository (indicator for Windows or Mac package ?)
   pkgs_other = ""
