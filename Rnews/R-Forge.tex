@@ -1,4 +1,4 @@
-\title{Collaborative Software Development using R-Forge}
+\title{Collaborative Software Development Using R-Forge}
 \author{Stefan Theu\ss{}l and Achim Zeileis}
 
 \maketitle
@@ -42,43 +42,43 @@ source model had its major breakthrough with the increasing
 usage of the internet. Online communities successfully combined
 not only their programming effort but also their knowledge, work
 and even their social life. OSS development is generally
-claimed to produce more bug free 
-code and to be available faster than closed source code because of the
+claimed to be faster than closed source code because of the
 ``release early, release often'' paradigm introduced by Linus
 Torvalds.
+%% or: Additionally in the open source community it is appreciated to
+%% release OSS more frequently than closed source software. This is
+%% often called the ``release early, release often'' paradigm 
+%% introduced by Linux Torvalds.
+%% But this also means to manage the source code of a project.
 
-All of the above led to an increasing demand for centralized resources
-enabling developers to manage their projects and their source code as
-well as to have standardized channels for communication. The most
-famous of such platforms---the world's largest open source
-software development web site---is SourceForge.net.
-
-For a decade, the \R{} Development Core Team as well as many
-\R{} package developers have been using
-development tools like Subversion (SVN---see (\cite{subversion07})) or
-Concurrent Versions System 
-(CVS) for managing their source code. 
+%% TODO: following paragraph
+Developers of larger projects like the language \R{} use source code
+management (SCM) facilities to follow this paradigm.
+The \R{} Development Core Team have been using
+development tools like Subversion (SVN---see
+(\citep{forge:Pilato+Collins-Sussman+Fitzpatrick:2004})) or 
+Concurrent Versions System (CVS---see \citep{forge:Cederqvist:2006})
+for managing their source code for a decade now.  
 A central repository is hosted by ETH Z\"urich mainly for
 managing the development of the base \R{} system. The
 \R{}-project is now ready to provide similar infrastructure
 for the entire \R{} community.
 
-\R{}-Forge~(\url{http://R-Forge.R-project.org}) is a set of tools based
-on the open source software GForge---a fork of
-the open source version of SourceForge.net.
-It aims to provide a platform for collaborative development of
-\R{} packages, \R{} 
-related software or other projects which are somehow related to \R{}.
-%%our all beloved language \R{}
-It offers source code management facilities through SVN and
-a wide variety of web-based services.
+R-Forge (\url{http://R-Forge.R-project.org}) provides a set of tools
+for source code management and various web-based
+features. It aims to provide a platform for collaborative development of
+\R{} packages, \R{}-related software or further projects.
+All work is organized in a ``Project'' on R-Forge. 
+
+
 
 %% brief overview of features possibly most interesting for readers
 Furthermore, packages hosted on \R{}-Forge are built daily
-for  various operating systems, i.e., Linux, MacOSX and Windows. These
-package builds are downloadable from the 
-project's website on \R{}-Forge as well as installable 
-directly in \R{} via \code{install.packages()}.
+for  various operating systems, namely Linux, MacOSX and Windows. These
+package builds are downloadable from the website of the project on
+\R{}-Forge as well as from a CRAN-style repository. This means that
+packages are installable directly in \R{} via
+\code{install.packages("foo", repos="http://R-Forge.R-project.org")}.
 
 %% Article Outline
 The present article is organized as follows. First, we present the core
@@ -98,14 +98,9 @@ Eventually we summarize ... and give a brief outlook future work.
 R-Forge (\url{http://R-Forge.R-project.org}) is a set of tools for
 collaborative development of \R{} packages, \R{}
 related software or other projects which are somehow related to the
-language \R{}. R-Forge hosted nearly 200 Projects and had around 450
-registered users in its development stage. This and the steadily growing list of
-feature requests show that there is a high demand for centralized source code
-management tools and for releasing prototype code frequently among the
-\R{} community.
+language \R{}.
 
-It is based 
-on the open source software GForge (\cite{manual:gforge}) which is a
+It is based on the OSS GForge (\citep{forge:copeland_et_al:2006}) which is a
 fork of the 2.61 SourceForge code maintained by one of the authors of
 the original SourceForge code Tim Perdue. GForge provides source code
 management facilities through SVN and various web-based features
@@ -126,6 +121,13 @@ Probably the most important features correspond to 3 project tabs are
 describing how people can access the source code repository and ``R
 Packages'' containing a list of packages available in this Project.
 
+%% eventually include history of the development of R-Forge
+R-Forge hosted nearly 200 Projects and had around 450
+registered users in its development stage. This and the steadily growing list of
+feature requests show that there is a high demand for centralized source code
+management tools and for releasing prototype code frequently among the
+\R{} community.
+
 \subsection{Source Code Management}
 
 Why is source code management important? Especially in science people
@@ -139,15 +141,17 @@ together or throwing away code as there is always the possibility to
 go back to a specific version of the whole software repository.
 
 %% Summarize the SCM feature
-On R-Forge each project has such a version controlled repository which
-can be used freely by the developers except two predefined directories
-(\code{pkg} and \code{www}). Another advantage is the daily backup
-made every day of all of the repositories.
+On R-Forge each project has such a version controlled repository
+including all features provided by SVN. In addition to the
+backup inherent backup of every version in an SVN repository a backup
+of the whole repository is made daily. 
 %% One can think of a situation where one has
 %% written code, updated it and then decides that some junks of the
 %% original code where better but are lost now. To overcome this one can
 %% make use of version control. This is very important as in each stage
 %% one can retrieve all historical code.
+
+%% except two predefined directories (\code{pkg} and \code{www})
 
 %% Rights management on R-Forge
 
@@ -209,10 +213,7 @@ subdomain of \url{http://r-forge.r-project.org}. It is also allowed to
 have a link on the project summary page to another website. 
 %% checked out hourly from ``www'' directory of the
 %%project's repository.
-\item Mailing Lists are nowadays valuable for every kind of project. By
-  default one is automatically created when setting up a project. This
-  list is used for circulating SVN commit messages to registered
-  users (has to be turned on separately). Additional mailing lists can be
+\item Mailing Lists are nowadays valuable for every kind of project.By default one is automatically created when setting up a project. Additional mailing lists can be
   created rather easily. 
 \item The project tree offers you to assign your project to one or more
   topics (e.g.: biostatistics, finance, regression analysis,
@@ -234,7 +235,7 @@ have a link on the project summary page to another website.
 In this section we show how new users can get started with
 R-Forge. For a more detailed guide to R-Forge and additional
 information we refer to the user's manual
-\cite{theussl08:r_forge_users_manual}.
+\cite{forge:theussl:2008}.
 
 If you type the URL \url{http://R-Forge.R-project.org} into your
 browser you get to the main page. Here you have the following
@@ -355,24 +356,53 @@ are also provided on the R tab.
 
 %% some remarks to the build process
 
-\section*{Outlook and future work}
+\section*{Recent and future developments}
+In this section we summarize the developments which took place between
+the first release basically consisting of the features of GForge and
+the current release Version. Then we briefly give an outlook to future
+developments.
 
-Upcoming features:
+Recently added features and major changes include:
 \begin{itemize}
-\item Wiki,
-\item task management
-\item code snippets,
-\item project help board.
+\item Enhanced structure in the SVN repository allows multiple
+  packages in one project. Each package is a subdirectory of the
+  \code{/pkg} directory.
+\item An additional check box on the news submit page helps to
+  separate front page news from project-only news. Nevertheless,
+  whenever a news item is declared to be put on the front page,
+  R-Forge administrators need to approve them (default project-only
+  submission).
+\item A new button in the SCM Admin tab allows for delivery of SVN
+  commit messages (default: off).  This
+  list is used for circulating SVN commit messages to registered
+  users (has to be turned on separately).
+\item In newly registered projects by default only the SCM, the R
+  packages tab and mailing lists are turned on. Forums, News and
+  Tracker can be turned on separately using ``Edit Public Info'' in
+  the Admin tab of the project. This is aimed to help new users to get
+  in touch with R-Forge and to let users decide which features they
+  want to use.
+\item We moved to a platform independent package building and quality
+  management code combined in one \R{} package.
 \end{itemize}
 
-%% 
+Currently on the wishlist and under development:
+\begin{itemize}
+\item Wiki,
+\item Task management,
+\item Restructured tracker more compatible to \R{}. E.g., \R{} version
+  used which generated the bug.  
+\end{itemize}
+
+%% - 
 
 \section{Acknowledgements}
 
-Many thanks to Douglas Bates and the University of Wisconsin
-for providing us with a server for hosting this platform
-and. Furthermore, we have to thank the Computer Center 
-of the Vienna University of Economics and Business Administration for
+Setting up this project would not have been possible without Douglas
+Bates and the University of Wisconsin 
+They provided us with a server for hosting this platform. Furthermore,
+the authors would like to thank the Computer Center 
+of the Wirtschaftsuniversit\"at Wien for
 their support and for providing us with hardware as well as a
 professional server infrastructure.
 

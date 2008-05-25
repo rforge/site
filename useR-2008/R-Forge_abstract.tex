@@ -18,7 +18,7 @@
 
 %\renewcommand{\title}[1]{\def\@title{#1}\newcommand{\Title}{#1}}
 
-\title{Collaborative Software Development using \proglang{R}-Forge}
+\title{Collaborative Software Development Using \proglang{R}-Forge}
 \author{Stefan Theu\ss{}l and Achim Zeileis and Kurt Hornik}
 \date{\today}
 
@@ -31,31 +31,37 @@
 %% Why should software developers use source code management tools?
 
 %% Open source and its advantages
-The source code of open source software is by definition accessible to
-everyone. One of the questions that may arise 
-in this context is how to provide code to other developers
-or even
-more important how to collaborate with others to contribute to an open
-source project. For this reason platforms for collaborative
-development are available which
-help users to find the software they like to download and allow developers to
-collaborate and provide their software on a centralized storage. The
-most famous example is SourceForge.net which is the world's largest
-open source software development web site.
+A key factor in open source software development is the rapid creation
+of solutions within an open, collaborative environment. The open
+source model had its major breakthrough with the increasing
+usage of the internet. Online communities successfully combined
+not only their programming effort but also their knowledge, work
+and even their social life.
+ 
+The consequence was an increasing demand for centralized resources e.g.,
+to manage projects or source code. The most famous of such
+platforms---the world's largest open source
+software development web site---is SourceForge.net.
 
-For a decade the \proglang{R} Development Core Team has been using similar
+For a decade, the \proglang{R} Development Core Team as well as many
+\proglang{R} package developeRs have been using
 development tools like Subversion (SVN) or Concurrent Versions System
-(CVS) provided by ETH Z\"urich.  
-Furthermore, many \proglang{R} package developers around the world use their own
-infrastructure or have their own solutions for source code
-development. Therefore the \proglang{R}-project
-wants to provide infrastructure not only
-for the \proglang{R} Development Core Team but also for the entire \proglang{R} community
-which consists of hundreds or thousands of volunteers. 
+(CVS) for managing their source
+code. A central repository is hosted by ETH Z\"urich mainly for
+managing the development of the base \proglang{R} system. Now, the
+\proglang{R}-project wants to provide infrastructure for the entire
+\proglang{R} community.
+
+%%One of the questions that may arise 
+%%in this context is how to provide code to other developers
+%%or even
+%%more important how to collaborate with others to contribute to an open
+%%source project. centralized resource for managing projects and
+%%source code
 
 %%As
 %%collaborative development is a key factor for a lot of 
-%%successfull open source projects. 
+%%successfully open source projects. 
 
 %%Open source development is
 %%generally claimed to produce more bug free
@@ -68,16 +74,15 @@ which consists of hundreds or thousands of volunteers.
 %%be seen as an self-organizing process which releases prototype code
 %%frequently which is reviewed by hundreds of peers.  
 
-\proglang{R}-Forge (\url{http://R-Forge.R-project.org}) is a set of tools based
+\proglang{R}-Forge~(\url{http://R-Forge.R-project.org}) is a set of tools based
 on the open source software GForge---a fork of
-the open source version
-of SourceForge.net. 
+the open source version of SourceForge.net.
 It aims to provide a platform for collaborative development of
 \proglang{R} packages, \proglang{R} 
 related software or other projects which are somehow related to \proglang{R}.
 %%our all beloved language \proglang{R}
-It offers source code management facilities
-through Subversion and various web-based features. 
+It offers source code management facilities through SVN and
+a wide variety of web-based services.
 
 %%R-Forge hosts nearly 150 Projects and has around 350 registered users at the
 %%time of this writing.
@@ -90,16 +95,16 @@ through Subversion and various web-based features.
 %%that they developed---bug fixes, additional functionality---which the
 %%maintainer adds to the code after verification.
 
-An outstanding feature is the 
-possibility to have packages built daily for  various platforms, i.e.,
-Linux, MacOSX and Windows (the latter two in binary form). These
-packages are accessible via download from the website and are installable
-directly in \proglang{R} via \code{install.packages()} then.
+Furthermore, packages hosted on \proglang{R}-Forge are built daily
+for  various operating systems, i.e., Linux, MacOSX and Windows. These
+package builds are downloadable from the 
+project's website on \proglang{R}-Forge as well as installable 
+directly in \proglang{R} via \code{install.packages()}.
 
-In our talk we show how package developeRs are getting started with
+In our talk we show how package developeRs can get started with
 \proglang{R}-Forge. In particular we show how people can register a project, 
-use \proglang{R}-Forge's version control facilities, provide their
-packages on \proglang{R}-Forge, host a project specific website, and
+use \proglang{R}-Forge's source code management facilities, provide their
+packages with \proglang{R}-Forge, host a project specific website, and
 finally submit a package to CRAN.
 
 \end{document}
