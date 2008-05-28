@@ -45,13 +45,16 @@ and even their social life. OSS development is generally
 claimed to be faster than closed source code because of the
 ``release early, release often'' paradigm introduced by Linus
 Torvalds.
-%% or: Additionally in the open source community it is appreciated to
-%% release OSS more frequently than closed source software. This is
-%% often called the ``release early, release often'' paradigm 
-%% introduced by Linux Torvalds.
-%% But this also means to manage the source code of a project.
 
-%% TODO: following paragraph
+
+\textbf{TODO: } I don't know what to do with the following paragraph
+%% FIXME:
+Much early work on OSS development was aimed at raising awareness  OSS
+work produced by a community of developers ``The Cathedral and the
+Bazaar'' by \cite{forge:Raymond:1999}.
+Advantages:
+decentralized self-organizing process, rapid code evolution, massive
+peer code review, rapid release of prototype code
 Developers of larger projects like the language \R{} use source code
 management (SCM) facilities to follow this paradigm.
 The \R{} Development Core Team have been using
@@ -63,50 +66,58 @@ A central repository is hosted by ETH Z\"urich mainly for
 managing the development of the base \R{} system. The
 \R{}-project is now ready to provide similar infrastructure
 for the entire \R{} community.
-
 R-Forge (\url{http://R-Forge.R-project.org}) provides a set of tools
 for source code management and various web-based
 features. It aims to provide a platform for collaborative development of
-\R{} packages, \R{}-related software or further projects.
-All work is organized in a ``Project'' on R-Forge. 
+\R{} packages, \R{}-related software or further projects. But it does not
+matter if individuals work on their own or a number of developers
+collaborate in a larger project, on R-Forge all work is organized in
+the same entity namely a ``Project''. 
 
-
-
-%% brief overview of features possibly most interesting for readers
-Furthermore, packages hosted on \R{}-Forge are built daily
-for  various operating systems, namely Linux, MacOSX and Windows. These
-package builds are downloadable from the website of the project on
-\R{}-Forge as well as from a CRAN-style repository. This means that
-packages are installable directly in \R{} via
-\code{install.packages("foo", repos="http://R-Forge.R-project.org")}.
+\textbf{END TODO}
 
 %% Article Outline
 The present article is organized as follows. First, we present the core
-features R-Forge is offering to the \R{} community. Second we
+features that R-Forge is offering to the \R{} community. Second we
 show how package developers can get started with 
-\R{}-Forge. In particular we show how people can register a project, 
-use \R{}-Forge's source code management facilities, provide their
+\R{}-Forge. In particular we answer some questions like: How people can
+register a project, use \R{}-Forge's source code management facilities, provide their
 packages with \R{}-Forge, host a project specific website, and
-finally submit a package to CRAN (\url{CRAN.R-project.org}). Then ...
-Eventually we summarize ... and give a brief outlook future work.
-
+finally how to submit a package to CRAN
+(\url{http:\\CRAN.R-project.org}).
+Eventually we summarize recent developments and give a brief outlook
+to future work.
 
 %% What is R-Forge offering to you?
 %% Alternative title: Core Features of R-Forge
 \section{R-Forge}
 %% what is R-Forge?
-R-Forge (\url{http://R-Forge.R-project.org}) is a set of tools for
-collaborative development of \R{} packages, \R{}
-related software or other projects which are somehow related to the
-language \R{}.
+R-Forge offers developers a central platform for the development of \R{} packages, \R{}
+related software and further projects. On R-Forge developers organize their work
+in so called projects. Every project has various tools and web-based features
+for software development, communcation between developers themselves
+as well as their
+user base and other services enabled.
 
-It is based on the OSS GForge (\citep{forge:copeland_et_al:2006}) which is a
+R-Forge is based on the OSS GForge (\citep{forge:copeland_et_al:2006}) which is a
 fork of the 2.61 SourceForge code maintained by one of the authors of
-the original SourceForge code Tim Perdue. GForge provides source code
-management facilities through SVN and various web-based features
-accessible via so called ``tabs''. Tabs can be distinguished in main
-tabs (currently Home, My Page and Project Tree) and project specific
-tabs which are only visible when you access a project.
+the original SourceForge code Tim Perdue. GForge has been modified to
+provide additional features for the \R{} community namely a
+CRAN-style repository for hosting development releases of \R{}
+packages as well as a quality management system similar to that of
+CRAN.
+%%This and the especially of interest for the \R{} community
+%% brief overview of features possibly most interesting for readers
+Packages hosted on \R{}-Forge are built daily
+for various operating systems, namely Linux, MacOSX and Windows. These
+package builds are downloadable from the website of the project on
+\R{}-Forge or are installable directly in \R{} via
+\code{install.packages("packagename",
+  repos="http://R-Forge.R-project.org")}.
+
+%%Tabs can be distinguished in main
+%%tabs (currently Home, My Page and Project Tree) and project specific
+%%tabs which are only visible when you access a project.
 
 %% Additional Information to GForge. Since the codebase of 
 %% SourceForge has not been released over a certain time the GForge
@@ -116,10 +127,10 @@ tabs which are only visible when you access a project.
 %% FIXME: How to formulate better
 %% Version control - probably the most important feature
 
-Probably the most important features correspond to 3 project tabs are
-``Summary'' which offers an overview of the whole project, ``SCM''
-describing how people can access the source code repository and ``R
-Packages'' containing a list of packages available in this Project.
+%%Probably the most important features correspond to 3 project tabs are
+%%``Summary'' which offers an overview of the whole project, ``SCM''
+%%describing how people can access the source code repository and ``R
+%%Packages'' containing a list of packages available in this Project.
 
 %% eventually include history of the development of R-Forge
 R-Forge hosted nearly 200 Projects and had around 450
@@ -128,78 +139,91 @@ feature requests show that there is a high demand for centralized source code
 management tools and for releasing prototype code frequently among the
 \R{} community.
 
+In the next section we explain the features which are important for
+collaborative development and for releasing prototype or development
+packages on R-Forge.
+%% TABS and projects
+All features mentioned in the following sections are accessible via so called
+``tabs''. E.g., user accounts can be managed in the ``My page'' tab or
+a list of available projects can be displayed using the ``Project Tree'' tab. 
+
+
 \subsection{Source Code Management}
 
-Why is source code management important? Especially in science people
-work together and exchange knowledge and 
-this is also true for developing software as well. Most often it is
-sufficient to have a shared storage for source code but sometimes it
-is better to have more than that. For example, version control enables
-a group of developers to work on a given project simultaneously
-without thinking about details like merging different code junks
-together or throwing away code as there is always the possibility to
+When carrying out a software projects source files change over time,
+new files get created and old files deleted. Moreover several authors
+work on several computers on the same and/or different files. Often it
+is sufficient to have a shared storage for the source code but if the
+project reaches a certain size it becomes a tedious task to overlook
+every file change. Especially if files get overwritten or deleted it
+is often not easy to restore them from a backup. Source
+code management tools like SVN help in organizing the process of
+creating a software. A central repository ensures that the developer
+has always access to the current version of the project source
+code. Any of the authorized collaborators can ``checkout'' or
+``update'' the project
+file structure, make the necessary changes or additions, delete
+files from the project and finally ``commit'' his changes or addions
+to the repository. More than
+that, SVN keeps track of the complete history of the project file
+structure. At any point in the development stage it is possible to go
+back to any stage in the history as well as to inspect and restore old
+files. This is called version control as every stage automatically is
+assigned a unique version number which increases over time. 
+All of this enables a group of developers to work on a given project
+simultaneously without losing time thinking of backups or thinking of
+details like throwing away obsolete code as there is always the possibility to 
 go back to a specific version of the whole software repository.
 
 %% Summarize the SCM feature
-On R-Forge each project has such a version controlled repository
-including all features provided by SVN. In addition to the
-backup inherent backup of every version in an SVN repository a backup
-of the whole repository is made daily. 
-%% One can think of a situation where one has
-%% written code, updated it and then decides that some junks of the
-%% original code where better but are lost now. To overcome this one can
-%% make use of version control. This is very important as in each stage
-%% one can retrieve all historical code.
+On R-Forge such a version controlled repository is automatically
+created for each project. The project members just have to install
+the client of their choice (e.g., TortoiseSVN on Windows of svnX on
+MacOSX), check out the repository and can start working using all the
+features provided by SVN. In addition to the inherent backup of every
+version mentioned above a backup of the whole repository and thus of
+the whole history of the project is made daily. This backup is necessary if
+the repository itself gets corrupted. 
 
 %% except two predefined directories (\code{pkg} and \code{www})
 
 %% Rights management on R-Forge
-
-Typically, users need to have read access to the data associated with
-a certain project. Some of them (the developers) have write access to
-the data. Usually there is a maintainer of the code. This person is the project
-leader, package maintainer or put simply has registered the
-project. 
+Typically, all users have read access and some of them (the
+developers) have write access to the data associated with
+a certain project. On R-Forge a rights management system assures that
+registered users can be granted one of several so called roles. 
 %% Explaining rights management
-To achieve this R-Forge has its own rights management system. A
-registered user can be 
-granted one of several so called roles. To name a few there is
-the \textit{Administrator} which typically are the package
-maintainers or project leaders. For example, only  administrators can
-add new users 
-to the project or release packages directly to CRAN using the ``R Packages''
-tab. Other members of a project typically have either the role \textit{Senior
-Developer} or \textit{Junior Developers}. Being granted one of above
-rights means that you are permitted to commit to the project
+E.g., the \textit{Administrator} has all rights including the right to
+add new users to the project or release packages directly to CRAN
+using the ``R Packages'' tab. He or she is usually the package
+maintainer, the project leader or has registered the project.
+Other members of a project typically have either the role \textit{Senior 
+Developer} or \textit{Junior Developers}. These two roles are
+permitted to commit to the project 
 SVN repository and examine the log files in the ``R Packages'' tab.
 When we speak of developers in subsequent sections we refer to project
 members having the rights of at least of a \textit{Junior Developer}.
 
-%% Contributers can make use of the 
-%% provided facilities or email any changes to the code
-%% that they developed---bug fixes, additional functionality---which the
-%% maintainer adds to the code after verification. How is this organized
-%% in R-Forge? 
 
-%%
-%%
 \subsection{Release and Quality Management of R Packages}
 
 %% Quality Management and bug/support/feature tracker
-Meaning that early version are typically prototypes and therefore are
+When realising early version of a software project they are typically
+prototypes and therefore are 
 not completely bug free. R-Forge can assist the developer with two
-sort of tools. First it offers a quality management system similar to
+tools to improve the quality of their products. First it offers a
+quality management system similar to 
 that of CRAN. Packages on R-Forge are checked in a
 standardized way based on \code{R CMD check} on different
-platforms. The resulting log files can be examined by developers.
+platforms. The resulting log files can be examined by the project
+developers so that they can make the necessary changes in order to get
+the package working properly on each platform.
 
-Second, especially of interest for the \R{} community is the
-possibility to have daily prototype or development releases
-of their packages. Furthermore, binaries for Windows and MacOS X are
-also built on a daily basis. These packages can be
-downloaded via a download link in the ``R Packages'' tab or
-are directly installable in \R{} using the function \code{install.packages()}. 
-%%They are built from the ``pkg'' directory.
+Second, a bug tracking systems allows users  to notify
+the authors of the package about problems they encountered. 
+Peer code review is one of the major advantages of OSS and lead to an
+overall improvent of the quality of the projects---Given
+enough eyeballs, all bugs are shallow (\cite{forge:Raymond:1999}).
 
 \subsection{Additional Features}
 
@@ -213,18 +237,16 @@ subdomain of \url{http://r-forge.r-project.org}. It is also allowed to
 have a link on the project summary page to another website. 
 %% checked out hourly from ``www'' directory of the
 %%project's repository.
-\item Mailing Lists are nowadays valuable for every kind of project.By default one is automatically created when setting up a project. Additional mailing lists can be
-  created rather easily. 
-\item The project tree offers you to assign your project to one or more
+\item Mailing Lists are nowadays valuable for every kind of
+  project. By default one is automatically created when setting up a
+  project. Additional mailing lists can be set up as well. 
+\item The project tree offers the assignment of a project to one or more
   topics (e.g.: biostatistics, finance, regression analysis,
-  \ldots). This helps other people to quickly find what they are
+  \ldots). This enables other people to quickly find what they are
   looking for. In the default setting the project tree lists
-  alphabetically all
-  projects including a short description similar to CRAN.
+  alphabetically all projects including a short description similar to CRAN.
 \item Forums can be set up separately by the project
   administrators.%% are places to discuss certain topics 
-\item Bug tracking and feature request systems assist in package
-  development process.
 \item News can be put on the project summary page as well as on the
   front page. The latter needs an approval by one of the R-Forge
   administrators). It is possible to download them as RSS feeds.
@@ -399,11 +421,11 @@ Currently on the wishlist and under development:
 \section{Acknowledgements}
 
 Setting up this project would not have been possible without Douglas
-Bates and the University of Wisconsin 
-They provided us with a server for hosting this platform. Furthermore,
+Bates and the University of Wisconsin as they provided us with a
+server for hosting this platform. Furthermore, 
 the authors would like to thank the Computer Center 
 of the Wirtschaftsuniversit\"at Wien for
-their support and for providing us with hardware as well as a
+their support and for providing us with additional hardware as well as a
 professional server infrastructure.
 
 \bibliography{R-Forge}
