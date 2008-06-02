@@ -58,15 +58,25 @@ decentralized self-organizing process, rapid code evolution, massive
 peer code review, rapid release of prototype code
 Developers of larger projects like the language \R{} use source code
 management (SCM) facilities to follow this paradigm.
+
 The \R{} Development Core Team have been using
 development tools like Subversion \citep[SVN,
 see][]{forge:Pilato+Collins-Sussman+Fitzpatrick:2004} or  
 Concurrent Versions System \citep[CVS, see][]{forge:Cederqvist:2006}
 for managing their source code for a decade now.  
 A central repository is hosted by ETH Z\"urich mainly for
-managing the development of the base \R{} system. The
-\R{}-project is now ready to provide similar infrastructure
-for the entire \R{} community.
+managing the development of the base \R{} system. 
+
+Many package developers use similar 
+infrastructure to manage their source code. They have their own private
+SVN repositories or use third party like Google Code
+(\url{http://code.google.com}). Moreover, around $45%$ of
+the packages on CRAN have 2 or more authors (as of June 02, 2008). All
+of the above show that a central repository would help people to
+develop R packages.
+
+The \R{}-project is now ready to provide infrastructure
+for the entire \R{} community. 
 R-Forge (\url{http://R-Forge.R-project.org}) provides a set of tools
 for source code management and various web-based
 features. It aims to provide a platform for collaborative development of
