@@ -190,9 +190,12 @@ build_packages <- function(email,
       ## first we have to build the tarball (important for vignettes)
       system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
                    ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+      ## then build the binary
       system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
                    paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+      ## and finally delete the tarball
+      file.remove(paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""))              
       }
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
