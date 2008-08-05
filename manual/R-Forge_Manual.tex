@@ -19,6 +19,7 @@
 %Vienna University of Economics and Business Administration}
 \date{\today}
 
+\let\code\texttt
 \begin{document}
 
 \maketitle
@@ -286,7 +287,7 @@ ssh-dsa AAAA... foo@bar
   created once an hour only)
 \end{enumerate}
 
-\subsection{Mac OSX}
+\subsubsection{Mac OSX}
 \label{sec:scm-macosx}
 %% Thanks to Philippe Grosjean for providing us with this description
 Mac OS X users should refer to Unix section~\ref{sec:scm-unix}. They
@@ -311,7 +312,7 @@ required to use SCPlugin, see point 4). In SSHKeychain, select 'Agent'
   make a copy of the public key on your desktop type the following
   commands in the terminal (replace the name of the file with yours): 
 
-  \code{cp ~/.ssh/id_rsa.pub ~/Desktop/id_rsa.pub}
+  \code{cp ~/.ssh/id\_rsa.pub ~/Desktop/id\_rsa.pub}
   
   Then, upload this file to \textbf{R-Forge}.
 
@@ -327,6 +328,8 @@ required to use SCPlugin, see point 4). In SSHKeychain, select 'Agent'
   "SCM") under "developer account". (Note: if this last step fails,
   wait an hour and try again. The logins are created once an hour
   only). 
+
+\end{enumerate}
 
 Another page to consult for SVN installation on Mac OS X is
 \url{http://www.wikihow.com/Install-Subversion-on-Mac-OS-X}. Alternate SVN
