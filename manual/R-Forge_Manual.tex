@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+\documentclass[a4paper]{report}
 
 % PREAMBLE
 %\usepackage[austrian]{babel}
@@ -6,27 +6,52 @@
 \usepackage[authoryear,round]{natbib}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{url}
 \sloppy
 
 %% Authornames: R-Forge Team, R-Forge Administration Team, R-Forge
 %% Support Team, R-Forge Maintenance Team, synonym for team -> crew
 \newcommand{\RFORGE}{R-Forge Administration and Development Team}
 
-\title{R-Forge User's Manual}
+\title{R-Forge User's Manual, BETA}
 \author{\RFORGE}
 %\email{R-Forge@R-project.org}
 %\institute{Department of Statistics and Mathematics\newline
 %Vienna University of Economics and Business Administration}
 \date{\today}
 
-\let\code\texttt
+\let\code=\texttt
+\let\email=\texttt
+\newcommand{\pkg}[1]{{\normalfont\fontseries{b}\selectfont #1}}
+\newcommand{\proglang}[1]{\textsf{#1}}
+\newcommand{\class}[1]{`\code{#1}'}
+
 \begin{document}
 
-\maketitle
+\pagestyle{empty}
 
-%\tableofcontents
+%%\maketitle
+
+\begin{titlepage}
+
+  {\LARGE \raggedleft \textbf{R-Forge User's Manual, BETA}}\\
+%%  \vspace*{0.5cm}
+  \begin{flushright}
+  \textbf{SVN Revision: xxxx, \today}\\
+  \end{flushright}
+
+  \vspace*{\fill}
+%%  \vspace*{10cm}  
+  {\Large \raggedleft \textbf{\RFORGE{}}}
+  
+\end{titlepage}
+
+
+
 
 \newpage
+\vspace*{\fill}
+
 %% Copyright notices
 Copyright 2006--2007 Stefan Theussl\\
 Copyright 2008 \RFORGE{}\\
@@ -57,32 +82,46 @@ following members:
 \end{itemize}
 
 \newpage
+
+\pagenumbering{roman}
+\pagestyle{plain}
+\tableofcontents
+
+\clearpage
+\pagestyle{headings}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
 \section{Introduction}
 \label{sec:intro}
 
-For a decade the R Development Core Team has used collaborative
-development tools like Subversion (SVN) or Concurrent Versions System
-(CVS) provided by ETH Z\"urich.  
-Many R package
-developers around the world use similar infrastructure build upon their own
+For a decade the \proglang{R} Development Core Team is using collaborative
+development tools like Subversion~\citep[SVN,
+see][]{forge:Pilato+Collins-Sussman+Fitzpatrick:2004} or Concurrent
+Versions System~\citep[CVS, see][]{forge:Cederqvist:2006} provided by
+ETH Z\"urich.   
+Many \proglang{R} package
+developers around the world use similar infrastructure built upon their own
 solutions as collaborative development is a key factor for a lot of
 successfull open source projects. Therefore the \textbf{R-project}
 wants to provide infrastructure not only
-for the R Development Core Team but also for the entire R community.
+for the \proglang{R} Development Core Team but also for the entire
+\proglang{R} community. 
 
 \textbf{R-Forge} (\url{http://R-Forge.R-project.org}) is a
 framework based on 
-\textbf{GForge} \citep{manual:gforge} which integrates various tools like
+\textbf{GForge} \citep{forge:copeland_et_al:2006} which integrates
+various tools like 
 SVN for collaborative work on source code, mailing lists, bug tracking
 etc. into one platform. It is a
-place where all R developers and users can come together and exchange
+place where all \proglang{R} developers and users can come together and exchange
 their knowledge. Joining this community service gives you access to
 all we have to offer.
 
 The advantage of having the new meeting (or coding) 
 point is, that your package is going to be built and checked every day
 not only with the latest patched and release version but also the
-newest devel version of R. You don't have to set up your own
+newest devel version of \proglang{R}. You don't have to set up your own
 build and check environment. That means you have your devel version of
 your package on R-Forge and if you decide to release a new
 version on CRAN, this can be done in a standardized way.
@@ -103,7 +142,7 @@ started with \textbf{R-Forge} are described. If you need help or have
 comments regarding \textbf{R-Forge} please send an email to
 \url{R-Forge@R-project.org}. For more detailed
 documentation regarding the underlying \textbf{GForge} system
-see~\cite{manual:gforge}.\newline 
+see~\cite{forge:copeland_et_al:2006}.\newline 
 \newline
 The main features provided by \textbf{R-Forge} are:
 \begin{description}
@@ -111,7 +150,7 @@ The main features provided by \textbf{R-Forge} are:
   important feature namely ``SVN''.
 \item[Daily package builds] are automatically created and can then be
   downloaded via\newline 
-  \url{install.packages("foo", repos = "R-Forge.R-project.org")}.
+  \code{install.packages("foo", repos = "R-Forge.R-project.org")}.
 \end{description}
 In addition there are other useful tools available
 \begin{itemize}
@@ -337,37 +376,53 @@ Another page to consult for SVN installation on Mac OS X is
 \url{http://www.wikihow.com/Install-Subversion-on-Mac-OS-X}. Alternate SVN
 software are proposed there. 
 
-
 \subsection{R Package Development}
+
 Making developing R packages easy is the main mission of
 R-Forge. R-Forge will build and check your packages on multiple
 plattforms, including Linux, Windows (32 bit) and Mac OS X. 
 
-To build your packages, simply place your package in the \textbf{\texttt{pkg/}} directory in your SVM repository (see
+To build your packages, simply place your package in the
+\textbf{\texttt{pkg/}} directory in your SVM repository (see 
 Section~\ref{sec:scmhowto} on how to achieve this) and check it
 in. Typically this directory contains the R package with the usual
 \texttt{DESCRIPTION} file and \texttt{R/}, \texttt{man/},
 \texttt{data/} directories (see \cite{Rcore:writing_R_extensions} for more
 details). You can build \textbf{more than one package} by putting the
-packages in subdirectories, e.g. \texttt{pkg/myPkgA/},
+packages in subdirectories, e.g. \texttt{pkg/myPkgA/}, 
 \texttt{pkg/myPkgB/}, etc.
 
 Packages are automatically checked out every night (Central European
 Time) and built and checked on several plattforms (make sure that the
-\texttt{DESCRIPTION} files are well-formed and contain a proper
-package name, otherwise your package may not get checked out). The R Packages tab on the project's page gives an overview
-of all the
-packages in the project, including \textbf{check and build logs} for several
-plattforms. All packages built on R-Forge are made available on the R-Forge package repository, so packages can be installed simply by typing \url{install.packages("foo", repos = "R-Forge.R-project.org")} in R.
+\texttt{DESCRIPTION} files are well-formed and contain a proper 
+package name, otherwise your package may not get checked out). The R
+Packages tab on the project's page gives an overview 
+of all the 
+packages in the project, including \textbf{check and build logs} for
+several 
+plattforms. All packages built on R-Forge are made available on the
+R-Forge package repository, so packages can be installed simply by
+typing \url{install.packages("foo", repos = "R-Forge.R-project.org")}
+in R. 
 
-Developers who wish to use their own external package repository can use the \textbf{external SVN} feature in the R packages Admin tab (follow the instructions on the site). Please note that only repositories with anonymus access are supported. It is possible to use external and internal SVN repositories side-by-side. Regardless of origin, all packages will show up on the R packages tab.
+Developers who wish to use their own external package repository can
+use the \textbf{external SVN} feature in the R packages Admin tab
+(follow the instructions on the site). Please note that only
+repositories with anonymus access are supported. It is possible to use
+external and internal SVN repositories side-by-side. Regardless of
+origin, all packages will show up on the R packages tab. 
 
-Packages can be \textbf{submitted to CRAN} through the web interface (you have to be project admin to use this).
+Packages can be \textbf{submitted to CRAN} through the web interface
+(you have to be project admin to use this). 
 
 \subsection{Additional Features}
 
 \subsubsection{Project Homepage}
-Each project on R-Forge has its own homepage with the URL \url{http://ProjectUnixName.r-forge.r-project.org/}. Use the pre-defined \textbf{\texttt{www/}} directory in your SVN repository to create or modify your homepage. Note that it will be checked out daily, so please take
+Each project on R-Forge has its own homepage with the URL
+\url{http://ProjectUnixName.r-forge.r-project.org/}. Use the
+pre-defined \textbf{\texttt{www/}} directory in your SVN repository to
+create or modify your homepage. Note that it will be checked out
+daily, so please take 
 into consideration that it will not be available right after you
 commit your changes or updates. 
 % TODO: What about PHP scripting?
@@ -376,15 +431,39 @@ commit your changes or updates.
 \subsubsection{SCM Options}
 Two options can be accessed through the SCM Admin tab:
 \begin{enumerate}
-\item{Enable anonymus access} Self-explanatory. If disabled, only project members can access the SVN repository and  \textbf{packages will not be checked out for automatic building}. The project homepage will still be available though.
-% TODO: Fact-check this.
+\item{Enable anonymus access} Self-explanatory. If disabled, only
+  project members can access the SVN repository and  \textbf{packages
+    will not be checked out for automatic building}. The project
+  homepage will still be available though. 
+  % TODO: Fact-check this.
 
-\item{Delivery of Commit Messages} This allows you to direct commit messages to an email address of your choice, e.g. the project's commit mailing list (see below). 
+\item{Delivery of Commit Messages} This allows you to direct commit
+  messages to an email address of your choice, e.g. the project's
+  commit mailing list (see below).  
 \end{enumerate}
 
 
 \subsubsection{Mailing Lists}
 
+
+\section{Migration from an existing CVS/SVN repository}
+
+Steps to include the complete history of your current repositroy in
+your R-Forge project:
+\begin{enumerate}
+\item Please register a project on R-Forge first.
+\item convert from CVS to SVN (For converting from CVS to an SVN
+  repository see e.g.,
+  \url{http://www.xs4all.nl/~carlo17/svn/cvs2svn.html}).
+\item Then dump the whole SVN repository (using \code{svnadmin dump >
+    foo.dump}).
+\item Verify that the dump file can be loaded into a freshly created
+  SVN repository (\code{svnadmin load newrep < foo.dump}). 
+\item Send it to us: If the dump file is smaller than 10 MB you can
+  send it per email to \email{R-Forge@R-project.org} otherwise you have to
+  provide it somewhere for download. 
+\item \code{svn move} your package to the /pkg directory
+\end{enumerate}
 
 
 %% Acknowledgements from Rnews article
@@ -398,7 +477,7 @@ of the Wirtschaftsuniversit\"at Wien for
 their support and for providing us with additional hardware as well as a
 professional server infrastructure. 
 Thanks to Philippe Grosjean for
-providing a Mac OSX description (see Section~\ref{sec:scm-macosx}).
+providing a Mac OSX description (Section~\ref{sec:scm-macosx}).
 
 
 \bibliographystyle{plainnat}
