@@ -8,8 +8,12 @@
 \usepackage{hyperref}
 \sloppy
 
+%% Authornames: R-Forge Team, R-Forge Administration Team, R-Forge
+%% Support Team, R-Forge Maintenance Team, synonym for team -> crew
+\newcommand{\RFORGE}{R-Forge Administration and Development Team}
+
 \title{R-Forge User's Manual}
-\author{Stefan Theussl}
+\author{\RFORGE}
 %\email{R-Forge@R-project.org}
 %\institute{Department of Statistics and Mathematics\newline
 %Vienna University of Economics and Business Administration}
@@ -21,8 +25,40 @@
 
 %\tableofcontents
 
+\newpage
+%% Copyright notices
+Copyright 2006--2007 Stefan Theussl\\
+Copyright 2008 \RFORGE{}\\
+
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one. 
+
+Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions, except that this permission notice may be stated in a
+translation approved by the \RFORGE{}. 
+
+The \RFORGE{} consists of the
+following members:
+
+\begin{itemize}
+\item Kurt Hornik  
+\item Martin Kober 
+\item David Meyer 
+\item Stefan Theu\ss{}l
+\item Achim Zeileis
+\end{itemize}
+
+\newpage
 \section{Introduction}
 \label{sec:intro}
+
 For a decade the R Development Core Team has used collaborative
 development tools like Subversion (SVN) or Concurrent Versions System
 (CVS) provided by ETH Z\"urich.  
@@ -33,10 +69,10 @@ successfull open source projects. Therefore the \textbf{R-project}
 wants to provide infrastructure not only
 for the R Development Core Team but also for the entire R community.
 
-\textbf{R-Forge} (\url{http://R-Forge.R-project.org}) is the new
+\textbf{R-Forge} (\url{http://R-Forge.R-project.org}) is a
 framework based on 
-\textbf{GForge} (\cite{manual:gforge}) which integrates various tools like
-SVN for collaborative work on source code, mailinglists, bug tracking
+\textbf{GForge} \citep{manual:gforge} which integrates various tools like
+SVN for collaborative work on source code, mailing lists, bug tracking
 etc. into one platform. It is a
 place where all R developers and users can come together and exchange
 their knowledge. Joining this community service gives you access to
@@ -284,6 +320,16 @@ Note that it will be checked out daily, so please take
 into consideration that it will not be available right after you
 commit your changes or updates. 
 
+%% Acknowledgements from Rnews article
+\section{Acknowledgements}
+
+Setting up this project would not have been possible without Douglas
+Bates and the University of Wisconsin as they provided us with a
+server for hosting this platform. Furthermore, 
+the authors would like to thank the Computer Center 
+of the Wirtschaftsuniversit\"at Wien for
+their support and for providing us with additional hardware as well as a
+professional server infrastructure.
 
 
 \bibliographystyle{plainnat}

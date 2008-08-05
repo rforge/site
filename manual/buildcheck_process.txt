@@ -1,0 +1,30 @@
+This file describes the R-Forge infrastructure.
+
+There are several servers providing all the functionality users
+perceive on R-Forge. What follows is a brief summary of the tasks of
+the different servers.
+
+R-Forge.R-project.org: sponsored by the University of Wisconsin. HP
+Workstation AMD Opteron Quad core 12GB RAM, Webserver, SVN server, Database server
+
+The rest is kindly provided by the Wirtschaftsuniversitaet Wien
+R-apple: Mac mini Intel Core2 Duo 2Ghz 2GB RAM, MacOSX build server
+for universal binaries (x86/PPC)
+gimli: 32 bit Linux check server 3Ghz Core 2 Duo 4GB RAM
+orthanc: 64 bit Linux check server 3Ghz Core 2 Duo 4GB RAM
+zeus: 64 bit Windows build/check server
+hera: 32 bit Windows build/check server
+
+the nightly build/check schedule is as follows:
+
+1) xx:xx Exportation of packages: all public available packages in the
+SVN repositories are exproted on 
+R-Forge and provided by rsync
+
+2) Syncing of packages:
+
+3) Building packages
+
+4) Checking packages
+  
+
