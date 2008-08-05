@@ -257,6 +257,7 @@ on\newline
 \end{enumerate}
 
 \subsubsection{Unix}
+\label{sec:scm-unix}
 
 \begin{enumerate}
 \item First you need a ssh keypair: Generate and save the keys
@@ -284,6 +285,52 @@ ssh-dsa AAAA... foo@bar
   fails for some reason, wait an hour and try again. The logins are
   created once an hour only)
 \end{enumerate}
+
+\subsection{Mac OSX}
+\label{sec:scm-macosx}
+%% Thanks to Philippe Grosjean for providing us with this description
+Mac OS X users should refer to Unix section~\ref{sec:scm-unix}. They
+can alternatively use GUI applications to manage their SVN
+repositories and SSH keychains.
+
+\begin{enumerate}
+\item To manage the ssh keypair you can use SSHKeychain
+(http://www.sshkeychain.org/). You can generate your keychains in the
+'Preferences...' dialog box of SSHKeychain, but you have to provide a
+passphrase of 5 characters minimum. If you do not want a passphrase,
+use 'ssh-keygen' at the terminal (a keychain without passphrase is
+required to use SCPlugin, see point 4). In SSHKeychain, select 'Agent'
+-> 'Add single key...' and select the key you just generated. 
+
+\item Upload the public key to \textbf{R-Forge} as explained in
+  section~\ref{sec:scm-unix}
+  Unix. The public key is in a file name [keyfile].pub in the same
+  directory as your private key. If you used default directory and
+  name to generate your key, the files are in a hidden directory named
+  '.ssh' in your home path, and is thus not visible in the Finder. To
+  make a copy of the public key on your desktop type the following
+  commands in the terminal (replace the name of the file with yours): 
+
+  \code{cp ~/.ssh/id_rsa.pub ~/Desktop/id_rsa.pub}
+  
+  Then, upload this file to \textbf{R-Forge}.
+
+\item Wait until the next full hour that the key gets activated.
+
+\item If you want a convenient management of your SVN tree in the
+  Finder, install SCPlugin. To install it, follow instructions at
+  \url{http://scplugin.tigris.org/installation.html}. Once SCPlugin is
+  installed, navigate in the Finder to the directory where you want to
+  place the local copy of your SVN tree. Create a folder with the name
+  of your project, right click on this folder and select \textit{Subversion}
+  -> \textit{Checkout}. Indicate the URL given on the project web-site (tab
+  "SCM") under "developer account". (Note: if this last step fails,
+  wait an hour and try again. The logins are created once an hour
+  only). 
+
+Another page to consult for SVN installation on Mac OS X is
+\url{http://www.wikihow.com/Install-Subversion-on-Mac-OS-X}. Alternate SVN
+software are proposed there. 
 
 \subsection{Your Project Directory}
 After you have checked out the repository of your project (see
@@ -320,6 +367,7 @@ Note that it will be checked out daily, so please take
 into consideration that it will not be available right after you
 commit your changes or updates. 
 
+
 %% Acknowledgements from Rnews article
 \section{Acknowledgements}
 
@@ -329,7 +377,9 @@ server for hosting this platform. Furthermore,
 the authors would like to thank the Computer Center 
 of the Wirtschaftsuniversit\"at Wien for
 their support and for providing us with additional hardware as well as a
-professional server infrastructure.
+professional server infrastructure. 
+Thanks to Philippe Grosjean for
+providing a Mac OSX description (see Section~\ref{sec:scm-macosx}).
 
 
 \bibliographystyle{plainnat}
