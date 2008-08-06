@@ -36,13 +36,18 @@
 
   {\LARGE \raggedleft \textbf{R-Forge User's Manual, BETA}}\\
 %%  \vspace*{0.5cm}
+  \rule{\linewidth}{1.5mm}
   \begin{flushright}
   \textbf{SVN Revision: xxxx, \today}\\
   \end{flushright}
 
   \vspace*{\fill}
-%%  \vspace*{10cm}  
-  {\Large \raggedleft \textbf{\RFORGE{}}}
+%%  \vspace*{10cm} 
+   
+  {\Large \raggedleft
+    \textbf{\RFORGE{}}
+    \rule{\linewidth}{1mm} 
+  }
   
 \end{titlepage}
 
@@ -376,12 +381,13 @@ Another page to consult for SVN installation on Mac OS X is
 \url{http://www.wikihow.com/Install-Subversion-on-Mac-OS-X}. Alternate SVN
 software are proposed there. 
 
-\subsection{R Package Development}
+\section{R Package Development}
 
 Making developing R packages easy is the main mission of
 R-Forge. R-Forge will build and check your packages on multiple
 plattforms, including Linux, Windows (32 bit) and Mac OS X. 
 
+\subsection{Building and Checking}
 To build your packages, simply place your package in the
 \textbf{\texttt{pkg/}} directory in your SVM repository (see 
 Section~\ref{sec:scmhowto} on how to achieve this) and check it
@@ -395,16 +401,14 @@ packages in subdirectories, e.g. \texttt{pkg/myPkgA/},
 Packages are automatically checked out every night (Central European
 Time) and built and checked on several plattforms (make sure that the
 \texttt{DESCRIPTION} files are well-formed and contain a proper 
-package name, otherwise your package may not get checked out). The R
-Packages tab on the project's page gives an overview 
-of all the 
-packages in the project, including \textbf{check and build logs} for
-several 
-plattforms. All packages built on R-Forge are made available on the
-R-Forge package repository, so packages can be installed simply by
-typing \url{install.packages("foo", repos = "R-Forge.R-project.org")}
-in R. 
+package name, otherwise your package may not get checked out). All packages successfully checked out appear on the project home page in the R packages tab. Project members also have access to the \textbf{check and build logs} on all supported plattforms. 
 
+All packages successfully built are made available on the
+R-Forge package repository, so packages can be installed simply by
+typing \texttt{install.packages("foo", repos = "http://R-Forge.R-project.org")}
+on the \proglang{R} prompt. 
+
+\subsection{External SVNs}
 Developers who wish to use their own external package repository can
 use the \textbf{external SVN} feature in the R packages Admin tab
 (follow the instructions on the site). Please note that only
@@ -412,12 +416,13 @@ repositories with anonymus access are supported. It is possible to use
 external and internal SVN repositories side-by-side. Regardless of
 origin, all packages will show up on the R packages tab. 
 
+\subsection{Submit Packages to CRAN}
 Packages can be \textbf{submitted to CRAN} through the web interface
 (you have to be project admin to use this). 
 
-\subsection{Additional Features}
+\section{Additional Features}
 
-\subsubsection{Project Homepage}
+\subsection{Project Homepage}
 Each project on R-Forge has its own homepage with the URL
 \url{http://ProjectUnixName.r-forge.r-project.org/}. Use the
 pre-defined \textbf{\texttt{www/}} directory in your SVN repository to
@@ -428,22 +433,29 @@ commit your changes or updates.
 % TODO: What about PHP scripting?
 
 
-\subsubsection{SCM Options}
+\subsection{SCM Options}
 Two options can be accessed through the SCM Admin tab:
 \begin{enumerate}
 \item{Enable anonymus access} Self-explanatory. If disabled, only
   project members can access the SVN repository and  \textbf{packages
     will not be checked out for automatic building}. The project
-  homepage will still be available though. 
+  homepage will still be available though. Default is enabled.
   % TODO: Fact-check this.
 
 \item{Delivery of Commit Messages} This allows you to direct commit
   messages to an email address of your choice, e.g. the project's
-  commit mailing list (see below).  
+  commit mailing list (see below). Default is disabled.
 \end{enumerate}
 
 
-\subsubsection{Mailing Lists}
+\subsection{Mailing Lists}
+R-Forge provides a mailing list service for all projects accessible through the Lists tab. 
+
+A list named \texttt{ProjectUnixName-commits} is already created with each project and can be used for distributing commit messages (see above on how to enable this). Project admins can create and manage additional lists for their project. 
+
+\textbf{List search} is provided by the Swish-e engine and can be accessed via the List tab. Please note that private lists are not included in the search index. 
+% TODO: Reference for swish
+
 
 
 \section{Migration from an existing CVS/SVN repository}
