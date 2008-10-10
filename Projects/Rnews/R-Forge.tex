@@ -98,7 +98,7 @@ the \R{} community.
 %% Article Outline
 The present article is organized as follows. First, we present the core
 features that \R{}-Forge offers to the \R{} community. Second, we
-give a hands on tutorial on how package developers can get started with 
+give a hands-on tutorial on how package developers can get started with 
 \R{}-Forge. In particular we show how people register new projects,
 use \R{}-Forge's source code management facilities, provide their 
 packages with \R{}-Forge, host a project specific website, and
@@ -117,18 +117,14 @@ packages, \R{}-related software and further projects.
 R-Forge is based on GForge \citep{forge:copeland_et_al:2006} which is
 an open source fork of the 2.61 SourceForge code maintained by Tim
 Perdue, one of the original SourceForge authors. GForge has been
-modified to provide additional features for the \R{} community namely,
+modified to provide additional features for the \R{} community, namely
 a CRAN-style repository for hosting development releases of \R{}
 packages as well as a quality management system similar to that of
 CRAN.
-%%This and the especially of interest for the \R{} community
-%% brief overview of features possibly most interesting for readers
-Packages hosted on \R{}-Forge are provided as compressed package
-sources (the package tarball) generated daily for platform independend
-usage. Additionally, package binaries are built for Mac OSX and
-Windows. The package tarball and the binaries are downloadable from
-the website of the corresponding project on \R{}-Forge or are
-installable directly in \R{} via \code{install.packages("foo",
+Packages hosted on \R{}-Forge are provided in source form as well as
+in binary form for Mac OSX and Windows downloadable from the website
+of the corresponding project on \R{}-Forge or installable directly in
+\R{} via \code{install.packages("foo",
   repos="http://R-Forge.R-project.org")}.
 
 %%Tabs can be distinguished in main
@@ -161,7 +157,7 @@ a list of available projects can be displayed using the
 
 Since starting the platform in early 2007, more
 and more interested users registered their projects on \R{}-Forge. Now
-after one and a half years being in a development and testing stage nearly
+after 1.5 years of development and testing nearly
 240 projects and around 600  
 users are registered on \R{}-Forge. This and the steadily growing list of
 feature requests show that there is a high demand for centralized source code
@@ -178,12 +174,13 @@ of  collaborative development of \R{}-related software projects.
 When carrying out software projects source files change over time,
 new files get created and old files deleted. Typically, several authors
 work on several computers on the same and/or different files. Keeping
-track of every file change can become a tedious task. Especially if
-files get overwritten or deleted it is often not easy to restore them
-from a backup. 
+track of every change can become a tedious task. In the open source
+community the general solution is to use version control, typically
+provided by the majority of SCM tools. For this reason \R{}-Forge
+utilizes SVN to facilitate the developer's work when creating
+software.
 
-Source code management tools like SVN help organizing the process of
-creating software. A central repository ensures that the developer
+A central repository ensures that the developer
 has always access to the current version of the project's source
 code. Any of the authorized collaborators can ``checkout'' or
 ``update'' the project
@@ -206,11 +203,11 @@ backup of every version within the repository a backup of the whole
 repository and thus of the whole history of the project is made daily. 
 
 %% Rights management on R-Forge
-By default, anonymous users have read access and others---the
-developers---have write access to the data associated with 
-a certain project. On R-Forge a rights management system assures that
-registered users can be granted one of several roles. 
-E.g., the \textit{Administrator} has all rights including the right to
+A rights management system assures that by default, anonymous users
+have read access and developers have write access to the data associated with 
+a certain project on \R{}-Forge. More precisely, registered users can
+be granted one of several roles: e.g., the \textit{Administrator} has
+all rights including the right to 
 add new users to the project or release packages directly to CRAN. He
 or she is usually the package 
 maintainer, the project leader or has registered the project originally.
@@ -247,33 +244,33 @@ overall improvement of the quality of software projects.
 
 \subsection{Additional Features}
 
-A number of other tools, especially of interest for larger
+A number of further tools, especially of interest for larger
 projects, help developers to coordinate their work and to communicate
 with their user base. These tools include:
 
 \begin{itemize}
 \item Project websites: Developers may present their work
   on a subdomain of R-Forge, e.g.,
-  \url{http://foo.R-forge.R-project.org}), or via a link to an
+  \url{http://foo.R-Forge.R-project.org}), or via a link to an
   external website.
 %% checked out hourly from ``www'' directory of the
 %%project's repository.
 \item Mailing lists: By default a list
-  \code{foo-commits@lists.R-Forge.R-project.org} is automatically
+  \code{foo-commits@\\lists.R-Forge.R-project.org} is automatically
   created for each project. Additional mailing lists can be
   set up easily.
-\item Project categorization: Different
-  topics (e.g., biostatistics, finance, regression analysis,
-  \ldots) enable users to quickly find what they are
-  looking for by browsing these categories in the so-called
-  \tab{Project Tree} tab. By default an alphabetical listing of all
-  projects each including a short description similar to CRAN is
-  presented.
+\item Project categorization: Administrators may categorize their
+  project in several so-called ``Trove Categories'' in the \tab{Admin}
+  tab of their project (under \tab{Trove Categorization}). For each
+  category three different items can be selected. This enables users
+  to quickly find what they are looking using the \tab{Project Tree}
+  tab. By default an alphabetical listing of all projects each
+  including a short description similar to CRAN is presented.
 \item News: Announcements and other information related to a project
   can be put on the project summary page as well as on the 
   home page of \R{}-Forge. The latter needs approval by one of the R-Forge
   administrators. All items are available as RSS feeds.
-\item Forums: Discussion forums have to be set up separately by the
+\item Forums: Discussion forums can be set up separately by the
   project administrators.%% are places to discuss certain topics 
 \end{itemize}
 
@@ -281,7 +278,7 @@ with their user base. These tools include:
 %%A small guide through R-Forge---TODO: detailed description 
 This section is intended to be a hands-on tutorial for new users. For
 a more detailed guide to \R{}-Forge and additional 
-information we refer to \citep[][subsequently
+information we refer to \citet[][subsequently
 referred to as user's manual]{forge:usermanual:2008}.
 
 After accessing the URL \url{http://R-Forge.R-project.org} the home
@@ -300,13 +297,13 @@ page is presented to the user. Here one can
   \ldots{}).
 \end{itemize}
 
-Another tab on the home page named \tab{My Page} leads registered user
-to their personal page. How upcoming \R{}-Forge developers become
-registered users is explained in the next section.
+Another tab named \tab{My Page} leads registered users
+to their personal page. How one can register is explained in
+the next section.
 
 \subsection{Registering as a New User}
 
-Before using certain features or starting projects on \R{}-Forge, one has
+For using \R{}-Forge as a developer, one has
 to register as a site user. A link on the main web site called
 \tab{New Account} on the top right of the home page leads to the
 corresponding registration form.
@@ -314,7 +311,7 @@ corresponding registration form.
 After submitting the completed form an e-mail is sent to the given
 address containing a link for activating the account. Subsequently,
 all \R{}-Forge features, including joining existing or creating
-new projects, are available to the logged in user.
+new projects, are available to logged-in users.
 
 In the following section, we explain the registration of a project in
 more detail.  
@@ -329,21 +326,21 @@ process. In the text field ``Project Public Description'' the
 registrant is supposed to enter a short and concise description of the
 project. This text is shown at several places on \R{}-Forge. The text
 entered in the field ``Project Purpose And Summarization'' is an
-additional information for the \R{}-Forge administrators. Its
-intention is to see if the project is approvable. ``Project Unix
+additional information for the \R{}-Forge administrators, inspected
+for approval. ``Project Unix
 Name'' refers to the name which 
 uniquely determines the project. In case of a project that contains a
-single \R{} package, the project unix name typically corresponds to
-the package name or its lower case version. Restrictions according to
+single \R{} package, the project Unix name typically corresponds to
+the package name (in its lower case version). Restrictions according to
 the Unix file system convention force Unix names to be in lower case
 (and will be converted automatically if they are typed in upper case).
 
-After submitting the completed form the project has to be approved by
-the R-Forge administrators. A confirmation e-mail sent to the
-registrant indicates successful completion of the registration
-process. After that, the registrant automatically becomes the project
+After the completed form was submitted, the project has to be approved
+by the R-Forge administrators and a confirmation e-mail is sent to the
+registrant upon approval. After that, the registrant automatically
+becomes the project 
 administrator and the standardized web area of the project
-(\code{http://R-Forge.R-project.org/projects/foo/} is
+(\code{http://R-Forge.R-project.org/projects/foo/}) is
 immediately available on \R{}-Forge. 
 This web area includes a \tab{Summary} page, an \tab{Admin} tab
 visible only to the project administrators, and various other tabs
@@ -351,6 +348,22 @@ depending on the features enabled for this project in the \tab{Admin}
 tab. To present the new project to a broader community the name of the
 project additionally is promoted on the home page under ``Recently
 Registered Projects''.
+
+Furthermore, within an hour after approval a default mailing list and
+the project's SVN repository containing a \file{README} file and two
+pre-defined directories namely \file{www} and \file{pkg} get created. 
+
+As already stated in the listing above a second web area, accessible 
+through \url{http://foo.R-Forge.R-project.org} where \code{foo}
+corresponds to the unix name of the project, is automatically
+set up. This project website is managed via the \file{www} directory
+in the SVN repository and gets updated every hour.
+
+The usage of the other pre-defined directory \file{pkg} and how R
+packages are handled with \R-Forge is explained in the next
+section.
+
+
 
 The default entry point to a web area of a specific project is
 the \tab{Summary} page. Here, one can 
@@ -367,56 +380,46 @@ the \tab{Summary} page. Here, one can
    \tab{Lists}, \tab{R Packages}, \ldots{}.
 \end{itemize}
 
-Furthermore, within an hour after approval a default mailing list and
-the project's SVN repository containing a README file and two
-pre-defined directories namely \code{www} and \code{pkg} get created. 
-
-As already stated in the listing above a second web area, accessible 
-through \url{http://foo.R-Forge.R-project.org} where \code{foo}
-corresponds to the unix name of the project, is automatically
-set up. This project website is managed via the \code{www} directory
-in the SVN repository and gets updated every hour.
-
-The usage of the other pre-defined directory \code{pkg} and how R
-packages are handled with \R-Forge is explained in the next
-section.
 
 
 \subsection{SCM and R Packages}
 
 The \tab{SCM} tab of a project explains how the corresponding SVN
-repository can be checked out to your PC. Typically, this is done either
-anonymously without write permission via \code{svn checkout
-  svn://svn.R-Forge.R-project.org/svnroot/foo} (if enabled by the
-administrator, the default) or with full access to the repository as a
-developer via \code{svn checkout
-  svn+ssh://developername@svn.R-Forge.R-project.org/svnroot/foo}. 
+repository can be checked out to your
+PC. Typically, for a project named \code{foo} the repository is
+located at \code{svn://svn.R-Forge.R-project.org/svnroot/foo}. From
+this URL the sources are checked out either 
+anonymously without write permission (if enabled by the
+administrator, the default) or as developer using secure shell
+authentication (\code{svn+ssh://} instead \code{svn://}) with full
+access to the repository.
 
-There are two possibilities to put your package on R-Forge. The source
-code of new packages or existing packages currently not version
-controlled is added and committed to the project repository. Packages
-already maintained in a version-controlled repository can be migrated
-to R-Forge including the whole version history. For the latter we 
-refer to the user's manual. 
+To put a package on R-Forge developers add the source code in the
+\file{pkg} directory or a subdirectory if it and commit the changes to
+the project repository. Or, if the package is already
+version-controlled somewhere else, the corresponding parts of the
+repository including the history can be migrated to R-Forge as well
+(see the user's manual on how to do this).
 
 In any way, to make use of the package building and checking feature
-the package source code has to be put into the \code{pkg} directory
-of your repository (i.e., \code{pkg/DESCRIPTION},
-\code{pkg/R}, \code{pkg/man}, ldots{}) or, alternatively, a 
-subdirectory of \code{pkg}. The latter structure allows to
+the package source code has to be put into the \file{pkg} directory
+of your repository (i.e., \file{pkg/DESCRIPTION},
+\file{pkg/R}, \file{pkg/man}, \ldots{}) or, alternatively, a 
+subdirectory of \file{pkg}. The latter structure allows to
 have more than one package in a single project, e.g., if
 a project consists of the packages \code{foo} and \code{bar} then the
-source code is located in \code{pkg/foo} and \code{pkg/bar},
+source code is located in \file{pkg/foo} and \file{pkg/bar},
 respectively.
 
-After committing the package/s to the server the tarball containing
-the package sources as well as the package binaries for Mac OSX and
-Windows will be available
-within a day in the \tab{R Packages} tab for download. The packages
-are installable directly in \R{} from a CRAN-style repository using
-\code{install.packages("foo", repos="http://R-Forge.R-project.org")}
-as well. Furthermore, logs of the build and check process on different
-platforms can be examined by the developers.  
+\R{}-Forge automatically examines daily the \file{pkg} directory of
+every repository and builds the package sources as well as the package
+binaries for Mac OSX and Windows where applicable. The packages builds
+are provided in the \tab{R Packages} tab for download or can be
+installed directly in \R{} from a CRAN-style repository using 
+\code{install.packages("foo",
+  repos="http://R-Forge.R-project.org")}. Furthermore, logs of the
+build and check process on different platforms can be examined in the
+\tab{R Packages} tab by the developers.
 
 To release a package to CRAN the project administrator clicks on
 \tab{Submit this package to CRAN} in the \tab{R Packages} tab. After
@@ -441,15 +444,15 @@ Recently added features and major changes include:
   new users with a flood of features. Experienced users can decide
   which features they want and activate them.
 \item An enhanced structure in the SVN repository allowing multiple
-  packages in a single project (see also the above section).
+  packages in a single project (see above).
 \item An \R{} package \citep[\pkg{RForgeTools},
   see][]{forge:theussl:2008} containing platform independent package
   building and quality management code used on the \R{}-Forge servers.
 \item A modified \tab{News} submit page offering two types of
-  submissions: project-only and home page submission. News items
-  declared to be put on the home page of \R{}-Forge need an approval
-  by one of the \R{}-Forge administrators (default: project-only
-  submission).
+  submissions: project-specific and global news. News items
+  declared to be global are put on the home page of \R{}-Forge and
+  need an approval by one of the \R{}-Forge administrators (default:
+  project-only submission).
 \item Circulation of SVN commit messages can be enabled in the
   \tab{SCM Admin} tab by project administrators. The mailing list mentioned in
   the text field is used for delivering the SVN commit messages
@@ -460,9 +463,8 @@ Recently added features and major changes include:
 
 \end{itemize}
 
-Eventually, we briefly summarize the features which are currently on
-the wishlist or are under development and likely to be included in the
-near future. These include
+Further features which are currently on the wishlist or under
+development include 
 
 \begin{itemize}
 \item a Wiki,
