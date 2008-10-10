@@ -1,0 +1,144 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[authoryear,round]{natbib}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{a4wide}
+\sloppy
+
+\newcommand{\RFORGE}{R-Forge Administration and Development Team}
+
+\title{R-Forge Installation and Administration Manual, ALPHA}
+\author{\RFORGE}
+\date{\today}
+
+\let\code=\texttt
+\let\email=\texttt
+\newcommand{\pkg}[1]{{\normalfont\fontseries{b}\selectfont #1}}
+\newcommand{\proglang}[1]{\textsf{#1}}
+\newcommand{\class}[1]{`\code{#1}'}
+
+\begin{document}
+
+\pagestyle{empty}
+
+
+
+\begin{titlepage}
+
+  {\LARGE \raggedleft \textbf{R-Forge Installation and Administration Manual, {\large ALPHA}}}\\
+%%  \vspace*{0.5cm}
+  \rule{\linewidth}{1.5mm}
+  \begin{flushright}
+  \textbf{SVN Revision: xx, \today}\\
+  \end{flushright}
+
+  \vspace*{\fill}
+%%  \vspace*{10cm} 
+   
+  {\Large
+    \noindent {\textbf{\RFORGE{}}\\
+    \rule{\linewidth}{1mm}} 
+  }
+  
+\end{titlepage}
+
+
+\newpage
+\vspace*{\fill}
+
+%% Copyright notices
+%%\noindent Copyright 2006--2007 Stefan Theussl\\
+\noindent Copyright 2006--2008 \RFORGE{}\\
+
+\vspace{0.5cm}
+\includegraphics{CCAL.png} 
+\vspace{1cm}
+
+\noindent The content in this manual is licensed
+under a Creative Commons Attribution-Share Alike 2.0 license. 
+
+\vspace{0.5cm}
+The \RFORGE{} has chosen to apply the Creative
+Commons Attribution License (CCAL) to this manual, i.e., that under the CCAL,
+the authors retain ownership of the copyright 
+for this manual, but the authors allow anyone to download, reuse,
+reprint, modify, distribute, and/or copy the contents of this manual,
+so long as the original authors and source are 
+credited. Furthermore, the authors permit others to distribute
+derivative works only under the same license or one compatible with
+the one that governs the authors' work. 
+This broad license was developed to facilitate open access
+to, and free use of, original works of all types. Applying this
+standard license to this work will ensure the authors' right to make
+this work freely and openly available (see
+\url{http://creativecommons.org/licenses/by-sa/2.0/} for details). 
+
+\vspace{0.5cm}
+The current members of the \RFORGE{} are Kurt Hornik, Martin Kober,
+David Meyer, Stefan Theu\ss{}l and Achim Zeileis. To contact the
+authors please write an email to \email{R-Forge@R-project.org}.
+
+\newpage
+
+\pagenumbering{roman}
+\pagestyle{plain}
+\tableofcontents
+
+\clearpage
+\pagestyle{headings}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\section{Introduction}
+
+Operating System Debian, reference to Rnews Article
+R-Forge~User's~Manual
+
+Subversion~\citep[SVN,
+see][]{forge:Pilato+Collins-Sussman+Fitzpatrick:2004} or Concurrent
+Versions System~\citep[CVS, see][]{forge:Cederqvist:2006}
+
+\section{Installation}
+\label{sec:installation}
+
+\subsection{GForge}
+
+\section{Components}
+\label{sec:registration}
+
+\subsection{Filesystem}
+\subsection{Serverfarm---map}
+\subsection{GForge}
+\subsection{Postfix}
+\subsection{Subversion}
+\subsection{Mailman}
+
+\section{Release and Quality Management System}
+\label{sec:release_and_QM}
+
+\subsection{Serverfarm}
+\subsection{Mac OSX}
+\subsection{Linux}
+\subsection{Windows}
+
+
+%% Acknowledgements from Rnews article
+\section{Acknowledgements}
+
+Setting up this project would not have been possible without Douglas
+Bates and the University of Wisconsin as they provided us with a
+server for hosting this platform. Furthermore, 
+the authors would like to thank the Zentrum f\"ur Informatikdienste  
+of the Wirtschaftsuniversit\"at Wien for
+their support and for providing us with additional hardware as well as a
+professional server infrastructure. 
+Thanks to Philippe Grosjean for
+providing a Mac~OS description (Section~\ref{sec:scm-macosx}).
+
+\bibliographystyle{plainnat}
+\bibliography{R-Forge_Manual}
+
+\end{document}

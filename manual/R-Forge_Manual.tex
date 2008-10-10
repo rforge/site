@@ -501,7 +501,7 @@ are not included in the search index.
 \section{Migration from an Existing CVS/SVN Repository}
 \label{sec:svnmigration}
 
-Steps to include the complete history of your current repositroy in
+Steps to include the complete history of your current repository in
 your R-Forge project:
 \begin{enumerate}
 \item Please register a project on R-Forge first.
@@ -518,6 +518,39 @@ your R-Forge project:
 \item The last step probably includes to \code{svn move} your package
   to the /pkg directory.
 \end{enumerate}
+
+
+%% TODO:
+If the source code of the package is in a subdirectory of a
+project. Add to step 3 the following procedure to filter out the
+desired code:
+This is a HowTo of how one can extract a given subdirectory of a
+repository.
+
+the subdirectory (package) to extract is named 'foo'
+
+\begin{enumerate}
+\item first dump original repository 'repo' to e.g., repo.dump
+
+\item then use svndumpfilter to extract a certain directory recursively\\
+  \code{cat repo.dump | svndumpfilter include 'path/to/foo'
+    --drop-empty-revs --renumber-revs  > foo_repo.dump} 
+
+\item create temporary repository e.g. 'foo_tmp' and load 'foo_repo.dump' into it\\
+  \code{cat foo_repo.dump | svnadmin load foo_tmp}
+
+\item check out temporary repository\\
+  \code{svn co file:///path/to/foo_tmp foo_temp_co}
+
+\item add missing directories to foo_temp\\
+  \code{cd foo_temp_co}\\
+  \code{mkdir -p path/to/foo  ## path to 'foo' in original repository 'repo'}\\
+  \code{svn add path/}\\
+  \code{svn ci -m "transition revision"}
+
+\item dump extracted svn rep and send it to \email{R-Forge@R-project.org}\\
+\code{svnadmin dump /path/to/foo_tmp > foo.dump}
+%% END TODO
 
 
 %% Acknowledgements from Rnews article
