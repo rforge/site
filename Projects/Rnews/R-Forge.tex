@@ -38,62 +38,53 @@
 %% <useR>
 %% Why should software developers use source code management tools?
 
-A key factor in open source software (OSS) development is the rapid creation
-of solutions within an open, collaborative environment. The open
-source model had its major breakthrough with the increasing
-usage of the internet. Online communities successfully combined
-not only their programming effort but also their knowledge, work
-and even their social life. OSS is by definition free and
-the source code is available to everyone.
-claimed to be  because of the
-``release early, release often'' paradigm introduced by Linus
-Torvalds.
-%% Peer review of open source software
+A key factor in open source software (OSS) development is the swift
+generation and implementation of conceptions within an open,
+collaborative environment. The open source model had its major
+breakthrough with the increasing usage of the internet. Leveraging
+this media, online communities formed and successfully combine
+not only their programming effort but also their knowledge and even
+share their social life. 
 
+OSS is typically created in a decentralized self-organizing process by a
+community of developers having the same or similar interests.
+OSS is by definition free and the source code is available to
+everyone. This allows for reusing existing code instead of reinventing
+it. Within that framework source code is evolving fast due to the ``release
+early, release often'' paradigm introduced by Linus Torvalds. All of
+the above and several other factors are the key ingredients for the
+success of OSS \citep[see][]{forge:Raymond:1999}
 
-\textbf{TODO: } I don't know what to do with the following paragraph
-%% FIXME:
-Much early work on OSS development was aimed at raising awareness  OSS
-work produced by a community of developers ``The Cathedral and the
-Bazaar'' by \cite{forge:Raymond:1999}.
-Advantages:
-decentralized self-organizing process, rapid code evolution, massive
-peer code review, rapid release of prototype code
-Developers of larger projects like the language \R{} use source code
-management (SCM) facilities to follow this paradigm.
-
-The \R{} Development Core Team have been using
+To follow this paradigm developers of larger projects like the
+language \R{} use source code management (SCM) facilities. Indeed, the
+\R{}~Development Core Team has been using 
 development tools like Subversion \citep[SVN,
-see][]{forge:Pilato+Collins-Sussman+Fitzpatrick:2004} or  
-Concurrent Versions System \citep[CVS, see][]{forge:Cederqvist:2006}
+see][]{forge:Pilato+Collins-Sussman+Fitzpatrick:2004} and Concurrent
+Versions System \citep[CVS, see][]{forge:Cederqvist:2006} 
 for managing their source code for a decade now.  
 A central repository is hosted by ETH Z\"urich mainly for
 managing the development of the base \R{} system. 
 
 Many package developers use similar infrastructure to manage their
-source code, e.g., in private SVN repositories, using web tools like
-Google Code (\url{http://code.google.com}) or simply by using shared
-storage. Additionally, when examining the \file{DESCRIPTION} files of
+source code, e.g., SVN repositories, web tools like Google Code
+(\url{http://code.google.com}) or simply shared storage. What's more,
+when examining the 
+\file{DESCRIPTION} files of 
 packages on CRAN we see that around $47\%$ of them have multiple
 authors (as of August 10, 2008). All of the above show that SCM
-facilities are already in use in the \R{} community and that a central
-repository would help people to get started with these tools.
+facilities are already in use in the \R{} community. A central
+well documented repository providing tools especially for the
+\R{}-community would help not only package developers but also book
+writers and teachers to get started with these tools.
 
-The \R{}-project is now ready to provide infrastructure
-for the entire \R{} community. 
-R-Forge (\url{http://R-Forge.R-project.org}) provides a set of tools
-for source code management and various web-based
+The \R{}-project offers such a central platform to the \R{}
+community. R-Forge (\url{http://R-Forge.R-project.org}) provides a set
+of tools for source code management and various web-based
 features. It aims to provide a platform for collaborative development of
-\R{} packages, \R{}-related software or further projects. But it does not
-matter if individuals work on their own or a number of developers
-collaborate in a larger project, on R-Forge all work is organized in
-the same entity namely a ``Project''.
-
-R-Forge is closely related to the most famous of such platforms---the
+\R{} packages, \R{}-related software or further projects. R-Forge is
+closely related to the most famous of such platforms---the 
 world's largest OSS development website---namely
-\url{http://SourceForge.net}. The major strength of \R{}-Forge in
-comparison to SourceForge is the focus on services especially aimed at
-the \R{} community.
+\url{http://SourceForge.net}.
 
 %% Article Outline
 The present article is organized as follows. First, we present the core
@@ -223,11 +214,10 @@ members having the rights of at least of a \textit{Junior Developer}.
 \label{sec:release_and_quality_management}
 
 %% Quality Management and bug/support/feature tracker
-Development versions of a software project are typically
-prototypes and are subject to fundamental changes. \R{}-Forge offer
-two tools which assist the developers in meeting specific standards in
-\R{} package development and to improve the quality of their source
-code. 
+Development versions or prototypes of a software project are typically
+subject to fundamental changes. \R{}-Forge offers
+two tools which assist the developers in improving the quality of
+their source code.
 
 First, it offers a quality management system similar to 
 that of CRAN. Packages on \R{}-Forge are checked in a
@@ -338,9 +328,8 @@ the Unix file system convention force Unix names to be in lower case
 After the completed form was submitted, the project has to be approved
 by the R-Forge administrators and a confirmation e-mail is sent to the
 registrant upon approval. After that, the registrant automatically
-becomes the project 
-administrator and the standardized web area of the project
-(\code{http://R-Forge.R-project.org/projects/foo/}) is
+becomes the project administrator and the standardized web area of the
+project (\code{http://R-Forge.R-project.org/projects/foo/}) is
 immediately available on \R{}-Forge. 
 This web area includes a \tab{Summary} page, an \tab{Admin} tab
 visible only to the project administrators, and various other tabs
@@ -351,35 +340,35 @@ Registered Projects''.
 
 Furthermore, within an hour after approval a default mailing list and
 the project's SVN repository containing a \file{README} file and two
-pre-defined directories namely \file{www} and \file{pkg} get created. 
+pre-defined directories namely \file{www} and \file{pkg} get
+created. The first steps for the administrator and the developers
+are to add meta information about and content to the project. The
+former is achieved in the \tab{Admin} tab in the so-called ``Trove
+Categorization'', the latter using the project repository. E.g., a
+personalized project website, accessible through
+\url{http://foo.R-Forge.R-project.org} where \code{foo} 
+corresponds to the unix name of the project, is managed via the
+\file{www} directory. The website gets updated every hour. 
 
-As already stated in the listing above a second web area, accessible 
-through \url{http://foo.R-Forge.R-project.org} where \code{foo}
-corresponds to the unix name of the project, is automatically
-set up. This project website is managed via the \file{www} directory
-in the SVN repository and gets updated every hour.
-
-The usage of the other pre-defined directory \file{pkg} and how R
-packages are handled with \R-Forge is explained in the next
-section.
-
-
-
-The default entry point to a web area of a specific project is
-the \tab{Summary} page. Here, one can 
+The changes made to the project can be examined by entering the
+corresponding standardized web area. On entry, the the \tab{Summary}
+page is shown. Here, one can 
 
 \begin{itemize}
 \item examine the details about the project including a short
   description and a listing of the administrators and developers,
-\item follow the download link leading directly to the available packages
-  of the project (i.e., the \tab{R Packages} tab),
 \item follow a link leading to the (personal) project homepage,
 \item examine the latest news announcements (if available),
 \item go to other sections of the project like
   \tab{Forums}, \tab{Tracker},
-   \tab{Lists}, \tab{R Packages}, \ldots{}.
+   \tab{Lists}, \tab{R Packages}, \ldots{},
+\item follow the download link leading directly to the available
+  packages of the project (i.e., the \tab{R Packages} tab.
 \end{itemize}
 
+The usage of the other pre-defined directory \file{pkg} and how R
+packages are handled with \R-Forge is explained in the next
+section. 
 
 
 \subsection{SCM and R Packages}
