@@ -432,6 +432,10 @@ R-Forge package repository. This allows packages to be installed simply by
 typing \texttt{install.packages("foo", repos = "http://R-Forge.R-project.org")}
 on the \proglang{R} command prompt. 
 
+To install dependencies from other repositories as well use e.g.,
+\code{install.packages("mypackage", repos = c("http://R-Forge.R-project.org",
+"http://your.nearest.CRAN.mirror.org"), dep = TRUE)}
+
 \subsection{External SVNs}
 Developers who wish to use their own external package repository can
 use the \textbf{external SVN} feature in the R~packages Admin~tab
