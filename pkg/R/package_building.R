@@ -106,8 +106,10 @@ build_packages <- function(email,
 
   ## FIXME: is it sufficient what we are doing here?
 
+  writeLines("Updating package library ...")
   update_package_library(pkgs, path_to_pkg_src, cran_url, path_to_local_library)
-
+  writeLines("Done.")
+  
   ## LAST PREPARATION BEFORE PACKAGE BUILD
   
   ## change to directory where the sources of R-Forge are in
@@ -169,6 +171,7 @@ build_packages <- function(email,
     names(timings) <- pkgs
     
     for( pkg in avail_src_pkgs ){
+      writeLines(paste("Building package", pkg, "from package tarball..."))
       ## timer start
       proc_start <- proc.time()
       ## path to pkg buildlog 
@@ -199,9 +202,11 @@ build_packages <- function(email,
       }
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
+      writeLines(paste("Done in", timings[pkg], "seconds."))
     }
     ## build binaries which are not available as src tarball (maybe Windows binaries)
     for( pkg in pkgs_other ){
+      writeLines(paste("Building package", pkg, "from package source..."))
       ## timer start
       proc_start <- proc.time()
       ## path to pkg buildlog 
@@ -220,6 +225,7 @@ build_packages <- function(email,
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
+      writeLines(paste("Done in", timings[pkg], "seconds."))
     }
     ## delete 00LOCK, sometimes this interrupted the build process ...
     check_local_library(path_to_local_library)
