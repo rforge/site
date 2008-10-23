@@ -15,7 +15,7 @@ check_packages <- function(email,
   platform <- match.arg(platform) ## FIXME: automat. use info from .Platform?
   architecture <- match.arg(architecture)
   maj.version <- paste(R.Version()$maj,unlist(strsplit(R.Version()$min,"[.]"))[1],sep=".")
-  flavor <- R.Version$status
+  flavor <- R.Version()$status
   ## x86_32 on x86_64 allowed but not the other way round
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
     stop("Building x86_64 binaries not possible on an x86_32 architecture") 
