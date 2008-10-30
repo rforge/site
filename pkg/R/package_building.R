@@ -69,7 +69,7 @@ build_packages <- function(email,
     stop(paste("There is no directory", dir,"!"))
   ## get current working directory -> set back at FINALIZATION step
   old_wd <- getwd()
-
+  
   ## PACKAGE SIGHTING
   
   ## STOP LIST: packages which should not be compiled
@@ -158,10 +158,12 @@ build_packages <- function(email,
     ## path to pkg buildlog 
     pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
     for(pkg in pkgs){
+      writeLines(paste("Building package", pkg, "from package sources..."))
       timings[pkg] <- 
         system.time(system(paste(R,"CMD build", pkg, 
                            ">", pkg_buildlog, "2>&1"))
                    )["elapsed"]
+      writeLines(paste("Done in", timings[pkg], "seconds."))
     }
     close_virtual_X11_fb(pid)
   }else if(platform=="Windows"){

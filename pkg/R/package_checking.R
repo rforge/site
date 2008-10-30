@@ -63,9 +63,10 @@ check_packages <- function(email,
   ## PACKAGE DB UPDATE
 
   ## FIXME: is it sufficient what we are doing here?
-
+  writeLines("Updating package library ...")
   update_package_library(pkgs, path_to_pkg_src, cran_url, path_to_local_library)
-
+  writeLines("Done.")
+  
   ## LAST PREPARATION BEFORE CHECKING
 
   ## change to directory where the check output should go
@@ -112,6 +113,7 @@ check_packages <- function(email,
   timings <- numeric(length(pkgs))
   names(timings) <- pkgs
   for(pkg in pkgs){
+    writeLines(paste("Checking package", pkg, "..."))
     check_arg <- character()
     if(!is.null(check_args))
       check_arg <- check_args[which(check_args["Package"] == pkg), "check_args"]
@@ -119,6 +121,7 @@ check_packages <- function(email,
                    paste(path_to_pkg_log, file_separator, pkg, "-", platform, "-",
                          architecture, "-checklog.txt", sep=""),
                  "2>&1")))["elapsed"]
+    writeLines(paste("Done in", timings[pkg], "seconds."))
   }
   ## better implementation necessary:
   pkgs_checked <- " "
