@@ -19,8 +19,6 @@ check_packages <- function(email,
   ## x86_32 on x86_64 allowed but not the other way round
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
     stop("Building x86_64 binaries not possible on an x86_32 architecture") 
-  ## handle different file separators
-  file_separator <- get_file_separator()
   ## check for necessary directories---create them if possible
   path_to_pkg_src <- control$path_to_pkg_src
   path_to_pkg_log <- control$path_to_pkg_log
@@ -74,7 +72,7 @@ check_packages <- function(email,
   ## delete 00LOCK, sometimes this interrupted the build process ...
   check_local_library(path_to_local_library)
   ## where is our R binary?
-  R <- paste(R.home(), "bin", "R", sep = file_separator)
+  R <- file.path(R.home(), "bin", "R")
   ## Set environment variables which are necessary for checking
   Sys.setenv(R_LIBS = path_to_local_library)
   ## Calculate dependency structure - Do we need package installation as we already have
@@ -117,15 +115,15 @@ check_packages <- function(email,
     check_arg <- character()
     if(!is.null(check_args))
       check_arg <- check_args[which(check_args["Package"] == pkg), "check_args"]
-    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, paste(path_to_pkg_src, pkg, sep = file_separator), ">",
-                   paste(path_to_pkg_log, file_separator, pkg, "-", platform, "-",
-                         architecture, "-checklog.txt", sep=""),
-                 "2>&1")))["elapsed"]
+    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, file.path(path_to_pkg_src, pkg), ">",
+                                             paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
+                                                   architecture, "-checklog.txt", sep=""),
+                                             "2>&1")))["elapsed"]
     writeLines(paste("Done in", timings[pkg], "seconds."))
   }
   ## better implementation necessary:
   pkgs_checked <- " "
-
+  
   ## FINALIZATION
 
   if(platform == "Linux"){
