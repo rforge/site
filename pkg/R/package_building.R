@@ -284,27 +284,27 @@ build_packages <- function(email,
       	    check_directory(tmpdir, fix = TRUE)
       	    ## first look if there is a src directory because then we know that we have
       	    ## to compile something ...
-      	    if(file.exists(paste(".", pkg, "src", sep = file_separator))){
+      	    if(file.exists(file.path(".", pkg, "src"))){
       	      ## compile an x86_32 binary
       	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
-	      paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                         pkg_version_src, ".tar.gz", sep = ""), sep = file_separator),
+	      file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                         pkg_version_src, ".tar.gz", sep = "")),
                      ">>", pkg_buildlog, "2>&1"))
       	      ## compile a PPC binary
       	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
-	      		 paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                         pkg_version_src, ".tar.gz", sep = ""), sep = file_separator), 
+	      		 file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                         pkg_version_src, ".tar.gz", sep = "")), 
                      ">>", pkg_buildlog, "2>&1"))
 
       	    }else {
               ## R only packages can be installed in one rush
               system(paste(R, "CMD INSTALL -l", tmpdir, 
-                         paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                         pkg_version_src, ".tar.gz", sep = ""), sep = file_separator), 
+                         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                         pkg_version_src, ".tar.gz", sep = "")), 
                      ">>", pkg_buildlog, "2>&1"))
             }
       	    ## combine everything to universal binary
-      	    if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep = file_separator))){
+      	    if(file.exists(file.path(tmpdir, pkg, "DESCRIPTION"))){
               system(paste("tar czvf", paste(pkg, "_", pkg_version_src, ".tgz", sep = ""), 
                      "-C", tmpdir, pkg, 
                      ">>", pkg_buildlog, "2>&1"))
@@ -323,7 +323,7 @@ build_packages <- function(email,
       	check_directory(tmpdir, fix = TRUE)
       	## first look if there is a src directory because then we know that we have
       	## to compile something ...
-      	if(file.exists(paste(".", pkg, "src", sep = file_separator))){
+      	if(file.exists(file.path(".", pkg, "src"))){
       	      ## compile an x86_32 binary
       	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
 	             paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""),
@@ -340,7 +340,7 @@ build_packages <- function(email,
                      ">>", pkg_buildlog, "2>&1"))
         }
       	## combine everything to universal binary
-      	if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep = file_separator))){
+      	if(file.exists(file.path(tmpdir, pkg, "DESCRIPTION"))){
               system(paste("tar czvf", paste(pkg, "_", pkg_version_local, ".tgz", sep = ""), 
                      "-C", tmpdir, pkg, 
                      ">>", pkg_buildlog, "2>&1"))
