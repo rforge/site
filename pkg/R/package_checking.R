@@ -5,8 +5,9 @@
 check_packages <- function(email,
                            platform           = c("Linux", "Windows", "MacOSX"),
                            architecture       = c("x86_32", "x86_64"),
-                           rforge_url = "http://R-Forge.R-project.org",
+                           rforge_url         = "http://R-Forge.R-project.org",
                            cran_url           = "http://CRAN.R-project.org",
+                           bioc_url           = "http://bioconductor.org/packages/release/bioc",
                            control=list()
                            ){
   ## INITIALIZATION
@@ -61,9 +62,7 @@ check_packages <- function(email,
   ## PACKAGE DB UPDATE
 
   ## FIXME: is it sufficient what we are doing here?
-  writeLines("Updating package library ...")
-  update_package_library(pkgs, path_to_pkg_src, cran_url, path_to_local_library)
-  writeLines("Done.")
+  update_package_library(pkgs, path_to_pkg_src, c(cran_url, bioc_url), path_to_local_library, platform)
   
   ## LAST PREPARATION BEFORE CHECKING
 
@@ -111,14 +110,24 @@ check_packages <- function(email,
   timings <- numeric(length(pkgs))
   names(timings) <- pkgs
   for(pkg in pkgs){
-    writeLines(paste("Checking package", pkg, "..."))
+    pkg_revision <- "coming soon"
+    msg <- paste("Checking package ", pkg, " (SVN revision ", pkg_revision, ") ...", sep = "")
+    pkg_checklog <- paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
+                          architecture, "-checklog.txt", sep="")
+    cat(msg, file = pkg_checklog)
+    cat("\n", file = pkg_checklog, append = TRUE)
+    writeLines(msg)
+
     check_arg <- character()
-    if(!is.null(check_args))
+    if(!is.null(check_args)){
       check_arg <- check_args[which(check_args["Package"] == pkg), "check_args"]
-    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, file.path(path_to_pkg_src, pkg), ">",
-                                             paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
-                                                   architecture, "-checklog.txt", sep=""),
-                                             "2>&1")))["elapsed"]
+      cat(paste("Additional arguments to R CMD check:", check_arg, "\n"), file = pkg_checklog, append = TRUE)
+    }
+
+    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, file.path(path_to_pkg_src, pkg), ">>",
+                                             pkg_checklog, "2>&1")))["elapsed"]
+
+    cat(paste("Run time:", timings[pkg], "seconds."), file = pkg_checklog, append = TRUE)
     writeLines(paste("Done in", timings[pkg], "seconds."))
   }
   ## better implementation necessary:

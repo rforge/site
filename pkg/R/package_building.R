@@ -39,7 +39,7 @@ build_packages <- function(email,
                            control            = list()){
 
   ## INITIALIZATION
-  
+  writeLines("Start build process ...")
   ## match arguments
   platform <- match.arg(platform) ## FIXME: automatically use info from .Platform?
   architecture <- match.arg(architecture)
@@ -103,11 +103,8 @@ build_packages <- function(email,
   ## PACKAGE DB UPDATE
 
   ## FIXME: is it sufficient what we are doing here?
+  update_package_library(pkgs, path_to_pkg_src, c(cran_url, bioc_url), path_to_local_library, platform)
 
-  writeLines("Updating package library ...")
-  update_package_library(pkgs, path_to_pkg_src, c(cran_url, bioc_url), path_to_local_library)
-  writeLines("Done.")
-  
   ## LAST PREPARATION BEFORE PACKAGE BUILD
   
   ## change to directory where the sources of R-Forge are in
@@ -151,15 +148,20 @@ build_packages <- function(email,
     ## Initialize timings
     timings <- numeric(length(pkgs))
     names(timings) <- pkgs
-    ## path to pkg buildlog 
-    pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
     for(pkg in pkgs){
-      writeLines(paste("Building package", pkg, "from package sources..."))
-      timings[pkg] <- 
-        system.time(system(paste(R,"CMD build", pkg, 
-                           ">", pkg_buildlog, "2>&1"))
-                   )["elapsed"]
-      writeLines(paste("Done in", timings[pkg], "seconds."))
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
+      pkg_revision <- "coming soon"
+      msg <- paste("Building tarball for package ", pkg, " (SVN revision ", pkg_revision,
+                   ")\n", sep = "")
+      cat(msg, file = pkg_buildlog)
+      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      writeLines(msg)
+
+      timings[pkg] <- system.time(system(paste(R, "CMD build", pkg, 
+                                               ">>", pkg_buildlog, "2>&1")))["elapsed"]
+      
+      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
+      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
     }
     close_virtual_X11_fb(pid)
   }else if(platform=="Windows"){
@@ -169,11 +171,17 @@ build_packages <- function(email,
     names(timings) <- pkgs
     
     for( pkg in avail_src_pkgs ){
-      writeLines(paste("Building package", pkg, "from package tarball..."))
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+      pkg_revision <- "coming soon"
+      msg <- paste("Building package ", pkg, " from package tarball (SVN revision ", pkg_revision,
+                   ")\n", sep = "")
+      cat(msg, file = pkg_buildlog)
+      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      writeLines(msg)
+
       ## timer start
       proc_start <- proc.time()
-      ## path to pkg buildlog 
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+
       ## look out for version number	
       try(pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version, silent = TRUE)
       if(inherits(pkg_version_local, "try-error"))
@@ -185,12 +193,12 @@ build_packages <- function(email,
       system(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
                    file.path(path_to_pkg_tarballs, "src", "contrib",
                              paste(pkg, "_", pkg_version_src, ".tar.gz", sep = "")),
-                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
       }else { 
       ## Otherwise it is a brandnew version and we build it directly from source
       ## first we have to build the tarball (important for vignettes)
       system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
-                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
       ## then build the binary
       system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
                    paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
@@ -200,15 +208,23 @@ build_packages <- function(email,
       }
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-      writeLines(paste("Done in", timings[pkg], "seconds."))
+      
+      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
+      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
     }
     ## build binaries which are not available as src tarball (maybe Windows binaries)
     for( pkg in pkgs_other ){
-      writeLines(paste("Building package", pkg, "from package source..."))
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+      pkg_revision <- "coming soon"
+      msg <- paste("Building package ", pkg, " from sources (SVN revision ", pkg_revision,
+                   ")\n", sep = "")
+      cat(msg, file = pkg_buildlog)
+      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      writeLines(msg)
+
       ## timer start
       proc_start <- proc.time()
-      ## path to pkg buildlog 
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+
       ## does the pkg exist?
       if(!file.exists(pkg))
         next
@@ -217,13 +233,15 @@ build_packages <- function(email,
       
       ## first we have to build the tarball (important for vignettes)
       system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
-                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
       system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
                    paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-      writeLines(paste("Done in", timings[pkg], "seconds."))
+
+      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
+      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
     }
     ## delete 00LOCK, sometimes this interrupted the build process ...
     check_local_library(path_to_local_library)
@@ -240,12 +258,19 @@ build_packages <- function(email,
 
     ## BUILDING FROM PKG TARBALLS
     for(pkg in avail_src_pkgs){
-      writeLines(paste("Building package", pkg, "from package tarball..."))
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
+      pkg_revision <- "coming soon"
+      
+      msg <- paste("Building package ", pkg, " (SVN revision ", pkg_revision,
+                   ")\n", sep = "")
+      cat(msg, file = pkg_buildlog)
+      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      writeLines(msg)
+
       ## timer start
       proc_start <- proc.time()
       ## path to pkg buildlog 
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
-      
+
       ## look out for version number	
       try(pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version, silent = TRUE)
       if(inherits(pkg_version_local, "try-error"))
@@ -264,7 +289,7 @@ build_packages <- function(email,
       	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
 	      paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
                          pkg_version_src, ".tar.gz", sep = ""), sep = file_separator),
-                     ">", pkg_buildlog, "2>&1"))
+                     ">>", pkg_buildlog, "2>&1"))
       	      ## compile a PPC binary
       	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
 	      		 paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
@@ -276,7 +301,7 @@ build_packages <- function(email,
               system(paste(R, "CMD INSTALL -l", tmpdir, 
                          paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
                          pkg_version_src, ".tar.gz", sep = ""), sep = file_separator), 
-                     ">", pkg_buildlog, "2>&1"))
+                     ">>", pkg_buildlog, "2>&1"))
             }
       	    ## combine everything to universal binary
       	    if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep = file_separator))){
@@ -291,7 +316,7 @@ build_packages <- function(email,
         ## Otherwise it is a brandnew version and we build it directly from local source
         ## first we have to build the tarball (important for vignettes)
         system(paste(R, "CMD", "build", pkg, 
-                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
         ## then build the binary
         ## make temporary directory
 	tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
@@ -302,7 +327,7 @@ build_packages <- function(email,
       	      ## compile an x86_32 binary
       	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
 	             paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""),
-                     ">", pkg_buildlog, "2>&1"))
+                     ">>", pkg_buildlog, "2>&1"))
       	      ## compile a PPC binary
       	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
 	      	     paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
@@ -312,7 +337,7 @@ build_packages <- function(email,
               ## R only packages can be installed in one rush
               system(paste(R, "CMD INSTALL -l", tmpdir, 
                      paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
-                     ">", pkg_buildlog, "2>&1"))
+                     ">>", pkg_buildlog, "2>&1"))
         }
       	## combine everything to universal binary
       	if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep = file_separator))){
@@ -328,16 +353,25 @@ build_packages <- function(email,
       }
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-      writeLines(paste("Done in", timings[pkg], "seconds."))
+
+      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
+      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
     } #</FOR>
     ## BUILDING FROM SOURCES
     ## build binaries which are not available as src tarball (maybe MacOS binaries)
     for( pkg in pkgs_other ){
-      writeLines(paste("Building package", pkg, "from package source..."))
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+      pkg_revision <- "coming soon"
+      
+      msg <- paste("Building package ", pkg, " from sources (SVN revision ", pkg_revision,
+                   ")\n", sep = "")
+      cat(msg, file = pkg_buildlog)
+      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      writeLines(msg)
+
       ## timer start
       proc_start <- proc.time()
-      ## path to pkg buildlog 
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+      
       ## does the pkg exist?
       if(!file.exists(pkg))
         next
@@ -345,7 +379,7 @@ build_packages <- function(email,
       pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version
       ## first we have to build the tarball (important for vignettes)
       system(paste(R, "CMD", "build", pkg, 
-                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
       ## make temporary directory
       tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
       check_directory(tmpdir, fix = TRUE)
@@ -355,7 +389,7 @@ build_packages <- function(email,
       	      ## compile an x86_32 binary
       	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
 	      paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""),
-                     ">", pkg_buildlog, "2>&1"))
+                     ">>", pkg_buildlog, "2>&1"))
       	      ## compile a PPC binary
       	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
 	      		 paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
@@ -365,7 +399,7 @@ build_packages <- function(email,
               ## R only packages can be installed in one rush
               system(paste(R, "CMD INSTALL -l", tmpdir, 
                          paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
-                     ">", pkg_buildlog, "2>&1"))
+                     ">>", pkg_buildlog, "2>&1"))
       }
       ## combine everything to universal binary
       if(file.exists(file.path(tmpdir, pkg, "DESCRIPTION"))){
@@ -380,12 +414,14 @@ build_packages <- function(email,
       file.remove(paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""))
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-      writeLines(paste("Done in", timings[pkg], "seconds."))
+
+      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
+      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
     } #</FOR>
   }else stop(paste("Strange platform: ", platform, "! I'm confused ...", sep = ""))
 
   ## FINAL STEPS
-  
+  writeLines("Send email to R-Forge maintainer and cleanup ...")
   ## provide built packages in corresponding contrib dir
   pkgs_provided <- provide_packages_in_contrib(path_to_pkg_src, path_to_contrib_dir, platform)
   ## send email to R-Forge maintainer which packages successfully were built
@@ -393,5 +429,6 @@ build_packages <- function(email,
                 about = "build", timings = timings)
   ## go back to old working directory
   setwd(old_wd)
+  writeLines("Done.")
   TRUE
 }
