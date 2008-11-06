@@ -49,22 +49,22 @@ resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
   ##write.dcf(do.call(rbind, pkg_db), file = paste(path_to_pkg_src, "PACKAGES", sep = file_separator))
  
   ## look out for available packages
-  avail_cran <- available.packages(contriburl =
+  avail_repos <- available.packages(contriburl =
                                    contrib.url(repository_url))
   avail_rforge <- available.packages(contriburl =
                                      sprintf("file:///%s", path_to_pkg_src))
-  avail <- rbind(avail_rforge, avail_cran)
+  avail <- rbind(avail_rforge, avail_repos)
   ## What packages do we need from external repository
   pkgs <- pkgs[pkgs %in% rownames(avail_rforge)]
   pkgs_suggested <- resolve_suggests(pkgs, avail)
   pkgs_suggested <- pkgs_suggested[pkgs_suggested %in% rownames(avail)]
   pkgs_to_resolve_deps <- unique(c(pkgs, pkgs_suggested))
   pkgs_all <- resolve_dependencies(pkgs_to_resolve_deps, avail)
-  pkgs_cran <- setdiff(pkgs_all, pkgs)
+  pkgs_repos <- setdiff(pkgs_all, pkgs)
   
   DL <- utils:::.make_dependency_list(pkgs_all, avail)
   pkgs_install_order <- utils:::.find_install_order(pkgs_all, DL)
 
   ## return a vector with packages and install order
-  list(ALL = pkgs_all, CRAN = pkgs_cran, INSTALL_ORDER = pkgs_install_order)
+  list(ALL = pkgs_all, REPOS = pkgs_repos, INSTALL_ORDER = pkgs_install_order)
 }

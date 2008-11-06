@@ -35,7 +35,8 @@ build_packages <- function(email,
                            architecture       = c("x86_32", "x86_64"),
                            rforge_url         = "http://R-Forge.R-project.org",
                            cran_url           = "http://CRAN.R-project.org",
-                           control=list()){
+                           bioc_url           = "http://bioconductor.org/packages/release/bioc",
+                           control            = list()){
 
   ## INITIALIZATION
   
@@ -46,9 +47,6 @@ build_packages <- function(email,
   ## x86_32 on x86_64 allowed but not the other way round
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
     stop("Building x86_64 binaries not possible on an x86_32 architecture") 
-  ## handle different path separators
-  ## FIXME: use file.path?
-  file_separator <- get_file_separator()
   ## check for necessary directories---create them if possible
   path_to_pkg_src <- control$path_to_pkg_src
   path_to_pkg_log <- control$path_to_pkg_log
@@ -107,7 +105,7 @@ build_packages <- function(email,
   ## FIXME: is it sufficient what we are doing here?
 
   writeLines("Updating package library ...")
-  update_package_library(pkgs, path_to_pkg_src, cran_url, path_to_local_library)
+  update_package_library(pkgs, path_to_pkg_src, c(cran_url, bioc_url), path_to_local_library)
   writeLines("Done.")
   
   ## LAST PREPARATION BEFORE PACKAGE BUILD
@@ -119,23 +117,21 @@ build_packages <- function(email,
   ## the major version of R to the contrib directory otherwise use /src/contrib
   if(platform == "Windows"){
     ##if(!any(dir("c:\\srv\\rsync\\R-Forge\\bin\\windows\\contrib\\")==maj.version))
-    path_to_contrib_dir <- paste(path_to_pkg_root, "bin", .Platform$OS.type,
-                                 "contrib", maj.version,
-                                 sep=file_separator)
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", .Platform$OS.type,
+                                 "contrib", maj.version)
   }else if(platform == "MacOSX"){
-    path_to_contrib_dir <- paste(path_to_pkg_root, "bin", "macosx", "universal",
-                                 "contrib", maj.version,
-                                 sep=file_separator)
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", "macosx", "universal",
+                                 "contrib", maj.version)
   }else {
     ## UNIX SOURCE directory
-    path_to_contrib_dir <- paste(path_to_pkg_root, "src/contrib", sep=file_separator)
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "src/contrib")
   }
   if(!check_directory(path_to_contrib_dir, fix=TRUE, recursive=TRUE))
       stop(paste("There is no directory", dir,"!"))
   ## delete 00LOCK, sometimes this interrupted the build process ...
   check_local_library(path_to_local_library)
   ## where is our R binary?
-  R <- paste(R.home(), "bin", "R", sep=file_separator)
+  R <- file.path(R.home(), "bin", "R")
   ## Set environment variables which are necessary for building (or creating vignettes)
   Sys.setenv(R_LIBS = path_to_local_library)
 
@@ -187,8 +183,8 @@ build_packages <- function(email,
       ## then build from it (as it already contains the package vignette).
       if(package_version(pkg_version_src) >= package_version(pkg_version_local)){
       system(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
-                   paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                         pkg_version_src, ".tar.gz", sep = ""), sep = file_separator),
+                   file.path(path_to_pkg_tarballs, "src", "contrib",
+                             paste(pkg, "_", pkg_version_src, ".tar.gz", sep = "")),
                    ">", pkg_buildlog, "2>&1"), invisible = TRUE)
       }else { 
       ## Otherwise it is a brandnew version and we build it directly from source
@@ -254,7 +250,7 @@ build_packages <- function(email,
       check_directory(tmpdir, fix = TRUE)
       ## first look if there is a src directory because then we know that we have
       ## to compile something ...
-      if(file.exists(paste(".", pkg, "src", sep = file_separator))){
+      if(file.exists(file.path(".", pkg, "src"))){
       	## compile an x86_32 binary
       	system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, pkg, 
                      ">", pkg_buildlog, "2>&1"))
@@ -268,7 +264,7 @@ build_packages <- function(email,
                      ">", pkg_buildlog, "2>&1"))
       }
       ## combine everything to universal binary
-      if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep = file_separator))){
+      if(file.exists(file.path(tmpdir, pkg, "DESCRIPTION"))){
         system(paste("tar czvf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), 
                      "-C", tmpdir, pkg, 
                      ">>", pkg_buildlog, "2>&1"))

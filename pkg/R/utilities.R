@@ -80,7 +80,7 @@ check_directory <- function(dir, fix = FALSE, ...){
 ## check, if packages can be installed to local library
 check_local_library <- function(lib){
   ## look, if library is locked
-  lock <- paste(lib, "00LOCK", sep = get_file_separator())
+  lock <- file.path(lib, "00LOCK")
   if(file.exists(lock))
      system(paste("rm -rf", lock))
 }
@@ -124,13 +124,7 @@ close_virtual_X11_fb <- function(pid){
   Sys.unsetenv("DISPLAY")
 }
 
-get_file_separator <- function(){
-  file_separators <- c(unix = "/", windows = "\\")
-  file_separator <- file_separators[.Platform$OS.type]
-  file_separator
-}
-
 get_buildlog <- function(path_to_pkg_log, pkg, platform, architecture){
-paste(path_to_pkg_log, get_file_separator(), pkg, "-", platform,
+paste(file.path(path_to_pkg_log, pkg), "-", platform,
                                "-", architecture, "-buildlog.txt", sep = "")
 }

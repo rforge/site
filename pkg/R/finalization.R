@@ -24,7 +24,7 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   tmp <- dir()
   splitted <- strsplit(tmp, "_")
   packages <- sapply(splitted, "[", 1)
-  ind <- 1:length(packages)
+  ind <- 1L:length(packages)
   versno <- unlist(strsplit(sapply(splitted, "[", 2), file_type))
   duplicated_pkgs <- duplicated(packages)
   if(any(duplicated_pkgs)){
@@ -36,20 +36,19 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   } 
   ## Write a new PACKAGES and PACKAGES.gz file
   write_PACKAGES(dir = contrib_dir, fields = fields, type = pkg_type)
-  ## Unix: wd <- getwd(); tools:::write_PACKAGES(wd,type="source")
-  ## Under Windows additionally
-  ##shell(paste("gzip -c", file.path(contrib_dir, "PACKAGES"), 
-  ##">", file.path(contrib_dir, "PACKAGES.gz")))
+
   ## back to old directory
   setwd(old_dir)
   unique(packages)
 }
 
 notify_admins <- function(packages, donotcompile, email, platform, control, timings = NULL, about = c("build", "check")){
+  writeLines(paste("Preparing to send", about, "summary to", email, "..."))
   about <- match.arg(about)
-  proc_time_minutes <- round(proc.time()["elapsed"]/60, 2)
+  proc_time_minutes <- round(proc.time()["elapsed"]/60, 2L)
   attachment <- "Rnightlybuildmail.txt"
-  donotcompiletxt <- paste(donotcompile, collapse="\n")
+  donotcompiletxt <- paste(donotcompile, collapse = "\n")
+  ## Do we inform about build or check results?
   if(about == "build"){
     pkg_txt <- paste("The binaries/sources of the following",
                      length(unique(packages)),
@@ -61,9 +60,10 @@ notify_admins <- function(packages, donotcompile, email, platform, control, timi
   }
 
   if(!is.null(timings)){
-    timings <- apply(matrix(c(names(timings), timings),ncol =2), 1, function(x) {paste(c(names(x), x), collapse = " ")})
+    timings <- apply(matrix(c(names(timings), round(timings, 2L)), ncol = 2L), 1L, function(x) {paste(c(names(x), x), collapse = " ")})
   }
-  
+
+  ## Text
   write(c(paste("R-Forge", platform, about, "log:"), " ",
           "Disk status:", " ",
           system("df -h", intern = TRUE), " ",
@@ -75,7 +75,9 @@ notify_admins <- function(packages, donotcompile, email, platform, control, timi
   mail_prog <- control$mail_program
   send_host <- control$mail_domain_name_of_sender
   relay_host <- control$mail_relay_server
-  
+
+  ## Windows (sendEmail) or Unix (mail) program to deliver reports
+  writeLines("Sending ...")
   if(mail_prog == "sendEmail")
     system(paste(mail_prog, "-f", send_host, "-t", email,
                  paste("-u \"R-Forge: Nightly", about,"\" -m Summary -a"), attachment,
@@ -83,5 +85,6 @@ notify_admins <- function(packages, donotcompile, email, platform, control, timi
   if(mail_prog == "mail")
     system(paste("cat", attachment, "|", mail_prog, 
                  paste("-s \"R-Forge: Nightly", about, "\""), email))
-  system(paste("rm -f", attachment))  
+  system(paste("rm -f", attachment))
+  writeLines("Done.")
 }
