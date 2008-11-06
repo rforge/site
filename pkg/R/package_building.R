@@ -154,7 +154,7 @@ build_packages <- function(email,
       msg <- paste("Building tarball for package ", pkg, " (SVN revision ", pkg_revision,
                    ")\n", sep = "")
       cat(msg, file = pkg_buildlog)
-      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
       writeLines(msg)
 
       timings[pkg] <- system.time(system(paste(R, "CMD build", pkg, 
@@ -176,7 +176,7 @@ build_packages <- function(email,
       msg <- paste("Building package ", pkg, " from package tarball (SVN revision ", pkg_revision,
                    ")\n", sep = "")
       cat(msg, file = pkg_buildlog)
-      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
       writeLines(msg)
 
       ## timer start
@@ -219,7 +219,7 @@ build_packages <- function(email,
       msg <- paste("Building package ", pkg, " from sources (SVN revision ", pkg_revision,
                    ")\n", sep = "")
       cat(msg, file = pkg_buildlog)
-      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
       writeLines(msg)
 
       ## timer start
@@ -264,7 +264,7 @@ build_packages <- function(email,
       msg <- paste("Building package ", pkg, " (SVN revision ", pkg_revision,
                    ")\n", sep = "")
       cat(msg, file = pkg_buildlog)
-      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
       writeLines(msg)
 
       ## timer start
@@ -366,7 +366,7 @@ build_packages <- function(email,
       msg <- paste("Building package ", pkg, " from sources (SVN revision ", pkg_revision,
                    ")\n", sep = "")
       cat(msg, file = pkg_buildlog)
-      cat(paste("using ", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
+      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
       writeLines(msg)
 
       ## timer start
