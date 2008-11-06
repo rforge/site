@@ -179,7 +179,7 @@ build_packages <- function(email,
       if(inherits(pkg_version_local, "try-error"))
         pkg_version_local <- "0.0"
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
-      ## if the version of available src tarball is the same (or newer) than 
+      ## if the version of available src tarball is the same (or newer) than local sources
       ## then build from it (as it already contains the package vignette).
       if(package_version(pkg_version_src) >= package_version(pkg_version_local)){
       system(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
@@ -237,43 +237,151 @@ build_packages <- function(email,
     ## Initialize timings
     timings <- numeric(length(avail_src_pkgs))
     names(timings) <- avail_src_pkgs
-    ## main loop - BUILDING
+
+    ## BUILDING FROM PKG TARBALLS
     for(pkg in avail_src_pkgs){
+      writeLines(paste("Building package", pkg, "from package tarball..."))
       ## timer start
       proc_start <- proc.time()
       ## path to pkg buildlog 
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
+      
       ## look out for version number	
-      pkg_version <- packageDescription(pkg, lib.loc = ".")$Version
+      try(pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version, silent = TRUE)
+      if(inherits(pkg_version_local, "try-error"))
+        pkg_version_local <- "0.0"
+      pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
+      ## if the version of available src tarball is the same (or newer) than local sources
+      ## then build from it (as it already contains the package vignette).
+      if(package_version(pkg_version_src) >= package_version(pkg_version_local)){
+            ## make temporary directory
+	    tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
+      	    check_directory(tmpdir, fix = TRUE)
+      	    ## first look if there is a src directory because then we know that we have
+      	    ## to compile something ...
+      	    if(file.exists(paste(".", pkg, "src", sep = file_separator))){
+      	      ## compile an x86_32 binary
+      	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
+	      paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                         pkg_version_src, ".tar.gz", sep = ""), sep = file_separator),
+                     ">", pkg_buildlog, "2>&1"))
+      	      ## compile a PPC binary
+      	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
+	      		 paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                         pkg_version_src, ".tar.gz", sep = ""), sep = file_separator), 
+                     ">>", pkg_buildlog, "2>&1"))
+
+      	    }else {
+              ## R only packages can be installed in one rush
+              system(paste(R, "CMD INSTALL -l", tmpdir, 
+                         paste(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                         pkg_version_src, ".tar.gz", sep = ""), sep = file_separator), 
+                     ">", pkg_buildlog, "2>&1"))
+            }
+      	    ## combine everything to universal binary
+      	    if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep = file_separator))){
+              system(paste("tar czvf", paste(pkg, "_", pkg_version_src, ".tgz", sep = ""), 
+                     "-C", tmpdir, pkg, 
+                     ">>", pkg_buildlog, "2>&1"))
+            }
+      	    ## remove temporary directory	
+      	    system(paste("rm -rf", tmpdir))
+
+      }else {
+        ## Otherwise it is a brandnew version and we build it directly from local source
+        ## first we have to build the tarball (important for vignettes)
+        system(paste(R, "CMD", "build", pkg, 
+                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
+        ## then build the binary
+        ## make temporary directory
+	tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
+      	check_directory(tmpdir, fix = TRUE)
+      	## first look if there is a src directory because then we know that we have
+      	## to compile something ...
+      	if(file.exists(paste(".", pkg, "src", sep = file_separator))){
+      	      ## compile an x86_32 binary
+      	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
+	             paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""),
+                     ">", pkg_buildlog, "2>&1"))
+      	      ## compile a PPC binary
+      	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
+	      	     paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
+                     ">>", pkg_buildlog, "2>&1"))
+
+      	}else {
+              ## R only packages can be installed in one rush
+              system(paste(R, "CMD INSTALL -l", tmpdir, 
+                     paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
+                     ">", pkg_buildlog, "2>&1"))
+        }
+      	## combine everything to universal binary
+      	if(file.exists(paste(tmpdir, pkg, "DESCRIPTION", sep = file_separator))){
+              system(paste("tar czvf", paste(pkg, "_", pkg_version_local, ".tgz", sep = ""), 
+                     "-C", tmpdir, pkg, 
+                     ">>", pkg_buildlog, "2>&1"))
+        }
+      	## remove temporary directory	
+      	system(paste("rm -rf", tmpdir))
+	
+        ## and finally delete the tarball
+        file.remove(paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""))
+      }
+      ## save timing
+      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
+      writeLines(paste("Done in", timings[pkg], "seconds."))
+    } #</FOR>
+    ## BUILDING FROM SOURCES
+    ## build binaries which are not available as src tarball (maybe MacOS binaries)
+    for( pkg in pkgs_other ){
+      writeLines(paste("Building package", pkg, "from package source..."))
+      ## timer start
+      proc_start <- proc.time()
+      ## path to pkg buildlog 
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+      ## does the pkg exist?
+      if(!file.exists(pkg))
+        next
+      ## look out for version number
+      pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version
+      ## first we have to build the tarball (important for vignettes)
+      system(paste(R, "CMD", "build", pkg, 
+                   ">", pkg_buildlog, "2>&1"), invisible = TRUE)
       ## make temporary directory
       tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
       check_directory(tmpdir, fix = TRUE)
       ## first look if there is a src directory because then we know that we have
       ## to compile something ...
       if(file.exists(file.path(".", pkg, "src"))){
-      	## compile an x86_32 binary
-      	system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, pkg, 
+      	      ## compile an x86_32 binary
+      	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
+	      paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""),
                      ">", pkg_buildlog, "2>&1"))
-      	## compile a PPC binary
-      	system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", pkg, 
+      	      ## compile a PPC binary
+      	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
+	      		 paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
                      ">>", pkg_buildlog, "2>&1"))
 
       }else {
-        ## R only packages can be installed in one rush
-        system(paste(R, "CMD INSTALL -l", tmpdir, pkg, 
+              ## R only packages can be installed in one rush
+              system(paste(R, "CMD INSTALL -l", tmpdir, 
+                         paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
                      ">", pkg_buildlog, "2>&1"))
       }
       ## combine everything to universal binary
       if(file.exists(file.path(tmpdir, pkg, "DESCRIPTION"))){
-        system(paste("tar czvf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), 
+              system(paste("tar czvf", paste(pkg, "_", pkg_version_local, ".tgz", sep = ""), 
                      "-C", tmpdir, pkg, 
                      ">>", pkg_buildlog, "2>&1"))
-      }	
+      }
       ## remove temporary directory	
       system(paste("rm -rf", tmpdir))
+	
+      ## and finally delete the tarball
+      file.remove(paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""))
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-    }
+      writeLines(paste("Done in", timings[pkg], "seconds."))
+    } #</FOR>
   }else stop(paste("Strange platform: ", platform, "! I'm confused ...", sep = ""))
 
   ## FINAL STEPS
