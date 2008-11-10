@@ -110,25 +110,23 @@ check_packages <- function(email,
   timings <- numeric(length(pkgs))
   names(timings) <- pkgs
   for(pkg in pkgs){
-    pkg_revision <- "coming soon"
-    msg <- paste("Checking package ", pkg, " (SVN revision ", pkg_revision, ") ...", sep = "")
+    ## Prolog
     pkg_checklog <- paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
                           architecture, "-checklog.txt", sep="")
-    cat(msg, file = pkg_checklog)
-    cat("\n", file = pkg_checklog, append = TRUE)
-    writeLines(msg)
+    write_prolog(pkg, pkg_checklog, path_to_pkg_src, type = "check", what = "tarball", std.out = TRUE)
+    
 
     check_arg <- character()
     if(!is.null(check_args)){
       check_arg <- check_args[which(check_args["Package"] == pkg), "check_args"]
-      cat(paste("Additional arguments to R CMD check:", check_arg, "\n"), file = pkg_checklog, append = TRUE)
+      if(length(check_arg))
+        cat(paste("Additional arguments to R CMD check:", check_arg, "\n"), file = pkg_checklog, append = TRUE)
     }
 
     timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, file.path(path_to_pkg_src, pkg), ">>",
                                              pkg_checklog, "2>&1")))["elapsed"]
-
-    cat(paste("Run time:", timings[pkg], "seconds."), file = pkg_checklog, append = TRUE)
-    writeLines(paste("Done in", timings[pkg], "seconds."))
+    ## Epilog
+    write_epilog(pkg_checklog, timings[pkg], std.out = TRUE)
   }
   ## better implementation necessary:
   pkgs_checked <- " "

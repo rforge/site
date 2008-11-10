@@ -149,36 +149,30 @@ build_packages <- function(email,
     timings <- numeric(length(pkgs))
     names(timings) <- pkgs
     for(pkg in pkgs){
+      ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
-      pkg_revision <- "coming soon"
-      msg <- paste("Building tarball for package ", pkg, " (SVN revision ", pkg_revision,
-                   ")\n", sep = "")
-      cat(msg, file = pkg_buildlog)
-      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
-      writeLines(msg)
+      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "tarball", std.out = TRUE)
 
+      ## BUILD
       timings[pkg] <- system.time(system(paste(R, "CMD build", pkg, 
                                                ">>", pkg_buildlog, "2>&1")))["elapsed"]
-      
-      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
-      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
+
+      ## Epilog
+      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
     close_virtual_X11_fb(pid)
-  }else if(platform=="Windows"){
+  }else if(platform == "Windows"){
     ## WINDOWS BUILDS ##########################################################
     ## Initialize timings
     timings <- numeric(length(pkgs))
     names(timings) <- pkgs
     
     for( pkg in avail_src_pkgs ){
+      ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      pkg_revision <- "coming soon"
-      msg <- paste("Building package ", pkg, " from package tarball (SVN revision ", pkg_revision,
-                   ")\n", sep = "")
-      cat(msg, file = pkg_buildlog)
-      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
-      writeLines(msg)
+      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
 
+      ## BUILD
       ## timer start
       proc_start <- proc.time()
 
@@ -209,18 +203,14 @@ build_packages <- function(email,
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
       
-      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
-      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
+      ## Epilog
+      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
     ## build binaries which are not available as src tarball (maybe Windows binaries)
     for( pkg in pkgs_other ){
+      ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      pkg_revision <- "coming soon"
-      msg <- paste("Building package ", pkg, " from sources (SVN revision ", pkg_revision,
-                   ")\n", sep = "")
-      cat(msg, file = pkg_buildlog)
-      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
-      writeLines(msg)
+      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
 
       ## timer start
       proc_start <- proc.time()
@@ -240,8 +230,8 @@ build_packages <- function(email,
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
-      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
-      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
+      ## Epilog
+      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
     ## delete 00LOCK, sometimes this interrupted the build process ...
     check_local_library(path_to_local_library)
@@ -258,14 +248,9 @@ build_packages <- function(email,
 
     ## BUILDING FROM PKG TARBALLS
     for(pkg in avail_src_pkgs){
+      ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
-      pkg_revision <- "coming soon"
-      
-      msg <- paste("Building package ", pkg, " (SVN revision ", pkg_revision,
-                   ")\n", sep = "")
-      cat(msg, file = pkg_buildlog)
-      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
-      writeLines(msg)
+      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
 
       ## timer start
       proc_start <- proc.time()
@@ -354,20 +339,15 @@ build_packages <- function(email,
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
-      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
-      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
+      ## Epilog
+      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     } #</FOR>
     ## BUILDING FROM SOURCES
     ## build binaries which are not available as src tarball (maybe MacOS binaries)
     for( pkg in pkgs_other ){
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      pkg_revision <- "coming soon"
-      
-      msg <- paste("Building package ", pkg, " from sources (SVN revision ", pkg_revision,
-                   ")\n", sep = "")
-      cat(msg, file = pkg_buildlog)
-      cat(paste("using", R.Version()$version.string, "...\n\n"), file = pkg_buildlog, append = TRUE)
-      writeLines(msg)
+      ## Prolog
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
+      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
 
       ## timer start
       proc_start <- proc.time()
@@ -415,8 +395,8 @@ build_packages <- function(email,
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
-      cat(paste("Run time:", round(timings[pkg], 2L), "seconds."), file = pkg_buildlog, append = TRUE)
-      writeLines(paste("Done in", round(timings[pkg], 2L), "seconds."))
+      ## Epilog
+      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     } #</FOR>
   }else stop(paste("Strange platform: ", platform, "! I'm confused ...", sep = ""))
 
