@@ -92,8 +92,8 @@ build_packages <- function(email,
       stop("Directory", path_to_pkg_tarballs, "missing!") 
     avail_rforge <- available.packages(contriburl = contrib.url(paste("file:", path_to_pkg_tarballs, sep = ""), type = "source"))
     avail_src_pkgs <- avail_rforge[, 1]
-    ## FIXME: what if there are packages as tarball available which doesn't exist as pure source?!
-    ##        see also Windows building below (the try construct)
+    ## we take only tarballs into account which are hosted in R-Forge SVN reps
+    avail_src_pkgs <- avail_src_pkgs[avail_src_pkgs %in% pkgs_all]
     pkgs_other <- setdiff(pkgs_all, avail_src_pkgs)
   }
   ## Sort out packages that are on the exclude list
