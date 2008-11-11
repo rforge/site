@@ -53,11 +53,11 @@ check_packages <- function(email,
     check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
   }else check_args <- NULL
   ## sourcepackages available from R-Forge---exported svn reps
-  avail_src <- dir(path_to_pkg_src)
-  pkgs <- avail_src
+  pkgs_all <- available.packages(contriburl =
+                                 sprintf("file:///%s", path_to_pkg_src))[, 1]
   ## Sort out packages that are on the exclude list (TODO: not hardcoding in function!)
   donotcompile <- c("seriation")
-  pkgs <- remove_excluded_pkgs(pkgs, donotcompile)
+  pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
   
   ## PACKAGE DB UPDATE
 
