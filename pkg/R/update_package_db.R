@@ -5,7 +5,7 @@
 ## install updated
 update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, platform, ...){
   writeLines("Updating package library ...")
-  if(platform == "Linux"){
+  if((platform == "Linux") | (platform == "MacOSX")){
     ## Start a virtual framebuffer X server and use this for DISPLAY so that
     ## we can run package tcltk and friends.  
     pid <- start_virtual_X11_fb()
@@ -24,7 +24,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], pkgs_installed)
   if(length(pkgs_to_install) >= 2)
     install.packages(pkgs_to_install, lib = lib, contriburl = contrib.url(repository_url), ...)
-  if(platform == "Linux"){
+  if((platform == "Linux") | (platform == "MacOSX")){
     ## Close the virtual framebuffer X server 
     close_virtual_X11_fb(pid)
   }

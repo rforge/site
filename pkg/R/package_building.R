@@ -137,7 +137,7 @@ build_packages <- function(email,
   ##############################################################################
 
   ## LINUX BUILDS ##############################################################
-  if(platform=="Linux"){
+  if(platform == "Linux"){
     ## We need a virtual framebuffer
     pid <- start_virtual_X11_fb()
     ## Set TEXMFLOCAL environment variables in case we have
@@ -237,6 +237,8 @@ build_packages <- function(email,
     check_local_library(path_to_local_library)
   }else if(platform == "MacOSX"){
     ## MacOSX BUILDS ###########################################################
+    ## We need a virtual framebuffer
+    pid <- start_virtual_X11_fb()
     ## Set TEXMFLOCAL environment variables in case we have
     ## personalized style files (building vignettes)
     path_to_local_texmf <- control$path_to_local_texmf
@@ -398,7 +400,9 @@ build_packages <- function(email,
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     } #</FOR>
-  }else stop(paste("Strange platform: ", platform, "! I'm confused ...", sep = ""))
+    ## close framebuffer
+    close_virtual_X11_fb(pid)
+  } else stop(paste("Strange platform: ", platform, "! I'm confused ...", sep = ""))
 
   ## FINAL STEPS
   writeLines("Send email to R-Forge maintainer and cleanup ...")

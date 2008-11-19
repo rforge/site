@@ -84,7 +84,7 @@ check_packages <- function(email,
   path_to_local_texmf <- control$path_to_local_texmf
   if(file.exists(path_to_local_texmf))
     Sys.setenv(TEXMFLOCAL=path_to_local_texmf)
-  if(platform == "Linux"){
+  if((platform == "Linux") | (platform == "MacOSX")){
     ## Start a virtual framebuffer X server and use this for DISPLAY so that
     ## we can run package tcltk and friends.  
     pid <- start_virtual_X11_fb()
@@ -133,7 +133,7 @@ check_packages <- function(email,
   
   ## FINALIZATION
 
-  if(platform == "Linux"){
+  if((platform == "Linux") | (platform == "MacOSX")){
     ## Close the virtual framebuffer X server 
     close_virtual_X11_fb(pid)
   }
