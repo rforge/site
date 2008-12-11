@@ -42,28 +42,32 @@ A key factor in open source software (OSS) development is the swift
 generation and implementation of conceptions within an open,
 collaborative environment. 
 
-Typically, OSS is created in a decentralized self-organizing process by a
-community of developers having the same or similar interests. An
-important step in facilitating collaboration between developers
-distributed all around the world was the increasing penetration of the internet.
-Leveraging this media, online communities have formed and successfully
-combine not only their programming effort but also their knowledge and even
-share their social life. 
+%%Typically, OSS is created in a decentralized self-organizing process by a
+%%community of developers having the same or similar interests. An
+%%important step in facilitating collaboration between developers
+%%distributed all around the world was the increasing penetration of the
+%%internet. 
 
-OSS is by definition free and the source code is available to everyone
-so why do people volunteer to provide their software for free? One
-reason is that we allows for reusing
-existing code instead of reinventing new code. 
+%%Leveraging this media, online communities have formed and
+%%now their
+%%members successfully combine not only their programming effort but
+%%also their knowledge and even share their social life. 
 
-\citep[see][]{forge:Raymond:1999}
-are the key ingredients for the success of OSS
+%%OSS is by definition free and the source code is available to
+%%everyone. Within such framework source code is evolving fast not only
+%%due to the ``release early, release often'' paradigm introduced by
+%%Linus Torvalds---the founder of the Linux operating
+%%system. \cite{forge:Raymond:1999} compared the open source model to a
+%%bazaar . A couple of
+%%other reasons  are the cornerstones
+%%of the success of open source 
 
-
-Within that framework source code is
-evolving fast due to the ``release 
-early, release often'' paradigm introduced by Linus Torvalds. All of
-the above and several other factors .
-
+%%are the key ingredients for the success of OSS
+%%R-core team members are distributed all around the world and rarely
+%%meet one another face-to-face.
+%%
+%% All of
+%%the above and several other factors .
 
 To follow this paradigm developers of projects like the
 language \R{} use source code management (SCM) facilities. Indeed, the
@@ -84,10 +88,10 @@ examining the \file{DESCRIPTION} files of packages on CRAN
 reveals that more than $46\%$ have multiple 
 authors (as of December 10, 2008). 
 
-A central well documented SCM repository providing tools already
+A central well documented SCM repository providing a set of tools already
 widely accepted and used in the \R{} community would especially be
-helpful for beginners as e.g., there is no need to setup and manage a
-separate SVN server anymore which can become a tedious task. 
+helpful for beginners as, e.g., there is no need to setup
+SVN servers, mailing lists or websites. 
 
 The \R{}-project offers such a central platform to the \R{}
 community. R-Forge (\url{http://R-Forge.R-project.org}) provides a set
@@ -161,7 +165,7 @@ a list of available projects can be displayed using the
 Since starting the platform in early 2007, more
 and more interested users registered their projects on
 \R{}-Forge. Now, after 1.5 years of development and testing, nearly
-250 projects and around 600 
+300 projects and around 800 
 users are registered on \R{}-Forge. This and the steadily growing list of
 feature requests show that there is a high demand for centralized source code
 management tools and for releasing prototype code frequently among the
@@ -220,7 +224,7 @@ Developer} or \textit{Junior Developer}, who  are also permitted to
 commit to the project  
 SVN repository and examine the log files in the \tab{R Packages} tab.
 When we speak of developers in subsequent sections we refer to project
-members having the rights of at least of a \textit{Junior Developer}.
+members having the rights at least of a \textit{Junior Developer}.
 
 
 \subsection{Release and Quality Management of R Packages}
@@ -363,7 +367,7 @@ corresponds to the unix name of the project, is managed via the
 \file{www} directory. The website gets updated every hour. 
 
 The changes made to the project can be examined by entering the
-corresponding standardized web area. On entry, the the \tab{Summary}
+corresponding standardized web area. On entry, the \tab{Summary}
 page is shown. Here, one can 
 
 \begin{itemize}
@@ -375,7 +379,7 @@ page is shown. Here, one can
   \tab{Forums}, \tab{Tracker},
    \tab{Lists}, \tab{R Packages}, etc.
 \item follow the download link leading directly to the available
-  packages of the project (i.e., the \tab{R Packages} tab.
+  packages of the project (i.e., the \tab{R Packages} tab).
 \end{itemize}
 
 The usage of the other pre-defined directory \file{pkg} and how R
@@ -386,7 +390,7 @@ section.
 \subsection{SCM and R Packages}
 
 The \tab{SCM} tab of a project explains how the corresponding SVN
-repository can be checked out your
+repository can be checked out to your
 machine. Typically, for a project named \code{foo} the repository is
 located at \code{svn://svn.R-Forge.R-project.org/svnroot/foo}. From
 this URL the sources are checked out either 
@@ -404,11 +408,11 @@ repository including the history can be migrated to R-Forge as well
 
 In any way, to make use of the package building and checking feature
 the package source code has to be put into the \file{pkg} directory
-of your repository (i.e., \file{pkg/DESCRIPTION},
+of the repository (i.e., \file{pkg/DESCRIPTION},
 \file{pkg/R}, \file{pkg/man}, etc.) or, alternatively, a 
 subdirectory of \file{pkg}. The latter structure allows to
 have more than one package in a single project, e.g., if
-a project consists of the packages \code{foo} and \code{bar} then the
+a project consists of the packages \code{foo} and \code{bar}, then the
 source code is located in \file{pkg/foo} and \file{pkg/bar},
 respectively.
 
