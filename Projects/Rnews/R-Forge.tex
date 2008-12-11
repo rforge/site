@@ -40,34 +40,32 @@
 
 A key factor in open source software (OSS) development is the swift
 generation and implementation of conceptions within an open,
-collaborative environment. By definition OSS is free and the source
-code is available to everyone. This allows for reusing existing 
-instead of reinventing new code. 
+collaborative environment. 
+
+Typically, OSS is created in a decentralized self-organizing process by a
+community of developers having the same or similar interests. An
+important step in facilitating collaboration between developers
+distributed all around the world was the increasing penetration of the internet.
+Leveraging this media, online communities have formed and successfully
+combine not only their programming effort but also their knowledge and even
+share their social life. 
+
+OSS is by definition free and the source code is available to everyone
+so why do people volunteer to provide their software for free? One
+reason is that we allows for reusing
+existing code instead of reinventing new code. 
+
+\citep[see][]{forge:Raymond:1999}
+are the key ingredients for the success of OSS
+
 
 Within that framework source code is
 evolving fast due to the ``release 
 early, release often'' paradigm introduced by Linus Torvalds. All of
-the above and several other factors \citep[see][]{forge:Raymond:1999}
-are the key ingredients for the success of OSS.
+the above and several other factors .
 
 
-
-Typically, OSS
-is created in a decentralized self-organizing process by a
-community of developers having the same or similar interests.
-
-The open source model had its major
-breakthrough with the increasing usage of the internet.
-
-
-Leveraging
-this media, online communities have formed and successfully combine
-not only their programming effort but also their knowledge and even
-share their social life. 
-
-
-
-To follow this paradigm developers of larger projects like the
+To follow this paradigm developers of projects like the
 language \R{} use source code management (SCM) facilities. Indeed, the
 \R{}~Development Core Team has been using 
 development tools like Subversion \citep[SVN,
@@ -75,19 +73,21 @@ see][]{forge:Pilato+Collins-Sussman+Fitzpatrick:2004} and Concurrent
 Versions System \citep[CVS, see][]{forge:Cederqvist:2006} 
 for managing their source code for more than a decade now.  
 A central repository is hosted by ETH Z\"urich mainly for
-managing the development of the base \R{} system. 
+managing the development of the base \R{} system. Mailing lists like
+R-help, R-devel and many others are currently the main communication
+channels in  the \R{} community.
 
-Many package developers use similar infrastructure to manage their
+Many \R{} package developers use similar infrastructure to manage their
 source code, e.g., SVN repositories, web tools like Google Code
-(\url{http://code.google.com}) or simply shared storage. What's more,
-when examining the 
-\file{DESCRIPTION} files of 
-packages on CRAN we see that around $47\%$ of them have multiple
-authors (as of August 10, 2008). All of the above show that SCM
-facilities are already in use in the \R{} community. A central
-well documented repository providing tools especially for the
-\R{}-community would help not only package developers but also book
-writers and teachers to get started with these tools.
+(\url{http://code.google.com}) or simply shared storage. Indeed,
+examining the \file{DESCRIPTION} files of packages on CRAN 
+reveals that more than $46\%$ have multiple 
+authors (as of December 10, 2008). 
+
+A central well documented SCM repository providing tools already
+widely accepted and used in the \R{} community would especially be
+helpful for beginners as e.g., there is no need to setup and manage a
+separate SVN server anymore which can become a tedious task. 
 
 The \R{}-project offers such a central platform to the \R{}
 community. R-Forge (\url{http://R-Forge.R-project.org}) provides a set
@@ -101,17 +101,17 @@ world's largest OSS development website---namely
 %% Article Outline
 The present article is organized as follows. First, we present the core
 features that \R{}-Forge offers to the \R{} community. Second, we
-give a hands-on tutorial on how package developers can get started with 
-\R{}-Forge. In particular we show how people register new projects,
-use \R{}-Forge's source code management facilities, provide their 
+give a hands-on tutorial on how users and developers can get started with 
+\R{}-Forge. In particular we answer questions like how people
+can register, setup new projects, use \R{}-Forge's source code
+management facilities, provide their  
 packages with \R{}-Forge, host a project specific website, and
-finally submit a package to the Comprehensive R Archive Network (CRAN,
-\url{http://CRAN.R-project.org}).
+finally how package maintainer submit a package to the Comprehensive R
+Archive Network (CRAN, \url{http://CRAN.R-project.org}).
 Eventually we summarize recent developments and give a brief outlook
 to future work.
 
-%% What is R-Forge offering to you?
-%% Alternative title: Core Features of R-Forge
+
 \section{R-Forge}
 %% what is R-Forge?
 R-Forge offers a central platform for the development of \R{}
