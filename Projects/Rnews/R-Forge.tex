@@ -38,40 +38,31 @@
 %% <useR>
 %% Why should software developers use source code management tools?
 
-A key factor in open source software (OSS) development is the swift
+Open source software (OSS) is typically created in a decentralized
+self-organizing process by a community of developers having the same
+or similar interests. A key factor in OSS development is the swift
 generation and implementation of conceptions within an open,
-collaborative environment. 
+collaborative environment. In such a framework source code is evolving
+fast not only because of the ``release early, release often''
+paradigm introduced by Linus Torvalds---the founder of the Linux
+operating system---but also because of the fact that we can compare
+the open source model 
+to a huge bazaar where developers are encouraged to reuse existing
+code instead of reinventing it \citep[see the famous essay
+by][]{forge:Raymond:1999}. Especially in statistical computing we are
+confronted with the challenge to implement methods going from strength
+to strength. Collaboration has therefore always been immanent in the
+statistical community. 
 
-%%Typically, OSS is created in a decentralized self-organizing process by a
-%%community of developers having the same or similar interests. An
-%%important step in facilitating collaboration between developers
-%%distributed all around the world was the increasing penetration of the
-%%internet. 
+But how should collaborative development of OSS be achieved when the
+developers of a software project like e.g. R-core---the main
+developers of the language \R{}---are distributed all over the world?
 
-%%Leveraging this media, online communities have formed and
-%%now their
-%%members successfully combine not only their programming effort but
-%%also their knowledge and even share their social life. 
-
-%%OSS is by definition free and the source code is available to
-%%everyone. Within such framework source code is evolving fast not only
-%%due to the ``release early, release often'' paradigm introduced by
-%%Linus Torvalds---the founder of the Linux operating
-%%system. \cite{forge:Raymond:1999} compared the open source model to a
-%%bazaar . A couple of
-%%other reasons  are the cornerstones
-%%of the success of open source 
-
-%%are the key ingredients for the success of OSS
-%%R-core team members are distributed all around the world and rarely
-%%meet one another face-to-face.
-%%
-%% All of
-%%the above and several other factors .
-
-To follow this paradigm developers of projects like the
-language \R{} use source code management (SCM) facilities. Indeed, the
-\R{}~Development Core Team has been using 
+The internet has opened new communication channels and enabled developers
+who rarely met one another face-to-face to move together and to manage
+their projects more efficiently. Now, source code management (SCM)
+facilities are widely used to conduct OSS development. Indeed, the
+\R{}~Development Core Team has been using  
 development tools like Subversion \citep[SVN,
 see][]{forge:Pilato+Collins-Sussman+Fitzpatrick:2004} and Concurrent
 Versions System \citep[CVS, see][]{forge:Cederqvist:2006} 
