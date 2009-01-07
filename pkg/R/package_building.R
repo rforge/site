@@ -332,10 +332,10 @@ build_packages <- function(email,
 ## input: uncompressed package sources (the exported pkg directories) 
 ## output: compressed package sources <package_name>_<version>.tar.gz
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_tarball_from_sources_linux <- function(pkg, version, R, pkg_buildlog){
+.build_tarball_from_sources_linux <- function(pkg, R, pkg_buildlog){
   system(paste(R, "CMD build", pkg, 
                ">>", pkg_buildlog, "2>&1"))
-  pkg_version_local <- get_package_version_from_sources(pkg)
+  version <- get_package_version_from_sources(pkg)
   invisible(paste(pkg, "_", version, ".tar.gz", sep = ""))
 }
 
