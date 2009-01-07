@@ -3,7 +3,11 @@
 ## We need the package tools for creating PACKAGES i.e.
 library("tools")
 
-## TODO LIST (there are more points in the functions):
+## FIXME: unifying architectures
+## I.e., using a control object containing all relevant information and looping over all packages
+## deciding at the function call for the build which architecture to use.
+
+## TODO LIST (there are more points in Uwe's functions):
 
 ## file URLs of local mirrors: contriburl = sprintf("file:///%s", dir)
   ## do not download from cran.r-prokect.org
@@ -131,6 +135,11 @@ build_packages <- function(email,
   R <- file.path(R.home(), "bin", "R")
   ## Set environment variables which are necessary for building (or creating vignettes)
   Sys.setenv(R_LIBS = path_to_local_library)
+  ## Set TEXMFLOCAL environment variables in case we have
+  ## personalized style files (building vignettes)
+  path_to_local_texmf <- control$path_to_local_texmf
+  if(file.exists(path_to_local_texmf))
+    Sys.setenv(TEXMFLOCAL=path_to_local_texmf)
 
   ##############################################################################
   ## PACKAGE BUILDING
@@ -140,29 +149,32 @@ build_packages <- function(email,
   if(platform == "Linux"){
     ## We need a virtual framebuffer
     pid <- start_virtual_X11_fb()
-    ## Set TEXMFLOCAL environment variables in case we have
-    ## personalized style files (building vignettes)
-    path_to_local_texmf <- control$path_to_local_texmf
-    if(file.exists(path_to_local_texmf))
-      Sys.setenv(TEXMFLOCAL=path_to_local_texmf)
+
     ## Initialize timings
     timings <- numeric(length(pkgs))
     names(timings) <- pkgs
+    
+    ## Building ...
     for(pkg in pkgs){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
       write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "tarball", std.out = TRUE)
 
       ## BUILD
-      timings[pkg] <- system.time(system(paste(R, "CMD build", pkg, 
-                                               ">>", pkg_buildlog, "2>&1")))["elapsed"]
+      timings[pkg] <- system.time(
+                                  .build_tarball_from_sources_linux(pkg, R, pkg_buildlog)
+      )["elapsed"]
 
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
+    
+    ## Cleanup
     close_virtual_X11_fb(pid)
+
+  ## WINDOWS BUILDS ##########################################################
   }else if(platform == "Windows"){
-    ## WINDOWS BUILDS ##########################################################
+
     ## Initialize timings
     timings <- numeric(length(pkgs))
     names(timings) <- pkgs
@@ -177,28 +189,21 @@ build_packages <- function(email,
       proc_start <- proc.time()
 
       ## look out for version number	
-      try(pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version, silent = TRUE)
-      if(inherits(pkg_version_local, "try-error"))
-        pkg_version_local <- "0.0"
+      pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
+      
       ## if the version of available src tarball is the same (or newer) than local sources
       ## then build from it (as it already contains the package vignette).
-      if(package_version(pkg_version_src) >= package_version(pkg_version_local)){
-      system(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
-                   file.path(path_to_pkg_tarballs, "src", "contrib",
-                             paste(pkg, "_", pkg_version_src, ".tar.gz", sep = "")),
-                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
-      }else { 
-      ## Otherwise it is a brandnew version and we build it directly from source
-      ## first we have to build the tarball (important for vignettes)
-      system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
-                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
-      ## then build the binary
-      system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
-                   paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
-                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
-      ## and finally delete the tarball
-      file.remove(paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""))              
+      ## FIXME: Revision based building
+      if( package_version( pkg_version_src ) >= package_version( pkg_version_local ) ){
+
+        .build_binary_from_tarball_win(pkg, pkg_version_src, R, pkg_buildlog)     
+      
+      ## Otherwise it is a brandnew version and we build it directly from uncompressed package sources    
+      } else { 
+        
+        .build_binary_from_sources_win(pkg, pkg_version_local, R, pkg_buildlog)
+
       }
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
@@ -206,7 +211,8 @@ build_packages <- function(email,
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
-    ## build binaries which are not available as src tarball (maybe Windows binaries)
+    
+    ## build binaries which are not available as src tarball (maybe Windows only packages?)
     for( pkg in pkgs_other ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
@@ -218,32 +224,29 @@ build_packages <- function(email,
       ## does the pkg exist?
       if(!file.exists(pkg))
         next
-      ## look out for version number
-      pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version
       
-      ## first we have to build the tarball (important for vignettes)
-      system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
-                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
-      system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
-                   paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
-                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+      ## look out for version number
+      pkg_version_local <- get_package_version_from_sources(pkg)
+      
+      .build_binary_from_sources_win(pkg, pkg_version_local, R, pkg_buildlog)
+
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
+
+    ## Cleanup
     ## delete 00LOCK, sometimes this interrupted the build process ...
     check_local_library(path_to_local_library)
+
+  ## MacOSX BUILDS ###########################################################
   }else if(platform == "MacOSX"){
-    ## MacOSX BUILDS ###########################################################
+
     ## We need a virtual framebuffer
     pid <- start_virtual_X11_fb()
-    ## Set TEXMFLOCAL environment variables in case we have
-    ## personalized style files (building vignettes)
-    path_to_local_texmf <- control$path_to_local_texmf
-    if(file.exists(path_to_local_texmf))
-      Sys.setenv(TEXMFLOCAL = path_to_local_texmf)
+
     ## Initialize timings
     timings <- numeric(length(avail_src_pkgs))
     names(timings) <- avail_src_pkgs
@@ -259,84 +262,20 @@ build_packages <- function(email,
       ## path to pkg buildlog 
 
       ## look out for version number	
-      try(pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version, silent = TRUE)
-      if(inherits(pkg_version_local, "try-error"))
-        pkg_version_local <- "0.0"
+      pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
-      ## if the version of available src tarball is the same (or newer) than local sources
+
+      ## if the version of available src tarball is equal (or newer than) the version of local sources
       ## then build from it (as it already contains the package vignette).
-      if(package_version(pkg_version_src) >= package_version(pkg_version_local)){
-            ## make temporary directory
-	    tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
-      	    check_directory(tmpdir, fix = TRUE)
-      	    ## first look if there is a src directory because then we know that we have
-      	    ## to compile something ...
-      	    if(file.exists(file.path(".", pkg, "src"))){
-      	      ## compile an x86_32 binary
-      	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
-	      file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                         pkg_version_src, ".tar.gz", sep = "")),
-                     ">>", pkg_buildlog, "2>&1"))
-      	      ## compile a PPC binary
-      	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
-	      		 file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                         pkg_version_src, ".tar.gz", sep = "")), 
-                     ">>", pkg_buildlog, "2>&1"))
+      if( package_version( pkg_version_src ) >= package_version( pkg_version_local ) ) {
 
-      	    }else {
-              ## R only packages can be installed in one rush
-              system(paste(R, "CMD INSTALL -l", tmpdir, 
-                         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                         pkg_version_src, ".tar.gz", sep = "")), 
-                     ">>", pkg_buildlog, "2>&1"))
-            }
-      	    ## combine everything to universal binary
-      	    if(file.exists(file.path(tmpdir, pkg, "DESCRIPTION"))){
-              system(paste("tar czvf", paste(pkg, "_", pkg_version_src, ".tgz", sep = ""), 
-                     "-C", tmpdir, pkg, 
-                     ">>", pkg_buildlog, "2>&1"))
-            }
-      	    ## remove temporary directory	
-      	    system(paste("rm -rf", tmpdir))
+        .build_binary_from_tarball_mac(pkg, pkg_version_src, R, pkg_buildlog)
 
-      }else {
-        ## Otherwise it is a brandnew version and we build it directly from local source
-        ## first we have to build the tarball (important for vignettes)
-        system(paste(R, "CMD", "build", pkg, 
-                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
-        ## then build the binary
-        ## make temporary directory
-	tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
-      	check_directory(tmpdir, fix = TRUE)
-      	## first look if there is a src directory because then we know that we have
-      	## to compile something ...
-      	if(file.exists(file.path(".", pkg, "src"))){
-      	      ## compile an x86_32 binary
-      	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
-	             paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""),
-                     ">>", pkg_buildlog, "2>&1"))
-      	      ## compile a PPC binary
-      	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
-	      	     paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
-                     ">>", pkg_buildlog, "2>&1"))
+      ## Otherwise it is a brandnew version and we build it directly from local source
+      } else {
 
-      	}else {
-              ## R only packages can be installed in one rush
-              system(paste(R, "CMD INSTALL -l", tmpdir, 
-                     paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
-                     ">>", pkg_buildlog, "2>&1"))
-        }
-      	## combine everything to universal binary
-      	if(file.exists(file.path(tmpdir, pkg, "DESCRIPTION"))){
-              system(paste("tar czvf", paste(pkg, "_", pkg_version_local, ".tgz", sep = ""), 
-                     "-C", tmpdir, pkg, 
-                     ">>", pkg_buildlog, "2>&1"))
-        }
-      	## remove temporary directory	
-      	system(paste("rm -rf", tmpdir))
-	
-        ## and finally delete the tarball
-        file.remove(paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""))
+	.build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog)
+
       }
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
@@ -344,8 +283,9 @@ build_packages <- function(email,
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     } #</FOR>
+
     ## BUILDING FROM SOURCES
-    ## build binaries which are not available as src tarball (maybe MacOS binaries)
+    ## build binaries which are not available as src tarball (MacOS only packages?)
     for( pkg in pkgs_other ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
@@ -357,50 +297,21 @@ build_packages <- function(email,
       ## does the pkg exist?
       if(!file.exists(pkg))
         next
-      ## look out for version number
-      pkg_version_local <- packageDescription(pkg, lib.loc = ".")$Version
-      ## first we have to build the tarball (important for vignettes)
-      system(paste(R, "CMD", "build", pkg, 
-                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
-      ## make temporary directory
-      tmpdir <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
-      check_directory(tmpdir, fix = TRUE)
-      ## first look if there is a src directory because then we know that we have
-      ## to compile something ...
-      if(file.exists(file.path(".", pkg, "src"))){
-      	      ## compile an x86_32 binary
-      	      system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
-	      paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""),
-                     ">>", pkg_buildlog, "2>&1"))
-      	      ## compile a PPC binary
-      	      system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
-	      		 paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
-                     ">>", pkg_buildlog, "2>&1"))
 
-      }else {
-              ## R only packages can be installed in one rush
-              system(paste(R, "CMD INSTALL -l", tmpdir, 
-                         paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
-                     ">>", pkg_buildlog, "2>&1"))
-      }
-      ## combine everything to universal binary
-      if(file.exists(file.path(tmpdir, pkg, "DESCRIPTION"))){
-              system(paste("tar czvf", paste(pkg, "_", pkg_version_local, ".tgz", sep = ""), 
-                     "-C", tmpdir, pkg, 
-                     ">>", pkg_buildlog, "2>&1"))
-      }
-      ## remove temporary directory	
-      system(paste("rm -rf", tmpdir))
-	
-      ## and finally delete the tarball
-      file.remove(paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""))
+      ## look out for version number
+      pkg_version_local <- get_package_version_from_sources(pkg)
+
+      .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog)
+
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
+
     } #</FOR>
-    ## close framebuffer
+
+    ## Cleanup: close framebuffer
     close_virtual_X11_fb(pid)
   } else stop(paste("Strange platform: ", platform, "! I'm confused ...", sep = ""))
 
@@ -414,5 +325,158 @@ build_packages <- function(email,
   ## go back to old working directory
   setwd(old_wd)
   writeLines("Done.")
-  TRUE
+  invisible(TRUE)
+}
+
+## OS: Linux (would also work on other POSIX systems?)
+## input: uncompressed package sources (the exported pkg directories) 
+## output: compressed package sources <package_name>_<version>.tar.gz
+## FIXME: currently sources and resulting tarball are in the current working dir
+.build_tarball_from_sources_linux <- function(pkg, version, R, pkg_buildlog){
+  system(paste(R, "CMD build", pkg, 
+               ">>", pkg_buildlog, "2>&1"))
+  pkg_version_local <- get_package_version_from_sources(pkg)
+  invisible(paste(pkg, "_", version, ".tar.gz", sep = ""))
+}
+
+## OS: Windows
+## input: uncompressed package sources (the exported pkg directories) 
+## output: compressed package binary <package_name>_<version>.zip
+## FIXME: currently sources and resulting tarball are in the current working dir
+.build_binary_from_sources_win <- function(pkg, version, R, pkg_buildlog){
+  ## first we have to build the tarball (important for vignettes)
+  system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+  ## then build the binary
+  system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
+                   paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+  ## and finally delete the tarball
+  file.remove(paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""))
+  invisible(paste(pkg, "_", pkg_version_local, ".zip", sep = ""))
+}
+
+## OS: Windows
+## input: package tarball (<package_name>_<version>.tar.gz)
+## output: compressed package binary <package_name>_<version>.zip
+## FIXME: currently sources and resulting tarball are in the current working dir
+.build_binary_from_tarball_win <- function(pkg, version, R, pkg_buildlog){
+  system(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
+               file.path(path_to_pkg_tarballs, "src", "contrib",
+                         paste(pkg, "_", version, ".tar.gz", sep = "")),
+               ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+  invisible(paste(pkg, "_", version, ".zip", sep = ""))
+}
+
+## OS: Mac OS X
+## input: uncompressed package sources (the exported pkg directories) 
+## output: compressed package binary <package_name>_<version>.tgz
+## FIXME: currently sources and resulting tarball are in the current working dir
+.build_binary_from_sources_mac <- function(pkg, version, R, pkg_buildlog){
+  ## first we have to build the tarball (important for vignettes)
+  system(paste(R, "CMD", "build", pkg, 
+               ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+
+  ## make temporary directory
+  tmpdir <- .make_tmp_directory()
+
+  ## first look if there is a src directory because then we know that we have
+  ## to compile something ...
+  if(.check_whether_package_contains_code_to_compile(pkg)){
+    ## compile an x86_32 binary
+    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
+	             paste(pkg, "_", version, ".tar.gz", sep = ""),
+                     ">>", pkg_buildlog, "2>&1"))
+    ## compile a PPC binary
+    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
+	      	     paste(pkg, "_", version, ".tar.gz", sep = ""), 
+                     ">>", pkg_buildlog, "2>&1"))
+
+  }else {
+    ## R only packages can be installed in one rush
+    system(paste(R, "CMD INSTALL -l", tmpdir, 
+                     paste(pkg, "_", version, ".tar.gz", sep = ""), 
+                     ">>", pkg_buildlog, "2>&1"))
+  }
+  ## combine everything to universal binary
+  pkg_binary <- .make_universal_mac_binary(pkg, version,  pkg_buildlog, tmpdir)
+
+  ## remove temporary directory
+  .cleanup_mac(tmpdir)
+
+  ## and finally delete the tarball
+  file.remove(paste(pkg, "_", version, ".tar.gz", sep = ""))
+}
+
+## OS: Mac OSX
+## input: package tarball (<package_name>_<version>.tar.gz)
+## output: compressed package binary <package_name>_<version>.tgz
+## FIXME: currently sources and resulting tarball are in the current working dir
+.build_binary_from_tarball_mac <- function(pkg, version, R, pkg_buildlog){
+  ## make temporary directory
+  tmpdir <- .make_tmp_directory()
+
+  ## first look if there is a src directory because then we know that we have
+  ## to compile something ...
+  if(.check_whether_package_contains_code_to_compile(pkg)){
+    ## compile an x86_32 binary
+    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
+                 file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                 version, ".tar.gz", sep = "")),
+                 ">>", pkg_buildlog, "2>&1"))
+    ## compile a PPC binary
+    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
+   	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                 version, ".tar.gz", sep = "")), 
+                ">>", pkg_buildlog, "2>&1"))
+
+  }else {
+    ## R only packages can be installed in one rush
+    system(paste(R, "CMD INSTALL -l", tmpdir, 
+                 file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                 version, ".tar.gz", sep = "")), 
+                 ">>", pkg_buildlog, "2>&1"))
+  }
+  
+  pkg_binary <- .make_universal_mac_binary(pkg, version,  pkg_buildlog, tmpdir)
+
+  ## Cleanup
+  .cleanup_mac(tmpdir)
+
+  invisible(pkg_binary)
+}
+
+.make_tmp_directory <- function(where = "."){
+  dirname <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
+  check_directory(file.path(where, dirname), fix = TRUE)
+  dirname
+}
+
+## simple check if there is an src directory
+.check_whether_package_contains_code_to_compile <- function(pkg, dir = ".")
+  file.exists(file.path(dir, pkg, "src"))
+
+## checks if there is an installed package in the given path and builds the .tgz
+.make_universal_mac_binary <- function(pkg, version,  pkg_buildlog, dir = "."){
+  if(file.exists(file.path(dir, pkg, "DESCRIPTION"))){
+    system(paste("tar czvf", paste(pkg, "_", version, ".tgz", sep = ""), 
+                 "-C", tmpdir, pkg, 
+                 ">>", pkg_buildlog, "2>&1"))
+    return(paste(pkg, "_", version, ".tgz", sep = ""))
+  }
+  NA
+}
+
+.cleanup_mac <- function(dir){
+  if( file.exists( file.path(".", dir)) )
+    system( paste("rm -rf", file.path(".", dir)) )
+}
+
+get_package_version_from_sources <- function(pkg, library = "."){
+  try(pkg_version_local <- packageDescription(pkg, lib.loc = library)$Version, silent = TRUE)
+  if(inherits(pkg_version_local, "try-error")){
+    warning(paste("Could not retrieve version number from package", pkg, ". Setting to 0.0!"))
+    pkg_version_local <- "0.0"
+  }
+  pkg_version_local
 }
