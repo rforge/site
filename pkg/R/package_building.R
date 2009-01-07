@@ -197,7 +197,7 @@ build_packages <- function(email,
       ## FIXME: Revision based building
       if( package_version( pkg_version_src ) >= package_version( pkg_version_local ) ){
 
-        .build_binary_from_tarball_win(pkg, pkg_version_src, R, pkg_buildlog)     
+        .build_binary_from_tarball_win(pkg, pkg_version_src, path_to_pkg_tarballs, R, pkg_buildlog)     
       
       ## Otherwise it is a brandnew version and we build it directly from uncompressed package sources    
       } else { 
@@ -269,12 +269,12 @@ build_packages <- function(email,
       ## then build from it (as it already contains the package vignette).
       if( package_version( pkg_version_src ) >= package_version( pkg_version_local ) ) {
 
-        .build_binary_from_tarball_mac(pkg, pkg_version_src, R, pkg_buildlog)
+        .build_binary_from_tarball_mac(pkg, pkg_version_src, path_to_pkg_tarballs, R, pkg_buildlog)
 
       ## Otherwise it is a brandnew version and we build it directly from local source
       } else {
 
-	.build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog)
+	      .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog)
 
       }
       ## save timing
@@ -335,44 +335,44 @@ build_packages <- function(email,
 .build_tarball_from_sources_linux <- function(pkg, R, pkg_buildlog){
   system(paste(R, "CMD build", pkg, 
                ">>", pkg_buildlog, "2>&1"))
-  version <- get_package_version_from_sources(pkg)
-  invisible(paste(pkg, "_", version, ".tar.gz", sep = ""))
+  pkg_version <- get_package_version_from_sources(pkg)
+  invisible(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
 }
 
 ## OS: Windows
 ## input: uncompressed package sources (the exported pkg directories) 
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_sources_win <- function(pkg, version, R, pkg_buildlog){
+.build_binary_from_sources_win <- function(pkg, pkg_version, R, pkg_buildlog){
   ## first we have to build the tarball (important for vignettes)
   system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
   ## then build the binary
   system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
-                   paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""), 
+                   paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), 
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
   ## and finally delete the tarball
-  file.remove(paste(pkg, "_", pkg_version_local, ".tar.gz", sep = ""))
-  invisible(paste(pkg, "_", pkg_version_local, ".zip", sep = ""))
+  file.remove(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
+  invisible(paste(pkg, "_", pkg_version, ".zip", sep = ""))
 }
 
 ## OS: Windows
 ## input: package tarball (<package_name>_<version>.tar.gz)
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_tarball_win <- function(pkg, version, R, pkg_buildlog){
+.build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
   system(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
                file.path(path_to_pkg_tarballs, "src", "contrib",
-                         paste(pkg, "_", version, ".tar.gz", sep = "")),
+                         paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),
                ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
-  invisible(paste(pkg, "_", version, ".zip", sep = ""))
+  invisible(paste(pkg, "_", pkg_version, ".zip", sep = ""))
 }
 
 ## OS: Mac OS X
 ## input: uncompressed package sources (the exported pkg directories) 
 ## output: compressed package binary <package_name>_<version>.tgz
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_sources_mac <- function(pkg, version, R, pkg_buildlog){
+.build_binary_from_sources_mac <- function(pkg, pkg_version, R, pkg_buildlog){
   ## first we have to build the tarball (important for vignettes)
   system(paste(R, "CMD", "build", pkg, 
                ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
@@ -385,34 +385,34 @@ build_packages <- function(email,
   if(.check_whether_package_contains_code_to_compile(pkg)){
     ## compile an x86_32 binary
     system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
-	             paste(pkg, "_", version, ".tar.gz", sep = ""),
+	             paste(pkg, "_", pkg_version, ".tar.gz", sep = ""),
                      ">>", pkg_buildlog, "2>&1"))
     ## compile a PPC binary
     system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
-	      	     paste(pkg, "_", version, ".tar.gz", sep = ""), 
+	      	     paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), 
                      ">>", pkg_buildlog, "2>&1"))
 
   }else {
     ## R only packages can be installed in one rush
     system(paste(R, "CMD INSTALL -l", tmpdir, 
-                     paste(pkg, "_", version, ".tar.gz", sep = ""), 
+                     paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), 
                      ">>", pkg_buildlog, "2>&1"))
   }
   ## combine everything to universal binary
-  pkg_binary <- .make_universal_mac_binary(pkg, version,  pkg_buildlog, tmpdir)
+  pkg_binary <- .make_universal_mac_binary(pkg, pkg_version,  pkg_buildlog, tmpdir)
 
   ## remove temporary directory
   .cleanup_mac(tmpdir)
 
   ## and finally delete the tarball
-  file.remove(paste(pkg, "_", version, ".tar.gz", sep = ""))
+  file.remove(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
 }
 
 ## OS: Mac OSX
 ## input: package tarball (<package_name>_<version>.tar.gz)
 ## output: compressed package binary <package_name>_<version>.tgz
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_tarball_mac <- function(pkg, version, R, pkg_buildlog){
+.build_binary_from_tarball_mac <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
   ## make temporary directory
   tmpdir <- .make_tmp_directory()
 
@@ -422,23 +422,23 @@ build_packages <- function(email,
     ## compile an x86_32 binary
     system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
                  file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                 version, ".tar.gz", sep = "")),
+                 pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"))
     ## compile a PPC binary
     system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
    	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                 version, ".tar.gz", sep = "")), 
+                 pkg_version, ".tar.gz", sep = "")), 
                 ">>", pkg_buildlog, "2>&1"))
 
   }else {
     ## R only packages can be installed in one rush
     system(paste(R, "CMD INSTALL -l", tmpdir, 
                  file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                 version, ".tar.gz", sep = "")), 
+                 pkg_version, ".tar.gz", sep = "")), 
                  ">>", pkg_buildlog, "2>&1"))
   }
   
-  pkg_binary <- .make_universal_mac_binary(pkg, version,  pkg_buildlog, tmpdir)
+  pkg_binary <- .make_universal_mac_binary(pkg, pkg_version,  pkg_buildlog, tmpdir)
 
   ## Cleanup
   .cleanup_mac(tmpdir)
@@ -457,12 +457,12 @@ build_packages <- function(email,
   file.exists(file.path(dir, pkg, "src"))
 
 ## checks if there is an installed package in the given path and builds the .tgz
-.make_universal_mac_binary <- function(pkg, version,  pkg_buildlog, dir = "."){
+.make_universal_mac_binary <- function(pkg, pkg_version,  pkg_buildlog, dir = "."){
   if(file.exists(file.path(dir, pkg, "DESCRIPTION"))){
-    system(paste("tar czvf", paste(pkg, "_", version, ".tgz", sep = ""), 
+    system(paste("tar czvf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), 
                  "-C", tmpdir, pkg, 
                  ">>", pkg_buildlog, "2>&1"))
-    return(paste(pkg, "_", version, ".tgz", sep = ""))
+    return(paste(pkg, "_", pkg_version, ".tgz", sep = ""))
   }
   NA
 }
@@ -473,10 +473,10 @@ build_packages <- function(email,
 }
 
 get_package_version_from_sources <- function(pkg, library = "."){
-  try(pkg_version_local <- packageDescription(pkg, lib.loc = library)$Version, silent = TRUE)
-  if(inherits(pkg_version_local, "try-error")){
+  try(pkg_version <- packageDescription(pkg, lib.loc = library)$Version, silent = TRUE)
+  if(inherits(pkg_version, "try-error")){
     warning(paste("Could not retrieve version number from package", pkg, ". Setting to 0.0!"))
-    pkg_version_local <- "0.0"
+    pkg_version <- "0.0"
   }
-  pkg_version_local
+  pkg_version
 }
