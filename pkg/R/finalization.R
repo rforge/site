@@ -34,7 +34,7 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
       ind_package_to_remove <- ind[packages==i][version_order(versno[packages==i])[1]]
       system(paste("rm -f", tmp[ind_package_to_remove]))
     }
-  } 
+  }
   ## Write a new PACKAGES and PACKAGES.gz file
   write_PACKAGES(dir = contrib_dir, fields = fields, type = pkg_type)
 
@@ -61,7 +61,15 @@ notify_admins <- function(packages, donotcompile, email, platform, control, timi
   }
 
   if(!is.null(timings)){
-    timings <- apply(matrix(c(names(timings), round(timings, 2L)), ncol = 2L), 1L, function(x) {paste(c(names(x), x), collapse = " ")})
+    ## max_cpu_time needed to mark packages taken too long
+    ## FIXME: has to be considered in cleanup, e.g., automatically put pkg on the stop list
+    max_cpu_time <- get_cpu_time_limit(control)
+    sorted <- sort(timings, decreasing = TRUE)
+    note <- rep("  ", length(sorted))
+    too_long_symbol <- "!!"
+    too_long <- which(sorted >= max_cpu_time)
+    note[too_long] <- too_long_symbol
+    timings_table <-  paste(formatDL(names(sorted), round(sorted, 2), "table"), note)
   }
 
   ## Text
@@ -71,7 +79,7 @@ notify_admins <- function(packages, donotcompile, email, platform, control, timi
           "This packages have been kept back (stop list):", " ",
           donotcompiletxt, " ",
           pkg_txt, " ",
-          "Timings [sec]:", " ", timings),
+          "Timings [sec]:", " ", timings_table),
         file = attachment)
   mail_prog <- control$mail_program
   send_host <- control$mail_domain_name_of_sender

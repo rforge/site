@@ -42,6 +42,8 @@ build_packages <- function(email,
                            bioc_url           = "http://bioconductor.org/packages/release/bioc",
                            control            = list()){
 
+  if(!inherits(control, "R-Forge_control"))
+    stop("No R-Forge control object given")
   ## INITIALIZATION
   writeLines("Start build process ...")
   ## match arguments
@@ -75,12 +77,20 @@ build_packages <- function(email,
   ## PACKAGE SIGHTING
   
   ## STOP LIST: packages which should not be compiled
-  donotcompile <- if(file.exists(stoplist)){
-    scan(stoplist, what = character(0)) 
-  }else ""
-  ## write 
-  if(!is.null(donotcompile)){
-  
+  ## FIXME: probably too strict at the moment. E.g., RWinEdt does not get build
+  ## when checking packages the stoplist includes additional arguments to check process
+  if(file.exists(stoplist)){
+    check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
+  }else check_args <- NULL
+  donotcompile <- check_args[, "Package"]
+  if( !is.null(donotcompile) ){
+    for(pkg in donotcompile){
+      arch <- "all"
+      if(platform == "Windows")
+        arch <- architecture
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = arch)
+      write_stoplist_notification(pkg, pkg_buildlog, "build", std.out = TRUE)
+    }
   }
   
   ## sourcepackages available from R-Forge---exported svn reps
@@ -94,16 +104,17 @@ build_packages <- function(email,
     path_to_pkg_tarballs <- control$path_to_pkg_tarballs
     if(!check_directory(path_to_pkg_tarballs))
       stop("Directory", path_to_pkg_tarballs, "missing!") 
-    avail_rforge <- available.packages(contriburl = contrib.url(paste("file:", path_to_pkg_tarballs, sep = ""), type = "source"))
+    avail_rforge <- available.packages(contriburl = contrib.url(paste("file:", path_to_pkg_tarballs, sep = ""), type = "source"), fields = "Revision")
     avail_src_pkgs <- avail_rforge[, 1]
     ## we take only tarballs into account which are hosted in R-Forge SVN reps
     avail_src_pkgs <- avail_src_pkgs[avail_src_pkgs %in% pkgs_all]
     pkgs_other <- setdiff(pkgs_all, avail_src_pkgs)
   }
+
   ## Sort out packages that are on the exclude list
   pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
   pkgs_other <- remove_excluded_pkgs(pkgs_other, donotcompile)
-  
+
   ## PACKAGE DB UPDATE
 
   ## FIXME: is it sufficient what we are doing here?
@@ -188,14 +199,15 @@ build_packages <- function(email,
       ## timer start
       proc_start <- proc.time()
 
-      ## look out for version number	
+      ## look out for version and revision number	
       pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
+      pkg_revision_local <- get_package_revision_from_sources(pkg)
+      pkg_revision_src  <- avail_rforge[Package = pkg, "Revision"]
       
       ## if the version of available src tarball is the same (or newer) than local sources
       ## then build from it (as it already contains the package vignette).
-      ## FIXME: Revision based building
-      if( package_version( pkg_version_src ) >= package_version( pkg_version_local ) ){
+      if( pkg_revision_src >= pkg_revision_local ){
 
         .build_binary_from_tarball_win(pkg, pkg_version_src, path_to_pkg_tarballs, R, pkg_buildlog)     
       
@@ -264,17 +276,19 @@ build_packages <- function(email,
       ## look out for version number	
       pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
+      pkg_revision_local <- get_package_revision_from_sources(pkg)
+      pkg_revision_src  <- avail_rforge[Package = pkg, "Revision"]
 
       ## if the version of available src tarball is equal (or newer than) the version of local sources
       ## then build from it (as it already contains the package vignette).
-      if( package_version( pkg_version_src ) >= package_version( pkg_version_local ) ) {
+      if( pkg_revision_src >= pkg_revision_local ){
 
         .build_binary_from_tarball_mac(pkg, pkg_version_src, path_to_pkg_tarballs, R, pkg_buildlog)
 
       ## Otherwise it is a brandnew version and we build it directly from local source
       } else {
 
-	      .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog)
+        .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog)
 
       }
       ## save timing
@@ -460,7 +474,7 @@ build_packages <- function(email,
 .make_universal_mac_binary <- function(pkg, pkg_version,  pkg_buildlog, dir = "."){
   if(file.exists(file.path(dir, pkg, "DESCRIPTION"))){
     system(paste("tar czvf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), 
-                 "-C", tmpdir, pkg, 
+                 "-C", dir, pkg, 
                  ">>", pkg_buildlog, "2>&1"))
     return(paste(pkg, "_", pkg_version, ".tgz", sep = ""))
   }
@@ -479,4 +493,15 @@ get_package_version_from_sources <- function(pkg, library = "."){
     pkg_version <- "0.0"
   }
   pkg_version
+}
+
+get_package_revision_from_sources <- function(pkg, library = "."){
+  try(pkg_revision <- packageDescription(pkg, lib.loc = library)$Revision, silent = TRUE)
+  if(inherits(pkg_revision, "try-error")){
+    warning(paste("Could not retrieve revision number from package", pkg, ". Setting to 0L!"))
+    pkg_revision <- 0L
+  }
+  if(is.na(pkg_revision))
+    pkg_revision <- 0L
+  as.integer(pkg_revision)
 }

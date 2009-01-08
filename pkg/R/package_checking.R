@@ -49,7 +49,7 @@ check_packages <- function(email,
   
   ## STOP LIST: packages which should not be compiled
   ## when checking packages the stoplist includes additional arguments to check process
-  check_args <- if(file.exists(stoplist)){
+  if(file.exists(stoplist)){
     check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
   }else check_args <- NULL
   ## sourcepackages available from R-Forge---exported svn reps

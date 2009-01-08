@@ -154,3 +154,18 @@ write_epilog <- function(file, timing, std.out = FALSE){
     writeLines(paste("Done in", round(timing, 2L), "seconds."))
 }
 
+write_stoplist_notification <- function(pkg, file, type = c("build", "check"), std.out = FALSE){
+  type <- match.arg(type)
+  ## R CMD build message
+  if(type == "build")
+    msg <- paste(date(), ": Package ", pkg, " is currently on the stop list ...\n", sep = "")
+  ## R CMD check message
+  if(type == "check")
+    msg <- paste(date(), ": Package ", pkg, " is currently on the stop list ...\n", sep = "")
+  cat(msg, file = file)
+  ## additional information about R version not provided by R CMD build
+  if(type == "build")
+    cat(paste("using", R.Version()$version.string, "...\n\n"), file = file, append = TRUE)
+  if(std.out)
+    cat(msg)
+}
