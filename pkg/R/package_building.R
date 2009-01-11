@@ -49,7 +49,7 @@ build_packages <- function(email,
   ## match arguments
   platform <- match.arg(platform) ## FIXME: automatically use info from .Platform?
   architecture <- match.arg(architecture)
-  maj.version <- paste(R.Version()$maj,unlist(strsplit(R.Version()$min,"[.]"))[1],sep=".")
+  maj.version <- paste(R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
   ## x86_32 on x86_64 allowed but not the other way round
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
     stop("Building x86_64 binaries not possible on an x86_32 architecture") 
@@ -82,8 +82,11 @@ build_packages <- function(email,
   if(file.exists(stoplist)){
     check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
   }else check_args <- NULL
-  donotcompile <- check_args[, "Package"]
-  if( !is.null(donotcompile) ){
+  no_install <- grep("--install=no", check_args[["check_args"]])
+  donotcompile <- check_args[no_install, "Package"]
+  no_vignettes <- check_args[grep("--no-vignettes", check_args[["check_args"]]), "Package"]
+
+  if( length(donotcompile) ){
     for(pkg in donotcompile){
       arch <- "all"
       if(platform == "Windows")
@@ -129,10 +132,10 @@ build_packages <- function(email,
   ## the major version of R to the contrib directory otherwise use /src/contrib
   if(platform == "Windows"){
     ##if(!any(dir("c:\\srv\\rsync\\R-Forge\\bin\\windows\\contrib\\")==maj.version))
-    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", .Platform$OS.type,
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", .Platform$OS.type, 
                                  "contrib", maj.version)
   }else if(platform == "MacOSX"){
-    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", "macosx", "universal",
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", "macosx", "leopard",
                                  "contrib", maj.version)
   }else {
     ## UNIX SOURCE directory
@@ -170,10 +173,13 @@ build_packages <- function(email,
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
       write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "tarball", std.out = TRUE)
+      
+      build_args <- if(pkg %in% no_vignettes)
+        "--no-vignettes" else ""
 
       ## BUILD
       timings[pkg] <- system.time(
-                                  .build_tarball_from_sources_linux(pkg, R, pkg_buildlog)
+                                  .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
       )["elapsed"]
 
       ## Epilog
@@ -214,7 +220,10 @@ build_packages <- function(email,
       ## Otherwise it is a brandnew version and we build it directly from uncompressed package sources    
       } else { 
         
-        .build_binary_from_sources_win(pkg, pkg_version_local, R, pkg_buildlog)
+	 build_args <- if(pkg %in% no_vignettes)
+        "--no-vignettes" else ""
+	
+        .build_binary_from_sources_win(pkg, pkg_version_local, R, pkg_buildlog, build_args)
 
       }
       ## save timing
@@ -240,7 +249,10 @@ build_packages <- function(email,
       ## look out for version number
       pkg_version_local <- get_package_version_from_sources(pkg)
       
-      .build_binary_from_sources_win(pkg, pkg_version_local, R, pkg_buildlog)
+      build_args <- if(pkg %in% no_vignettes)
+        "--no-vignettes" else ""
+	
+      .build_binary_from_sources_win(pkg, pkg_version_local, R, pkg_buildlog, build_args)
 
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
@@ -287,8 +299,11 @@ build_packages <- function(email,
 
       ## Otherwise it is a brandnew version and we build it directly from local source
       } else {
+      
+        build_args <- if(pkg %in% no_vignettes)
+          "--no-vignettes" else ""
 
-        .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog)
+        .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog, build_args)
 
       }
       ## save timing
@@ -315,7 +330,11 @@ build_packages <- function(email,
       ## look out for version number
       pkg_version_local <- get_package_version_from_sources(pkg)
 
-      .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog)
+      build_args <- if(pkg %in% no_vignettes)
+        "--no-vignettes" else ""
+
+
+      .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog, build_args)
 
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
@@ -346,8 +365,8 @@ build_packages <- function(email,
 ## input: uncompressed package sources (the exported pkg directories) 
 ## output: compressed package sources <package_name>_<version>.tar.gz
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_tarball_from_sources_linux <- function(pkg, R, pkg_buildlog){
-  system(paste(R, "CMD build", pkg, 
+.build_tarball_from_sources_linux <- function(pkg, R, pkg_buildlog, build_args = ""){
+  system(paste(R, "CMD build", build_args, pkg, 
                ">>", pkg_buildlog, "2>&1"))
   pkg_version <- get_package_version_from_sources(pkg)
   invisible(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
@@ -357,9 +376,9 @@ build_packages <- function(email,
 ## input: uncompressed package sources (the exported pkg directories) 
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_sources_win <- function(pkg, pkg_version, R, pkg_buildlog){
+.build_binary_from_sources_win <- function(pkg, pkg_version, R, pkg_buildlog, build_args = ""){
   ## first we have to build the tarball (important for vignettes)
-  system(paste(paste(R, "cmd", sep = ""), "build", pkg, 
+  system(paste(paste(R, "cmd", sep = ""), "build", build_args, pkg, 
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
   ## then build the binary
   system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
@@ -386,32 +405,29 @@ build_packages <- function(email,
 ## input: uncompressed package sources (the exported pkg directories) 
 ## output: compressed package binary <package_name>_<version>.tgz
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_sources_mac <- function(pkg, pkg_version, R, pkg_buildlog){
+.build_binary_from_sources_mac <- function(pkg, pkg_version, R, pkg_buildlog, build_args = ""){
   ## first we have to build the tarball (important for vignettes)
-  system(paste(R, "CMD", "build", pkg, 
-               ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+  pkg_tarball <- .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
 
   ## make temporary directory
   tmpdir <- .make_tmp_directory()
 
   ## first look if there is a src directory because then we know that we have
   ## to compile something ...
-  if(.check_whether_package_contains_code_to_compile(pkg)){
+  if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
     ## compile an x86_32 binary
     system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
-	             paste(pkg, "_", pkg_version, ".tar.gz", sep = ""),
-                     ">>", pkg_buildlog, "2>&1"))
+	             pkg_tarball, ">>", pkg_buildlog, "2>&1"))
     ## compile a PPC binary
     system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
-	      	     paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), 
-                     ">>", pkg_buildlog, "2>&1"))
+	      	     pkg_tarball, ">>", pkg_buildlog, "2>&1"))
 
   }else {
     ## R only packages can be installed in one rush
     system(paste(R, "CMD INSTALL -l", tmpdir, 
-                     paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), 
-                     ">>", pkg_buildlog, "2>&1"))
+                     pkg_tarball, ">>", pkg_buildlog, "2>&1"))
   }
+  
   ## combine everything to universal binary
   pkg_binary <- .make_universal_mac_binary(pkg, pkg_version,  pkg_buildlog, tmpdir)
 
@@ -419,7 +435,9 @@ build_packages <- function(email,
   .cleanup_mac(tmpdir)
 
   ## and finally delete the tarball
-  file.remove(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
+  file.remove(pkg_tarball)
+  
+  invisible(pkg_binary)
 }
 
 ## OS: Mac OSX
@@ -432,7 +450,7 @@ build_packages <- function(email,
 
   ## first look if there is a src directory because then we know that we have
   ## to compile something ...
-  if(.check_whether_package_contains_code_to_compile(pkg)){
+  if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
     ## compile an x86_32 binary
     system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
                  file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
@@ -452,7 +470,7 @@ build_packages <- function(email,
                  ">>", pkg_buildlog, "2>&1"))
   }
   
-  pkg_binary <- .make_universal_mac_binary(pkg, pkg_version,  pkg_buildlog, tmpdir)
+  pkg_binary <- .make_universal_mac_binary(pkg, pkg_version, pkg_buildlog, tmpdir)
 
   ## Cleanup
   .cleanup_mac(tmpdir)
@@ -467,8 +485,21 @@ build_packages <- function(email,
 }
 
 ## simple check if there is an src directory
-.check_whether_package_contains_code_to_compile <- function(pkg, dir = ".")
+.check_whether_package_contains_code_to_compile <- function(pkg, dir = "."){
+  if(!file.exists(file.path(dir, pkg)))
+    warning(paste("Package", pkg, "does not exist in", dir, "!"))
   file.exists(file.path(dir, pkg, "src"))
+}
+	
+## check if package has a Makefile or a configure script,
+## necessary for building mac packages -> Do we have to set 'arch=' variable?
+.check_whether_package_code_contains_makefile_or_configure <- function(pkg, dir = "."){
+  if(!file.exists(file.path(dir, pkg)))
+    warning(paste("Package", pkg, "does not exist in", dir, "!"))
+  files <- c("Makefile", "configure")
+  files_to_test <- c(file.path(dir, pkg, files), file.path(dir, pkg, "src", files))
+  any(file.exists(files_to_test))
+}
 
 ## checks if there is an installed package in the given path and builds the .tgz
 .make_universal_mac_binary <- function(pkg, pkg_version,  pkg_buildlog, dir = "."){
@@ -486,22 +517,29 @@ build_packages <- function(email,
     system( paste("rm -rf", file.path(".", dir)) )
 }
 
-get_package_version_from_sources <- function(pkg, library = "."){
-  try(pkg_version <- packageDescription(pkg, lib.loc = library)$Version, silent = TRUE)
-  if(inherits(pkg_version, "try-error")){
-    warning(paste("Could not retrieve version number from package", pkg, ". Setting to 0.0!"))
+get_package_version_from_sources <- function(pkg, library = ".") 
+  sapply(pkg, .get_package_version_from_sources, library)
+
+.get_package_version_from_sources <- function(pkg, library){
+  suppressWarnings(pkg_version <- tryCatch(packageDescription(pkg, lib.loc = library)$Version, error = identity))
+  if(inherits(pkg_version, "error") | is.null(pkg_version)){
+    warning(paste("Could not retrieve version number from package", pkg, ". Setting to 0L!"))
     pkg_version <- "0.0"
   }
   pkg_version
 }
 
-get_package_revision_from_sources <- function(pkg, library = "."){
-  try(pkg_revision <- packageDescription(pkg, lib.loc = library)$Revision, silent = TRUE)
-  if(inherits(pkg_revision, "try-error")){
+get_package_revision_from_sources <- function(pkg, library = ".")
+  sapply(pkg, .get_package_revision_from_sources, library)
+
+.get_package_revision_from_sources <- function(pkg, library){
+  suppressWarnings(pkg_revision <- tryCatch(packageDescription(pkg, lib.loc = library)$Revision, error = identity))
+  if(inherits(pkg_revision, "error") | is.null(pkg_revision)){
     warning(paste("Could not retrieve revision number from package", pkg, ". Setting to 0L!"))
     pkg_revision <- 0L
   }
+  pkg_revision <- as.integer(pkg_revision)
   if(is.na(pkg_revision))
     pkg_revision <- 0L
-  as.integer(pkg_revision)
+  pkg_revision
 }
