@@ -10,12 +10,15 @@ check_packages <- function(email,
                            bioc_url           = "http://bioconductor.org/packages/release/bioc",
                            control=list()
                            ){
+  if(!inherits(control, "R-Forge_control"))
+    stop("No R-Forge control object given")
+
   ## INITIALIZATION
   
   ## match arguments
   platform <- match.arg(platform) ## FIXME: automat. use info from .Platform?
   architecture <- match.arg(architecture)
-  maj.version <- paste(R.Version()$maj,unlist(strsplit(R.Version()$min,"[.]"))[1],sep=".")
+  maj.version <- paste(R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
   flavor <- R.Version()$status
   ## x86_32 on x86_64 allowed but not the other way round
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
@@ -56,7 +59,8 @@ check_packages <- function(email,
   pkgs_all <- available.packages(contriburl =
                                  sprintf("file:///%s", path_to_pkg_src))[, 1]
   ## Sort out packages that are on the exclude list (TODO: not hardcoding in function!)
-  donotcompile <- c("seriation")
+  ## donotcompile <- c("seriation")
+  donotcompile <- ""
   pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
   
   ## PACKAGE DB UPDATE
