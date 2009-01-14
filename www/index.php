@@ -43,9 +43,19 @@ echo $contents; } ?>
 
 <!-- end of project description -->
 
-<p> No content added. </p>
+<h3>R-Forge Build Check Schedule</h3>
 
-<p> The <strong>project summary page</strong> you can find <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/"><strong>here</strong></a>. </p>
+<p><b>Exportation of R package sources</b> (this includes also an update of the R Packages tab): 4:00 and 16:00 CET.</p>
+<p><b>Building of R package tarballs</b>: 4:30 CET.</p>
+<p><b>Building of Windows binary packages</b>: 4:30 (R patched), 12:30 (R-devel) CET.</p>
+<p><b>Building of Mac binary packages</b>: 4:30 (R patched) CET.</p>
+<p><b>Checking of packages (Linux)</b>: 6:00 (patched), 14:00 (devel) CET.</p>
+<p><b>Checking of packages (Windows)</b>: 6:00 (patched), 14:00 (devel) CET.</p>
+<p><b>Checking of packages (Mac)</b>: 6:00 (patched) CET.</p>
+<p><b>Synchronization of /contrib directory</b> (e.g., copy package builds/logs to R-Forge): 1:00, 5:00 ,9:00, 13:00, 17:00 and 21:00 CET.</p>
+<p><b>Synchronization of check results</b>: 2:00 ,6:00 ,10:00 ,14:00, 18:00 and 22:00 CET.</p>
+
+<p> For general information about the project please visit the <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/">project summary page</a>. </p>
 
 </body>
 </html>
