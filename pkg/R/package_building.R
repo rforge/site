@@ -135,7 +135,8 @@ build_packages <- function(email,
     path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", .Platform$OS.type, 
                                  "contrib", maj.version)
   }else if(platform == "MacOSX"){
-    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", "macosx", "leopard",
+    macosx_branch <- c(x86_64="leopard", x86_32="universal")
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", macosx_branch[architecture], "leopard",
                                  "contrib", maj.version)
   }else {
     ## UNIX SOURCE directory
@@ -278,7 +279,7 @@ build_packages <- function(email,
     ## BUILDING FROM PKG TARBALLS
     for(pkg in avail_src_pkgs){
       ## Prolog
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
       write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
 
       ## timer start
@@ -317,7 +318,7 @@ build_packages <- function(email,
     ## build binaries which are not available as src tarball (MacOS only packages?)
     for( pkg in pkgs_other ){
       ## Prolog
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
       write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
 
       ## timer start
