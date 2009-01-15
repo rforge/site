@@ -136,7 +136,7 @@ build_packages <- function(email,
                                  "contrib", maj.version)
   }else if(platform == "MacOSX"){
     macosx_branch <- c(x86_64="leopard", x86_32="universal")
-    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", macosx_branch[architecture], "leopard",
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", "macosx", macosx_branch[architecture],
                                  "contrib", maj.version)
   }else {
     ## UNIX SOURCE directory
