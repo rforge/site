@@ -1,0 +1,83 @@
+* News Items postet in R-Forge Site Admin
+
+** R-Forge Update: Minor Improvements 
+   Today we improved the package build system.
+   - closed [#262] we added support to Brian Ripley's Windows packages repository
+     http://r-forge.r-project.org/tracker/index.php?func=detail&aid=262&group_id=34&atid=196 
+   - fixed some lines in RForgeTools (now version 0.3-2). Resolving
+     dependencies (Depends + Suggests in DESCRIPTION) works better
+     now.
+   - MacOSX: switched back to universal binaries (default R on CRAN
+     is a Tiger build).
+
+   Best,
+   Stefan
+
+** R-Forge New Year Update (2009-01-12)
+
+   The R-Forge Development and Administration Team wishes the whole R community a happy new year. The first update in 2009 includes:
+   - a new documentation section on the home page,
+   - a link on the home page to a short introduction to the R-Forge system. The title of this paper is "Collaborative Software Development Using R-Forge".
+   - R-devel package checking for all platforms (Mac OSX coming soon). Furthermore experimental R-devel binaries for Windows are available. Take care!
+   
+   Furthermore, RForgeTools have been updated to version 0.3-1 which delivers,
+   - a new field "Revision" in the PACKAGES file in all R-Forge contrib directories. You can use e.g. the command available.packages(contriburl = contrib.url("http://r-forge.r-project.org";), fields = "Revision") directly in R to additionally retrieve the SVN revision of the packages on R-Forge,
+   - an improved build/check system (support of R-devel),
+   - and a revision-based package building system leading to faster availability of package binaries.
+   
+   Regards,
+   Stefan
+
+** Mailing List Improvements (2008-11-28)
+
+   Several mailing list issues have been fixed or improved in the last couple of days:
+   
+   - I've fixed a problem with list admin mails not being delivered. As some of you may already have noticed, those notifications now work properly.
+   
+   - As a side effect, mails to &lt;username&gt;@users.r-forge.r-project.org are now properly forwarded.
+   
+   - There is now an option to generate a new password for mailing list administration, in case you cannot recall your old one. Just go to the List -> Admin tab and click "Generate New Password".
+   
+   - Automated commit mails are now truncated to be smaller than 40kB. This way they do not get caught in Mailman's size filter and don't require authorization by the list admin.
+
+   Regards
+   Martin
+
+** Minor Fixes to R-Forge System (2008-11-22)
+Closed the following bugs/requests:
+
+- X11 on Mac (Support #249)
+http://r-forge.r-project.org/tracker/index.php?func=detail&aid=249&group_id=34&atid=194
+- Added support for ssh on port 23 (Feature Req. #108)
+http://r-forge.r-project.org/tracker/index.php?func=detail&aid=108&group_id=34&atid=196
+
+st
+
+** Additional Software on Windows Server (2008-11-18)
+
+   Today I additionally installed
+   - JAVA SE JDK 1.6 Update 10
+   - GTK+ from SourceForge.net
+   on the Windows build/check server.
+
+   Happy forging,
+   Stefan
+
+** Updates on R-Forge (2008-11-10)
+
+   Last week we updated the build/check system. The following changes
+   were made:
+
+*** new field "Revision" in DESCRIPTION files.
+    R-Forge packages now include this field which is automatically generated upon checkout.
+    
+*** log files include additional information 
+    like the R version used to build the package.
+
+*** Bioconductor dependencies are now resolved correctly.
+*** an additional link for each package in the 'R packages' tab points to the CRAN web area of the corresponding package (if it exists).
+
+   Best regards,
+   The R-Forge Administration and Development Team
+
+
