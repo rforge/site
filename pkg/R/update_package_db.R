@@ -21,7 +21,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## Temporarily All packages are installed
   ## TODO: install only those packages which are only available from R-Forge, the rest
   ## should be installed from CRAN or other repositories considering the install order
-  pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], pkgs_installed)
+  pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], rownames(pkgs_installed))
   if(length(pkgs_to_install) >= 2)
     install.packages(pkgs_to_install, lib = lib, contriburl = contrib.url(repository_url), ...)
   if((platform == "Linux") | (platform == "MacOSX")){

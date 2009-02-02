@@ -18,7 +18,7 @@ version_order <- function(x){
 }
 
 ## resolve dependencies helper 
-resolve_dependencies <- function(pkgs,available){
+resolve_dependencies <- function(pkgs, available){
   pkgs_all <- pkgs
   pkgs_old <- NULL
   while(!(length(pkgs_old)==length(pkgs_all))){
@@ -31,7 +31,7 @@ resolve_dependencies <- function(pkgs,available){
   pkgs_all        
 }
 
-.make_suggests_list <- function(pkgs,available){
+.make_suggests_list <- function(pkgs, available){
   if (!length(pkgs))
     return(NULL)
   if (is.null(available))
@@ -52,7 +52,7 @@ resolve_dependencies <- function(pkgs,available){
   x
 }
 
-resolve_suggests <- function(pkgs,available){
+resolve_suggests <- function(pkgs, available){
   pkgs_suggested <- unlist(.make_suggests_list(pkgs,available))
   pkgs_suggested
 }

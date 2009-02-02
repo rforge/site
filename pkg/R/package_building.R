@@ -121,7 +121,12 @@ build_packages <- function(email,
   ## PACKAGE DB UPDATE
 
   ## FIXME: is it sufficient what we are doing here?
-  update_package_library(pkgs, path_to_pkg_src, c(cran_url, bioc_url), path_to_local_library, platform)
+  other_repositories <- NULL
+  if(platform == "Windows"){
+    ## include Brian Ripley's Windows Repository
+    other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
+  }
+  update_package_library(c(pkgs, pkgs_other), path_to_pkg_src, c(cran_url, bioc_url, other_repositories), path_to_local_library, platform)
 
   ## LAST PREPARATION BEFORE PACKAGE BUILD
   
