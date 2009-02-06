@@ -1,0 +1,12 @@
+* R-Forge package dependencies
+   Generally resolve CRAN/Bioc (i.e. stable) package
+   dependencies. Currently R-Forge package dependencies are only
+   installed if there is no corresponding "stable" version
+   available. In the future, packages in R-Forge should be able to
+   force the installation of R-Forge packagies via forcing the version
+   number to be larger than on CRAN. E.g., if package foo on R-Forge
+   depends on bar, bar is available in version 2.1 and on R-Forge in
+   version 2.2, the maintainer of foo should have the possibility to
+   install bar from R-Forge via forcing bar (>=2.2) in the DESCRIPTION
+
+
