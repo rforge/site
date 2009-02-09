@@ -19,11 +19,15 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## install missing packages
   pkgs_installed <- installed.packages(lib = lib)
   ## Temporarily All packages are installed
-  ## TODO: install only those packages which are only available from R-Forge, the rest
-  ## should be installed from CRAN or other repositories considering the install order
+  ## install those packages which are only available from R-Forge, the rest
+  ## should be installed from CRAN or other repositories
+  ## TODO: considering the install order
   pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], rownames(pkgs_installed))
+  pkgs_to_install_rforge <- setdiff(pkgs_dep[["R_FORGE"]], rownames(pkgs_installed))
   if(length(pkgs_to_install) >= 2)
     install.packages(pkgs_to_install, lib = lib, contriburl = contrib.url(repository_url), ...)
+  if(length(pkgs_to_install_rforge) >= 2)
+    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = path_to_pkg_src, ...)
   if((platform == "Linux") | (platform == "MacOSX")){
     ## Close the virtual framebuffer X server 
     close_virtual_X11_fb(pid)
@@ -50,10 +54,10 @@ resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
   pkgs_to_resolve_deps <- unique(c(pkgs, pkgs_suggested))
   pkgs_all <- resolve_dependencies(pkgs_to_resolve_deps, avail)
   pkgs_repos <- setdiff(pkgs_all, pkgs)
-  
+  pkgs_rforge <- setdiff(pkgs_all, rownames(avail_repos))
   DL <- utils:::.make_dependency_list(pkgs_all, avail)
   pkgs_install_order <- utils:::.find_install_order(pkgs_all, DL)
 
   ## return a vector with packages and install order
-  list(ALL = pkgs_all, REPOS = pkgs_repos, INSTALL_ORDER = pkgs_install_order)
+  list(ALL = pkgs_all, REPOS = pkgs_repos, R_FORGE = pkgs_rforge, INSTALL_ORDER = pkgs_install_order)
 }
