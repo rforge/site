@@ -26,8 +26,9 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   pkgs_to_install_rforge <- setdiff(pkgs_dep[["R_FORGE"]], rownames(pkgs_installed))
   if(length(pkgs_to_install) >= 2)
     install.packages(pkgs_to_install, lib = lib, contriburl = contrib.url(repository_url), ...)
+  ## FIXME: hard coded R-Forge tar.gz source dir
   if(length(pkgs_to_install_rforge) >= 2)
-    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = path_to_pkg_src, ...)
+    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = "file:///srv/R/R-Forge/src/contrib", ...)
   if((platform == "Linux") | (platform == "MacOSX")){
     ## Close the virtual framebuffer X server 
     close_virtual_X11_fb(pid)
