@@ -70,12 +70,14 @@ world's largest OSS development website---namely
 \url{http://SourceForge.net/}.
 
 %% Article Outline
-The remainder of this article is organized as follows. First, we present the core
+The remainder of this article is organized as follows. First, we
+present the core 
 features that \R{}-Forge offers to the \R{} community. Second, we
 give a hands-on tutorial on how users and developers can get started with 
 \R{}-Forge. In particular, we illustrate how people
 can register, set up new projects, use \R{}-Forge's SCM
-facilities, provide their packages on \R{}-Forge, host a project-specific website, and
+facilities, provide their packages on \R{}-Forge, host a
+project-specific website, and 
 finally how package maintainer submit a package to the Comprehensive \R{}
 Archive Network (CRAN, \url{http://CRAN.R-project.org/}).
 Eventually, we summarize recent developments and give a brief outlook
@@ -131,11 +133,13 @@ a list of available projects can be displayed using the
 Since starting the platform in early 2007, more
 and more interested users registered their projects on
 \R{}-Forge. Now, after more than 1.5 years of development and testing, nearly
-300 projects and around 800 
+350 projects and around 900 
 users are registered on \R{}-Forge. This and the steadily growing list of
 feature requests show that there is a high demand for centralized source code
 management tools and for releasing prototype code frequently among the
-\R{} community.
+\R{} community. %%Furthermore, based on the support e-mails we can
+%%confidently say that not only developers but also users
+%%(e.g., students) make use of our service.
 
 In the next three sections, we summarize the core features of
 \R{}-Forge and what \R{}-Forge offers to the \R{} community in terms
@@ -159,8 +163,8 @@ has always access to the current version of the project's source
 code. Any of the authorized collaborators can ``checkout'' or
 ``update'' the project
 file structure, make the necessary changes or additions, delete
-files from the current revision and finally ``commit'' changes or additions
-to the repository. More than
+files from the current revision and finally ``commit'' changes or
+additions to the repository. More than
 that, SVN keeps track of the complete history of the project file
 structure. At any point in the development stage it is possible to go
 back to any stage in the history as well as to inspect and restore old
@@ -186,9 +190,11 @@ add new users to the project or release packages directly to CRAN.
 He/she is usually the package 
 maintainer, the project leader or has registered the project originally.
 Other members of a project typically have either the role ``Senior 
-Developer'' or ``Junior Developer'', who  are also permitted to
-commit to the project  
-SVN repository and examine the log files in the \tab{R Packages} tab.
+Developer'' or ``Junior Developer''. The differences between those
+roles are subtle: both are permitted to commit to the project SVN
+repository and examine the log files in the 
+\tab{R Packages} tab, but Senior Developers additionally have
+administrative privileges in several places in the project. 
 When we speak of developers in subsequent sections we refer to project
 members having the rights at least of a Junior Developer.
 
@@ -205,8 +211,8 @@ their source code.
 First, it offers a quality management system similar to 
 that of CRAN. Packages on \R{}-Forge are checked in a
 standardized way on different platforms based on
-\code{R~CMD~check}. The resulting log files can be examined by the
-project developers so that they can improve
+\code{R~CMD~check} at least once daily. The resulting log files can be
+examined by the project developers so that they can improve
 the package to pass all tests on \R{}-Forge and subsequently on CRAN.
 
 Second, bug tracking systems allow users to notify
@@ -272,14 +278,15 @@ page as seen in Figure~\ref{fig:home_page} is presented. Here one can
 \item go to a specific project website either by searching for available
   projects (top middle of the page), by clicking on one of the projects
   listed on the right, or by going through the listing in
-  the \tab{Project Tree} tab.
-\item see some \R{}-Forge specific statistics (how many projects/users
-  are currently registered on \R{}-Forge, project activity percentages,
-  etc.).
+  the \tab{Project Tree} tab,
+%% some \R{}-Forge specific statistics (how many projects/users
+%%  are currently registered on \R{}-Forge, project activity percentages,
+%%  etc.).
 \end{itemize}
 
-Another tab named \tab{My Page} leads registered users
-to their personal page~(Figure~\ref{fig:my_page}).
+Beside other information presented on the home page (like \R{}-Forge
+specific statistics) another tab named \tab{My Page} leads registered
+users to their personal page~(Figure~\ref{fig:my_page}).
 
 \setkeys{Gin}{width=0.95\textwidth}
 \begin{figure*}[th]
@@ -345,8 +352,8 @@ for creating \R{} packages and a project website, respectively.
 The first step after creation of a project is typically to start
 generation of content for one (or more) \R{} package(s) in the \file{pkg}
 directory. Developers can either start committing changes via SVN as usual
-or -- if the package is already version-controlled somewhere else --
-the corresponding parts of the repository including the history can be
+or---if the package is already version-controlled somewhere else---the
+corresponding parts of the repository including the history can be 
 migrated to \R{}-Forge (see the user's manual on how to do this).
 
 The \tab{SCM} tab of a project explains how the corresponding SVN
@@ -354,9 +361,13 @@ repository located at \code{svn://svn.R-Forge.R-project.org/svnroot/foo}
 can be checked out. From
 this URL the sources are checked out either 
 anonymously without write permission (enabled by default) or as
-developer using secure shell 
-authentication (\code{svn+ssh://} instead \code{svn://}) with full
-access to the repository.
+developer using an encrypted authentication method, namely secure
+shell (\code{ssh}). Via this secure protocol (\code{svn+ssh://}
+followed by the registered user name) developers have full access to the
+repository. Typically, the developer is being authenticated via the
+registered password but it is also possible to upload a secure shell
+key (updated hourly) to make use of public/private key
+authentication. To achieve the latter we refer to the user's manual.
 
 To make use of the package building and checking feature
 the package source code has to be put into the \file{pkg} directory
