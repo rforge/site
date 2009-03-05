@@ -1,0 +1,93 @@
+Dear Stefan and Achim,
+
+I now have a review of your paper, appended below, and am happy to accept
+the paper, pending its revision, for publication in The R Journal. I don't
+think that it should be necessary to send the revised paper back to the
+reviewer.
+
+You'll notice that the reviewer makes several suggestions for revising the
+paper, many of these aimed at making the paper more accessible to readers
+not entirely familiar with version control. I think that this is an
+important audience for the paper and I hope that you will move the paper in
+this direction. I understand that doing so will make the paper longer and
+see no problem in that.
+
+I also have a small suggestion: At several points in the text you describe
+web pages in the R-Forge site; of course, I'm familiar with R-Forge and can
+easily visualize these pages, but I expect that readers unfamiliar with
+R-Forge would follow the description more easily if you included "screen
+shots" of one, two, or even three of these pages -- e.g., the R-Forge home
+page, perhaps the packages tab for a project, and a user's "my page."
+
+I hope that you can submit the revised paper in time to be included in the
+next issue of The R Journal, which likely will be published in April or
+early May. You paper will probably appear in a special section on the future
+of R; we hope to have similar sections in all issues published this year and
+to collect them at the end of year.
+
+Thank you for your contribution to The R Journal.
+
+John
+
+-------------------- snip --------------
+
+Review of Collaborative Software Development Using R-Forge
+
+This is a very important paper for the R community, because it describes a
+framework that allows convenient collaboration on R package development. The
+paper is easy to understand in most parts and quite short, so that we can
+hope that many developers will join R forge for doing even more efficient
+work.
+
+Although I'd like to see the paper in R News / the R Journal, there are a
+few things that could and should be improved:
+
+
+- for the whole paper: please re-read you paper and try to guesstimate. 
+Will a novice in source code management understand the main parts?
+
+p. 1, before "Source Code Management": "high demand for centralized 
+source code management tools and for releasing [...] frequently among 
+the R community" - Is it possible to quantify this statement more 
+precisely? How many downloads? I.e., is it really used for deployment? 
+Are there other users (except for the developers) that make use of the 
+repositories?
+
+p. 2, before "Release and Quality Management": Explain the difference 
+"Senior Developer" vs. "Junior Developer".
+
+p. 2,  paragraph starting with "First, ....": How frequently is 'R CMD 
+check' applied, i.e. how frequently are logs updated? Is it possible to 
+check on demand on all platforms?
+
+p. 2, first paragraph in 2nd column: ... given a suer knows where to 
+report bugs... Do users check R-forge for bug repositories are do they 
+send bug reports to the authors/maintainers by looking into DESCRIPTION 
+files?
+
+p. 2, first item in "Additional features": "...R.project.org/)", remove 
+last parenthesis  (or add a starting one)
+
+p. 2-4 (How to Get Started): Can you please stress the "How to Get" ssh 
+keys and "How to Get" avn working a bit more detailed, at least in a way 
+that suggests to *really* read the corresponding user manual on R-Forge? 
+You may want to say hat it is not difficult, but that several steps are 
+required and people should not give up.
+
+p. 3, columns 1, very first item ("examine ...") seems not to be of high 
+interest (except for telling us this is a statistics journal ;-))
+
+p. 3, mid of column 2: "svn+ssh://" might be extremely cryptic for many 
+readers, perhaps invest a few more lines to explain it in more detail.
+
+p. 3, last paragraph before "Further Steps": What exactly happens on 
+"Submit this package to CRAN"? Is the recent tar.gz version submitted or 
+the version you have committed to the svn repository one second before?
+If the former: How can you submit the recent svn version that has been 
+updated seconds before? For how much time do you have to wait?
+
+p. 4, column 1, item starting "The R package RForgeTools" as well as 
+cited Theuﬂl, 2008 reference:
+I cannot find any package called RForgeTools, neither in 
+http://R-Forge.R-Project.org/projects/sites nor in any R-Forge repository.
+
