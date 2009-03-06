@@ -1,5 +1,17 @@
-export("check_packages")
-export("build_packages")
+importFrom("utils", "head")
+importFrom("utils", "tail")
+
+export("check_packages",
+       "build_packages",
+       "rforge_stats_read_logs"       
+       )
+
+S3method("print", "rforge_log")
+S3method("tail", "rforge_log")
+S3method("head", "rforge_log")
+S3method("[", "rforge_log")
+S3method("as.data.frame", "rforge_log")
+
 ## export("get_package_version_from_sources")
 ## export("build_tarball_from_sources")
 ## export("build_binary_from_sources")
