@@ -1,4 +1,23 @@
-## Various utilities
+## Constructor for R-Forge control files
+R_Forge_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
+                            path_to_local_texmf, path_to_local_library,
+                            stoplist, 
+                            mail_domain_name_of_sender, mail_relay_server,
+                            mail_programme = "mail",
+                            path_to_check_dir = "",
+                            cpu_time_limit = 600){
+  structure(list(path_to_pkg_src  = path_to_pkg_src,
+                 path_to_pkg_log  = path_to_pkg_log,
+                 path_to_pkg_root = path_to_pkg_root,
+                 path_to_local_texmf = path_to_local_texmf,
+                 path_to_local_library = path_to_local_library,
+                 stoplist = stoplist,
+                 mail_domain_name_of_sender = mail_domain_name_of_sender,
+                 mail_relay_server = mail_relay_server,
+                 mail_programme = mail_programme,
+                 cpu_time_limit = cpu_time_limit),
+            class = "R-Forge_control")
+}
 
 ## Function definition of version ordering functions
 ## given two version number, this function returns the order of them

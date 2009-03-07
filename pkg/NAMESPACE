@@ -3,6 +3,7 @@ importFrom("utils", "tail")
 
 export("check_packages",
        "build_packages",
+       "R_Forge_control",
        "rforge_stats_read_logs"       
        )
 
