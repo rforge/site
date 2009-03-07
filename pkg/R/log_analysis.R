@@ -62,8 +62,14 @@ head.rforge_log <- function(x, ...){
 
 as.data.frame.rforge_log <- function(x, ...){
   entries <- get_entries(prepare_entries(x$content))
-  tab <- as.data.frame( matrix( unlist(entries), ncol = 10, byrow= TRUE), ... )
-  colnames(tab) <- c("IP", "Date", "TZ", "HTTP_Method", "Path", "HTTP_Version", "HTTP_Code", "Size", "Connected_from", "Client")
+  tab <- as.data.frame( matrix( unlist(entries), ncol = 10, byrow= TRUE), stringsAsFactors = FALSE, ... )
+  colnames(tab) <- c("IP", "Date", "TZ", "HTTP_Method", "Path",
+                     "HTTP_Version", "HTTP_Code", "Size", "Connected_from", "Client")
+  tab[["Date"]] <- as.Date(tab[["Date"]], "%d/%b/%Y:%T")
+  tab[["HTTP_Method"]] <- as.factor(tab[["HTTP_Version"]])
+  tab[["HTTP_Version"]] <- as.factor(tab[["HTTP_Version"]])
+  tab[["HTTP_Code"]] <- as.factor(tab[["HTTP_Code"]])
+  tab[["Size"]] <- as.integer(tab[["Size"]])
   tab
 }
 
