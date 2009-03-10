@@ -12,9 +12,12 @@
 
 %% Authornames: R-Forge Team, R-Forge Administration Team, R-Forge
 %% Support Team, R-Forge Maintenance Team, synonym for team -> crew
-\newcommand{\RFORGE}{R-Forge Administration and Development Team}
+\newcommand{\RFORGE}{\proglang{R}-Forge Administration and Development Team}
 
-\title{R-Forge User's Manual, BETA}
+%% new command for R-Forge tabs
+\newcommand{\tab}[1]{{\normalfont\textit{#1}}}
+
+\title{\proglang{R}-Forge User's Manual, BETA}
 \author{\RFORGE}
 %\email{R-Forge@R-project.org}
 %\institute{Department of Statistics and Mathematics\newline
@@ -35,11 +38,11 @@
 
 \begin{titlepage}
 
-  {\LARGE \raggedleft \textbf{R-Forge User's Manual, {\large BETA}}}\\
+  {\LARGE \raggedleft \textbf{\proglang{R}-Forge User's Manual, {\large BETA}}}\\
 %%  \vspace*{0.5cm}
   \rule{\linewidth}{1.5mm}
   \begin{flushright}
-  \textbf{SVN Revision: 47, \today}\\
+  \textbf{SVN Revision: 102, \today}\\
   \end{flushright}
 
   \vspace*{\fill}
@@ -110,7 +113,7 @@ ETH Z\"urich.
 Many \proglang{R} package
 developers around the world use similar infrastructure built upon their own
 solutions as collaborative development is a key factor for a lot of
-successfull open source projects. Therefore the \textbf{R-project}
+successful open source projects. Therefore the \textbf{R-project}
 wants to provide infrastructure not only
 for the \proglang{R} Development Core Team but also for the entire
 \proglang{R} community. 
@@ -123,33 +126,33 @@ closely related to the most famous of such platforms---the
 world's largest open source software (OSS) development website---namely
 \url{http://SourceForge.net}. What is different is the provided set of
 tools with a strong focus on the need of the \proglang{R}
-community. All in all, R-Forge is a place where all \proglang{R}
+community. All in all, \proglang{R}-Forge is a place where all \proglang{R}
 developers and users can come together and exchange 
 their knowledge. Joining this community service gives you access to
 all we have to offer. 
 
-Basically, R-Forge is based on 
+Basically, \proglang{R}-Forge is based on 
 GForge~\citep{forge:copeland_et_al:2006} which is a framework
 integrating various tools like 
 SVN for collaborative work on source code, mailing lists, bug tracking
-etc. into one platform. On R-Forge all work is organized in
+etc. into one platform. On \proglang{R}-Forge all work is organized in
 the same entity namely a ``Project''. In these projects it is possible
 to host one or more packages. The main advantage is, that your package
 is going to be built and checked every day 
 not only with the latest patched version of \proglang{R} but also with
 the release candidate just before a new version of \proglang{R} is to be
 released. It is not necessary anymore, that developers have to set up
-a local platform-independend build and check environment. Furthermore,
-packages passing the quality management system on R-Forge can be
+a local platform-independent build and check environment. Furthermore,
+packages passing the quality management system on \proglang{R}-Forge can be
 released to CRAN in a standardized way.
 
-Additionally, R-Forge provides other tools especially for larger
+Additionally, \proglang{R}-Forge provides other tools especially for larger
 projects to coordinate the work between project members and to
 communicate with their user base.
 
 \begin{itemize}
 \item Project websites are a way for developers to present their work
-  on a subdomain of R-Forge (E.g.,
+  on a subdomain of \proglang{R}-Forge (E.g.,
   \url{http://foo.R-forge.R-project.org}). It is also possible to
   offer a link to another website on the project summary page instead. 
 \item Mailing lists: By default one is automatically created when setting up a
@@ -179,7 +182,7 @@ communicate with their user base.
 
 In this manual we present all relevant steps to get
 started with R-Forge. If you need further help or have
-comments regarding R-Forge please send an email to
+comments regarding \proglang{R}-Forge please send an email to
 \email{R-Forge@R-project.org}. For a more detailed
 documentation regarding the underlying GForge system
 see~\cite{forge:copeland_et_al:2006}. 
@@ -218,7 +221,7 @@ following steps:
   member of. You can ``search'' for the project (top middle side of the
   browser window) or you click on one of the projects showing in the
   ``Project Tree''. The latter is an alphabetically sorted list of all
-  \textbf{R-Forge} projects.
+  \proglang{R}-Forge projects.
 \item Then you go to the project summary page (should be the default
   entry point). There is a window on the right side called
   ``Developer Info''. To join this project you need the permission of
@@ -232,21 +235,75 @@ following steps:
 \subsection{Registering a New Project}
 \label{sec:newproject}
 
-Registering a new project is easy: Go to the R-Forge website, login and
+Registering a new project is easy: Go to the \proglang{R}-Forge website, login and
 go to ``My Page'' section. You have a ``Register Project'' link in the
 menu at the top of your page. Now fill in the form and submit your
-project. After approval of the project by the R-Forge admins  you will
+project. After approval of the project by the \proglang{R}-Forge admins  you will
 be notified via email and you will be able to start with your project
 on R-Forge.
 
 \section{Source Code Management}
 \label{sec:scm}
 
-\subsection{How to get SVN to work}
+\subsection{Introduction}
+
+When carrying out software projects, source files change over time,
+new files get created and old files deleted. Typically, several authors
+work on several computers on the same and/or different files and keeping
+track of every change can become a tedious task. In the open source
+community, the general solution to this problem is to use version
+control, typically provided by the majority of SCM tools. For this
+reason \proglang{R}-Forge utilizes SVN to facilitate the developer's
+work when creating software.
+
+A central repository ensures that the developer
+has always access to the current version of the project's source
+code. Any of the authorized collaborators can ``checkout''
+(i.e. download) or ``update'' the project
+file structure, make the necessary changes or additions, delete
+files from the current revision and finally ``commit'' changes or
+additions to the repository. More than
+that, SVN keeps track of the complete history of the project file
+structure. At any point in the development stage it is possible to go
+back to any stage in the history as well as to inspect and restore old
+files. This is called version control as every stage automatically is
+assigned a unique version number which increases over time. 
+
+%% SCM on R-Forge
+On \proglang{R}-Forge such a version-controlled repository is automatically
+created for each project. To get started, the project members just
+have to install the client of their choice (e.g., Tortoise SVN on
+Windows or svnX on 
+Mac OSX) and check out the repository. In addition to the inherent
+backup of every version within the repository a backup of the whole
+repository is generated daily. 
+
+%% Rights management on R-Forge
+A rights management system assures that, by default, anonymous users
+have read access and developers have write access to the data associated with 
+a certain project on \proglang{R}-Forge. More precisely, registered users can
+be granted one of several roles: e.g., the ``Administrator'' has
+all rights including the right to 
+add new users to the project or release packages directly to CRAN.
+He/she is usually the package 
+maintainer, the project leader or has registered the project originally.
+Other members of a project typically have either the role ``Senior 
+Developer'' or ``Junior Developer'' which both have permission to
+commit to the project SVN repository and examine the log files in the 
+\tab{R Packages} tab. The differences between those
+roles are subtle, e.g., senior developers additionally have administrative
+privileges in several places in the project.  
+When we speak of developers in subsequent sections we refer to project
+members having the rights at least of a junior developer.
+
+%% Note: the following section is referred to by the Rnews article as
+%% 3.2
+
+\subsection{How to Get SVN to Work}
 \label{sec:scmhowto}
 
-\textbf{R-Forge} uses
-\textbf{Subversion}~(SVN, \url{http://subversion.tigris.org}) for
+\proglang{R}-Forge uses \textbf{Subversion}~(SVN,
+\url{http://subversion.tigris.org}) for 
 source code management.
 Therefore you need an SVN client (e.g. ``Tortoise SVN'' on
 windows machines,~\url{http://tortoisesvn.tigris.org}). For security
@@ -267,7 +324,7 @@ on\newline
   step~5). But for convenience purposes (avoiding password 
   queries) it is probably better to
   generate an SSH keypair and upload the \textbf{public} 
-  key to \textbf{R-Forge}:
+  key to \proglang{R}-Forge:
   \begin{itemize}
   \item Download and execute \texttt{puttygen.exe}.
   \item leave ssh-2 rsa marked and click on ``generate'' (make some
@@ -322,7 +379,8 @@ on\newline
   queries) it is probably better to upload an SSH keypair: Generate
   and save the keys 
   using \texttt{ssh-keygen} on the command line or use your existing keypair.  
-\item Upload the \textbf{public} key to \textbf{R-Forge} using the webplatform: Go to
+\item Upload the \textbf{public} key to \proglang{R}-Forge using the following
+  website: Go to 
   ``My Page'' and then click on ``Account maintenance''. At the bottom
   of this page you click on ``edit keys'' in the ``Shell Account
   Information'' window (\textbf{Important note:} you need to be a project admin
@@ -364,7 +422,7 @@ use 'ssh-keygen' at the terminal (a keychain without passphrase is
 required to use SCPlugin, see step~4. In SSHKeychain, select 'Agent'
 - 'Add single key...' and select the key you just generated. 
 
-\item Upload the public key to \textbf{R-Forge} as explained in
+\item Upload the public key to \proglang{R}-Forge as explained in
   section~\ref{sec:scm-unix}
   Unix. The public key is in a file name [keyfile].pub in the same
   directory as your private key. If you used default directory and
@@ -375,7 +433,7 @@ required to use SCPlugin, see step~4. In SSHKeychain, select 'Agent'
 
   \code{cp ~/.ssh/id\_rsa.pub ~/Desktop/id\_rsa.pub}
   
-  Then, upload this file to \textbf{R-Forge}.
+  Then, upload this file to \proglang{R}-Forge.
 
 \item Wait until the next full hour so that the key gets activated.
 
@@ -398,17 +456,17 @@ software are proposed there.
 
 \section{R Package Development}
 
-R-Forge aims to provide a platform for collaborative development of
+\proglang{R}-Forge aims to provide a platform for collaborative development of
 \proglang{R}~packages, \proglang{R}-related software or further
 projects. Especially providing good infrastructure for the development of
 \proglang{R}~packages is a main mission of the \RFORGE{}. Packages
 committed to the SVN repositories are built and checked on multiple
-plattforms, including Linux, Windows (32 bit) and Mac~OS. 
+platforms, including Linux, Windows (32 bit) and Mac~OS. 
 
 \subsection{Building and Checking}
 To build your packages, simply place your package or, alternatively,
 multiple packages in the
-\textbf{\texttt{pkg/}} directory in your SVM repository (see 
+\textbf{\texttt{pkg/}} directory in your SVN repository (see 
 Section~\ref{sec:scmhowto} on how to achieve this) and check it
 in. Typically this directory contains either the R package with the usual
 \texttt{DESCRIPTION} file and \texttt{R/}, \texttt{man/},
@@ -419,16 +477,16 @@ putting the packages in subdirectories, e.g. \texttt{pkg/foo/},
 \texttt{pkg/bar/}, etc.
 
 Packages are automatically checked out every night (Central European
-Time), built and checked on several plattforms (make sure that the
+Time), built and checked on several platforms (make sure that the
 \texttt{DESCRIPTION} files are well-formed and contain a proper 
 package name, otherwise your package may not get checked out). All
 packages successfully checked out appear on the project home page in
 the \proglang{R} packages tab. Project members also have access to the
-\textbf{check and build logs} on all supported plattforms.  
+\textbf{check and build logs} on all supported platforms.  
 
 Furthermore, these packages are made available in a CRAN-style
 repository---the
-R-Forge package repository. This allows packages to be installed simply by
+\proglang{R}-Forge package repository. This allows packages to be installed simply by
 typing \texttt{install.packages("foo", repos = "http://R-Forge.R-project.org")}
 on the \proglang{R} command prompt. 
 
@@ -440,13 +498,13 @@ To install dependencies from other repositories as well use e.g.,
 Developers who wish to use their own external package repository can
 use the \textbf{external SVN} feature in the R~packages Admin~tab
 (follow the instructions on the site). Please note that only
-repositories with anonymus access and using the R-Forge repository
+repositories with anonymous access and using the \proglang{R}-Forge repository
 structure (i.e., \texttt{pkg} is available in the repositories) are
 supported. It is possible to use 
 external and internal SVN repositories side-by-side. Regardless of
 origin, all packages will show up on the R packages tab.
 
-If you decided to migrate your repository to R-Forge please go to
+If you decided to migrate your repository to \proglang{R}-Forge please go to
 Section~\ref{sec:svnmigration}.
 
 \subsection{Submit Packages to CRAN}
@@ -458,9 +516,9 @@ of the package to achieve this.
 \section{Additional Features}
 
 \subsection{Project Homepage}
-Each project on R-Forge has its own homepage with the URL
+Each project on \proglang{R}-Forge has its own homepage with the URL
 \url{http://foo.r-forge.r-project.org/} where \texttt{foo} is the
-project's unix name. Use the
+project's Unix name. Use the
 pre-defined \textbf{\texttt{www}} directory in your SVN repository to
 create or modify your homepage. Note that it will be checked out
 daily, so please take into consideration that it will not be available
@@ -473,7 +531,7 @@ only html or xhtml will be allowed in the future.
 \label{sec:scmoptions}
 Two options can be accessed through the SCM Admin tab:
 \begin{enumerate}
-\item{Enable anonymus access} Self-explanatory. If disabled, only
+\item{Enable anonymous access} Self-explanatory. If disabled, only
   project members can access the SVN repository and  \textbf{packages
     will not be checked out for automatic building}. The project
   homepage will still be available though. Default is enabled.
@@ -486,7 +544,7 @@ Two options can be accessed through the SCM Admin tab:
 
 
 \subsection{Mailing Lists}
-R-Forge provides a mailing list service for all projects accessible
+\proglang{R}-Forge provides a mailing list service for all projects accessible
 through the Lists tab.  
 
 A list named \texttt{foo-commits} where \texttt{foo} is the
@@ -502,13 +560,15 @@ are not included in the search index.
 % TODO: Reference for swish
 
 
+%% The following Section is referred ta aas Section 6 in the Rnews article
 \section{Migration from an Existing CVS/SVN Repository}
 \label{sec:svnmigration}
 
 Steps to include the complete history of your current repository in
-your R-Forge project:
+your \proglang{R}-Forge project:
+
 \begin{enumerate}
-\item Please register a project on R-Forge first.
+\item Register a project on \proglang{R}-Forge first.
 \item If you use CVS please convert from CVS to SVN (see e.g.,
   \url{http://www.xs4all.nl/~carlo17/svn/cvs2svn.html} on how to do
   this).
@@ -519,41 +579,37 @@ your R-Forge project:
 \item Send it to us: If the dump file is smaller than 10 MB you can
   send it via email to \email{R-Forge@R-project.org} otherwise you have to
   provide it somewhere for download. 
-\item The last step probably includes to \code{svn move} your package
-  to the /pkg directory.
+\item The last step includes to \code{svn move} your package
+  to the /pkg directory if this has not been done automatically.
 \end{enumerate}
 
 
 %% TODO:
-If the source code of the package is in a subdirectory of a
-project. Add to step 3 the following procedure to filter out the
-desired code:
-This is a HowTo of how one can extract a given subdirectory of a
-repository.
-
-the subdirectory (package) to extract is named 'foo'
-
-\begin{enumerate}
-\item first dump original repository 'repo' to e.g., repo.dump
-
-\item then use svndumpfilter to extract a certain directory recursively\\
-  \code{cat repo.dump | svndumpfilter include 'path/to/foo'
-    --drop-empty-revs --renumber-revs  > foo_repo.dump} 
-
-\item create temporary repository e.g. 'foo_tmp' and load 'foo_repo.dump' into it\\
-  \code{cat foo_repo.dump | svnadmin load foo_tmp}
-
-\item check out temporary repository\\
-  \code{svn co file:///path/to/foo_tmp foo_temp_co}
-
-\item add missing directories to foo_temp\\
-  \code{cd foo_temp_co}\\
-  \code{mkdir -p path/to/foo  ## path to 'foo' in original repository 'repo'}\\
-  \code{svn add path/}\\
-  \code{svn ci -m "transition revision"}
-
-\item dump extracted svn rep and send it to \email{R-Forge@R-project.org}\\
-\code{svnadmin dump /path/to/foo_tmp > foo.dump}
+%%If the source code of a package (e.g., \pkg{foo}) is in a subdirectory
+%%of an existing SVN repository add to step~3 the following procedure to
+%%filter out the desired parts:
+%%
+%%\begin{enumerate}
+%%\item first dump original repository 'repo' to e.g., repo.dump
+%%
+%%\item then use svndumpfilter to extract a certain directory recursively\\
+%%  \code{cat repo.dump | svndumpfilter include 'path/to/foo'
+%%    --drop-empty-revs --renumber-revs  > foo_repo.dump} 
+%%
+%%\item create temporary repository e.g. 'foo_tmp' and load 'foo_repo.dump' into it\\
+%%  \code{cat foo_repo.dump | svnadmin load foo_tmp}
+%%
+%%\item check out temporary repository\\
+%%  \code{svn co file:///path/to/foo_tmp foo_temp_co}
+%%
+%%\item add missing directories to foo_temp\\
+%%  \code{cd foo_temp_co}\\
+%%  \code{mkdir -p path/to/foo  ## path to 'foo' in original repository 'repo'}\\
+%%  \code{svn add path/}\\
+%%  \code{svn ci -m "transition revision"}
+%%
+%%\item dump extracted svn rep and send it to \email{R-Forge@R-project.org}\\
+%%\code{svnadmin dump /path/to/foo_tmp > foo.dump}
 %% END TODO
 
 

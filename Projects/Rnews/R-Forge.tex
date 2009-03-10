@@ -263,8 +263,8 @@ information is provided in the user's manual
 \setkeys{Gin}{width=0.95\textwidth}
 \begin{figure*}[th]
 \centering
-\includegraphics{rforge_main_snapshot.png}
-\caption{Home page of \R{}-Forge on 2009-03-06}
+\includegraphics{rforge_main_snapshot_modified.png}
+\caption{Home page of \R{}-Forge on 2009-03-10}
 \label{fig:home_page}
 \end{figure*}
 
@@ -356,7 +356,7 @@ generation of content for one (or more) \R{} package(s) in the \file{pkg}
 directory. Developers can either start committing changes via SVN as usual
 or---if the package is already version-controlled somewhere else---the
 corresponding parts of the repository including the history can be 
-migrated to \R{}-Forge (see the user's manual on how to do this).
+migrated to \R{}-Forge (see Section~6 of the user's manual on how to do this).
 
 The \tab{SCM} tab of a project explains how the corresponding SVN
 repository located at \code{svn://svn.R-Forge.R-project.org/svnroot/foo}
@@ -369,7 +369,8 @@ followed by the registered user name) developers have full access to the
 repository. Typically, the developer is being authenticated via the
 registered password but it is also possible to upload a secure shell
 key (updated hourly) to make use of public/private key
-authentication. To achieve the latter we refer to the user's manual.
+authentication. Section~3.2 of the user's manual explains this process
+in more detail.
 
 To make use of the package building and checking feature
 the package source code has to be put into the \file{pkg} directory
@@ -401,17 +402,17 @@ copied to \url{ftp://CRAN.R-project.org/incoming/}. Note that packages
 are built once daily, i.e., the latest source package does not
 necessarily reflect the latest revision committed to the SVN. 
 
-Figure~\ref{fig:rpackages_tab} shows the top part of the \tab{R
-  Packages} tab of the Rglpk project as one of the project
-administrators would see it. Depending on whether you are a member of
-the project or not and your rights you will see only parts of the
-information provided for each package (see above).
+Figure~\ref{fig:rpackages_tab} shows the \tab{R Packages} tab of the
+tm project (\url{http://R-Forge.R-project.org/projects/tm/}) as one of
+the project administrators would see it. Depending on whether you are
+a member of the project or not and your rights you will see only parts
+of the information provided for each package (see above).
 
 \setkeys{Gin}{width=0.95\textwidth}
 \begin{figure*}[th]
 \centering
-\includegraphics{rforge_rglpk_packages_snapshot_developer.png}
-\caption{\tab{R Packages} tab of the Rglpk project}
+\includegraphics{rforge_tm_packages_developer_snapshot.png}
+\caption{\tab{R Packages} tab of the tm project}
 \label{fig:rpackages_tab}
 \end{figure*}
 
@@ -486,7 +487,7 @@ or under development include
 \item a re-organized tracker more compatible to \R{} package
   development and,
 \item an update of the underlying GForge system to its successor
-  FusionForge~(\url{http://fusionforge.org/}).
+  FusionForge~(\url{http://FusionForge.org/}).
 \end{itemize}
 
 For suggestions, problems, feature requests, and other questions regarding

@@ -1,3 +1,167 @@
+<My reply to John>
+
+Dear John,
+
+We just finished to revise our paper "Collaborative Software
+Development Using R-Forge". I'm sending you attached the tex file and
+the reprint in pdf form of the paper. Thank you for your suggestion to
+add a few screenshots. We were not sure initially if we shall include
+them or not. I hope 6 pages instead of 4 still fits with your plans
+for the next issue. 
+
+We would be glad if you forward our replies to the reviewer as he/she
+might be interested in it.
+
+Thanks a lot for your effort in editing the R Journal.
+
+Best,
+Stefan
+
+
+<attachment>
+
+<comment>
+for the whole paper: please re-read you paper and try to guesstimate. 
+Will a novice in source code management understand the main parts?
+</comment>
+<reply>
+We made some parts clearer by either defining SCM/SVN specific terms
+more precisely, see e.g., p. 2 sec. paragraph [...] can "checkout"
+*(i.e. download)* [...], or by adding pointers to certain Sections in
+the User's manual (e.g., p.4. "SCM and R Packages" end of first
+paragraph/end of second paragraph". Furthermore, a colleague who never
+used SCM Tools but uses R from time to time managed to get the main
+parts after revising the paper.
+</reply>
+
+<comment>
+p. 1, before "Source Code Management": "high demand for centralized 
+source code management tools and for releasing [...] frequently among 
+the R community" - Is it possible to quantify this statement more 
+precisely? How many downloads? I.e., is it really used for deployment? 
+Are there other users (except for the developers) that make use of the 
+repositories?
+</comment>
+<reply>
+We can savely say that R-Forge is used for deployment. First, e.g.,
+quite a lot of interested people ask questions like: "What should I do
+to use R-Forge for my lectures" or "How can I compile a mac binary
+using your service". Second, after examining the webserver logs we
+found out that around 1500 packages get downloaded per week (40 %
+directly from R and 60% via Browser and tools). Nevertheless, we feel
+that adding e.g., package download statistics to the paper would not
+be appropriate.
+</reply>
+
+<comment>
+p. 2, before "Release and Quality Management": Explain the difference 
+"Senior Developer" vs. "Junior Developer".
+</comment>
+<reply>
+We added one and a half sentences point out similarities and differences.
+</reply>
+
+<comment>
+p. 2,  paragraph starting with "First, ....": How frequently is 'R CMD 
+check' applied, i.e. how frequently are logs updated? Is it possible to 
+check on demand on all platforms?
+</comment>
+<reply>
+added 'at least once daily'
+</reply>
+
+<comment>
+p. 2, first paragraph in 2nd column: ... given a suer knows where to 
+report bugs... Do users check R-forge for bug repositories are do they 
+send bug reports to the authors/maintainers by looking into DESCRIPTION 
+files?
+</comment>
+<reply>
+We can't say that for sure. Experience shows us that bug trackers are
+used rather sparely. The main work flow is to directly contact the
+author in case of bugs or requests. But this could change in the
+future. For the site administration I can say that trackers and email
+are equally used.
+</reply>
+
+<comment>
+p. 2, first item in "Additional features": "...R.project.org/)", remove 
+last parenthesis  (or add a starting one)
+</comment>
+<reply>
+fixed.
+</reply>
+<comment>
+p. 2-4 (How to Get Started): Can you please stress the "How to Get" ssh 
+keys and "How to Get" avn working a bit more detailed, at least in a way 
+that suggests to *really* read the corresponding user manual on R-Forge? 
+You may want to say hat it is not difficult, but that several steps are 
+required and people should not give up.
+
+and
+
+p. 3, mid of column 2: "svn+ssh://" might be extremely cryptic for many 
+readers, perhaps invest a few more lines to explain it in more detail.
+</comment>
+<reply>
+We invested a few more lines to explain svn+ssh and added a pointer to
+the user's manual.
+</reply>
+
+<comment>
+p. 3, columns 1, very first item ("examine ...") seems not to be of high 
+interest (except for telling us this is a statistics journal ;-))
+</comment>
+<reply>
+We dropped this statement and we added an item 
+"examine the latest news and changes" which should picture the two
+boxes "News" and "Statistics". 
+</reply>
+
+<comment>
+p. 3, last paragraph before "Further Steps": What exactly happens on 
+"Submit this package to CRAN"? Is the recent tar.gz version submitted or 
+the version you have committed to the svn repository one second before?
+If the former: How can you submit the recent svn version that has been 
+updated seconds before? For how much time do you have to wait?
+</comment>
+<reply>
+We rewrote that paragraph now saying:
+[...] Submit this package to CRAN in the
+R Packages tab. Upon confirmation, a message will
+be sent to CRAN@R-project.org and the latest successfully
+built source package (the '.tar.gz') is automatically
+copied to ftp://CRAN.R-project.org/
+incoming/. Note that packages are built once daily, i.e., the latest
+source package does not necessarily reflect the latest revision
+committed to the SVN.
+</reply>
+
+<comment>
+p. 4, column 1, item starting "The R package RForgeTools" as well as 
+cited Theuﬂl, 2008 reference:
+I cannot find any package called RForgeTools, neither in 
+http://R-Forge.R-Project.org/projects/sites nor in any R-Forge repository.
+</comment>
+<reply>
+The corresponding SCM repository
+(http://r-forge.r-project.org/projects/site/) was hidden for anonymous
+users. The project is now open to the public. The package can be
+found on http://r-forge.r-project.org/R/?group_id=34.
+</reply>
+
+</attachment>
+
+Thanks very much for all your comments. They helped us to considerably
+improve the paper.
+
+Best regards,
+Stefan Theussl and Achim Zeileis
+
+</My reply to John>
+
+<John Fox>
+
 Dear Stefan and Achim,
 
 I now have a review of your paper, appended below, and am happy to accept
@@ -29,7 +193,11 @@ Thank you for your contribution to The R Journal.
 
 John
 
--------------------- snip --------------
+</John Fox>
+
+
+
+<anonymous reviewer>
 
 Review of Collaborative Software Development Using R-Forge
 
@@ -91,3 +259,4 @@ cited Theuﬂl, 2008 reference:
 I cannot find any package called RForgeTools, neither in 
 http://R-Forge.R-Project.org/projects/sites nor in any R-Forge repository.
 
+</anonymous reviewer>
