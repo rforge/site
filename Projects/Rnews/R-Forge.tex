@@ -97,10 +97,11 @@ a CRAN-style repository for hosting development releases of \R{}
 packages as well as a quality management system similar to that of
 CRAN.
 Packages hosted on \R{}-Forge are provided in source form as well as
-in binary form for Mac OSX and Windows and can be downloaded from the
+in binary form for Mac OSX and Windows. They can be downloaded from the
 website of the corresponding project on \R{}-Forge or installed
 directly in \R{} via
-\code{install.packages("foo", repos = "http://R-Forge.R-project.org")}.
+\code{install.packages("foo", repos = "http://R-Forge.R-project.org")}
+where \pkg{foo} is the name of the package.
 
 %%Tabs can be distinguished in main
 %%tabs (currently Home, My Page and Project Tree) and project specific
@@ -132,8 +133,8 @@ a list of available projects can be displayed using the
 
 Since starting the platform in early 2007, more
 and more interested users registered their projects on
-\R{}-Forge. Now, after more than 1.5 years of development and testing, nearly
-350 projects and around 900 
+\R{}-Forge. Now, after more than 2 years of development and testing, around
+350 projects and more than 900 
 users are registered on \R{}-Forge. This and the steadily growing list of
 feature requests show that there is a high demand for centralized source code
 management tools and for releasing prototype code frequently among the
@@ -160,8 +161,8 @@ software.
 
 A central repository ensures that the developer
 has always access to the current version of the project's source
-code. Any of the authorized collaborators can ``checkout'' or
-``update'' the project
+code. Any of the authorized collaborators can ``checkout''
+(i.e. download) or ``update'' the project
 file structure, make the necessary changes or additions, delete
 files from the current revision and finally ``commit'' changes or
 additions to the repository. More than
@@ -190,13 +191,13 @@ add new users to the project or release packages directly to CRAN.
 He/she is usually the package 
 maintainer, the project leader or has registered the project originally.
 Other members of a project typically have either the role ``Senior 
-Developer'' or ``Junior Developer''. The differences between those
-roles are subtle: both are permitted to commit to the project SVN
-repository and examine the log files in the 
-\tab{R Packages} tab, but Senior Developers additionally have
-administrative privileges in several places in the project. 
+Developer'' or ``Junior Developer'' which both have permission to
+commit to the project SVN repository and examine the log files in the 
+\tab{R Packages} tab. The differences between those
+roles are subtle, e.g., senior developers additionally have administrative
+privileges in several places in the project.  
 When we speak of developers in subsequent sections we refer to project
-members having the rights at least of a Junior Developer.
+members having the rights at least of a junior developer.
 
 
 \subsection{Release and Quality Management}
@@ -263,7 +264,7 @@ information is provided in the user's manual
 \begin{figure*}[th]
 \centering
 \includegraphics{rforge_main_snapshot.png}
-\caption{Home page of \R{}-Forge}
+\caption{Home page of \R{}-Forge on 2009-03-06}
 \label{fig:home_page}
 \end{figure*}
 
@@ -274,19 +275,19 @@ page as seen in Figure~\ref{fig:home_page} is presented. Here one can
 \item login,
 \item register a user or a project,
 \item download the documentation,
-\item read the latest news,
+\item examine the latest news and changes,
 \item go to a specific project website either by searching for available
   projects (top middle of the page), by clicking on one of the projects
   listed on the right, or by going through the listing in
-  the \tab{Project Tree} tab,
+  the \tab{Project Tree} tab.
 %% some \R{}-Forge specific statistics (how many projects/users
 %%  are currently registered on \R{}-Forge, project activity percentages,
 %%  etc.).
 \end{itemize}
 
-Beside other information presented on the home page (like \R{}-Forge
-specific statistics) another tab named \tab{My Page} leads registered
-users to their personal page~(Figure~\ref{fig:my_page}).
+Registered users can access their personal
+page via the tab named \tab{My Page}. Figure~\ref{fig:my_page} shows
+the personal page of one of the authors.
 
 \setkeys{Gin}{width=0.95\textwidth}
 \begin{figure*}[th]
@@ -312,7 +313,8 @@ new projects, are available to logged-in users.
 
 There are two possibilities to register a project: Clicking on
 \tab{Register Your Project} on the home page or by going to the \tab{My
-Page} tab and clicking on \tab{Register Project}. Both links lead to a
+Page} tab and clicking on \tab{Register Project}~(see
+Figure~\ref{fig:my_page} below the main tabs). Both links lead to a
 form which has to be filled out in order to finish the registration
 process. In the text field ``Project Public Description'' the
 registrant is supposed to enter a short and concise description of the
@@ -391,15 +393,16 @@ installed directly in \R{} using
 process on different platforms. 
 
 To release a package to CRAN the project administrator clicks on
-\tab{Submit this package to CRAN} in the \tab{R Packages} tab. After
-confirmation that a message will be sent to \email{CRAN@R-project.org}
-the latest successfully built package (the .tar.gz) is automatically
-copied to \url{ftp://CRAN.R-project.org/incoming/}. One has to
-consider that packages are built once daily, i.e., the latest built
-package does not necessarily contain the latest sources from the SVN.
+\tab{Submit this package to CRAN} in the \tab{R Packages} tab. Upon
+confirmation, a message will be sent to \email{CRAN@R-project.org} and
+the latest successfully built source package (the \file{.tar.gz}) is
+automatically 
+copied to \url{ftp://CRAN.R-project.org/incoming/}. Note that packages
+are built once daily, i.e., the latest source package does not
+necessarily reflect the latest revision committed to the SVN. 
 
 Figure~\ref{fig:rpackages_tab} shows the top part of the \tab{R
-  Packages} tab of the Rmetrics project as one of the project
+  Packages} tab of the Rglpk project as one of the project
 administrators would see it. Depending on whether you are a member of
 the project or not and your rights you will see only parts of the
 information provided for each package (see above).
@@ -407,8 +410,8 @@ information provided for each package (see above).
 \setkeys{Gin}{width=0.95\textwidth}
 \begin{figure*}[th]
 \centering
-\includegraphics{rforge_rmetrics_packages_snapshot_developer.png}
-\caption{\tab{R Packages} tab of the Rmetrics project}
+\includegraphics{rforge_rglpk_packages_snapshot_developer.png}
+\caption{\tab{R Packages} tab of the Rglpk project}
 \label{fig:rpackages_tab}
 \end{figure*}
 
@@ -474,13 +477,16 @@ Recently added features and major changes include:
 
 \end{itemize}
 
-Further features which are currently on the wishlist or under
-development include 
+Further features and improvements which are currently on the wishlist
+or under development include 
 
 \begin{itemize}
 \item a Wiki,
-\item task management facilities, and
-\item a re-organized tracker more compatible to \R{} package development. 
+\item task management facilities,
+\item a re-organized tracker more compatible to \R{} package
+  development and,
+\item an update of the underlying GForge system to its successor
+  FusionForge~(\url{http://fusionforge.org/}).
 \end{itemize}
 
 For suggestions, problems, feature requests, and other questions regarding
