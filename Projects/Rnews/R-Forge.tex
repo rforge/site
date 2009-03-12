@@ -78,7 +78,7 @@ give a hands-on tutorial on how users and developers can get started with
 can register, set up new projects, use \R{}-Forge's SCM
 facilities, provide their packages on \R{}-Forge, host a
 project-specific website, and 
-finally how package maintainer submit a package to the Comprehensive \R{}
+finally how package maintainers submit a package to the Comprehensive \R{}
 Archive Network (CRAN, \url{http://CRAN.R-project.org/}).
 Eventually, we summarize recent developments and give a brief outlook
 to future work.
@@ -97,11 +97,10 @@ a CRAN-style repository for hosting development releases of \R{}
 packages as well as a quality management system similar to that of
 CRAN.
 Packages hosted on \R{}-Forge are provided in source form as well as
-in binary form for Mac OSX and Windows. They can be downloaded from the
+in binary form for Mac OS X and Windows. They can be downloaded from the
 website of the corresponding project on \R{}-Forge or installed
-directly in \R{} via
-\code{install.packages("foo", repos = "http://R-Forge.R-project.org")}
-where \pkg{foo} is the name of the package.
+directly in \R{}, for a package \pkg{foo}, say,
+\code{install.packages("foo", repos = "http://R-Forge.R-project.org")}.
 
 %%Tabs can be distinguished in main
 %%tabs (currently Home, My Page and Project Tree) and project specific
@@ -177,7 +176,7 @@ On \R{}-Forge such a version-controlled repository is automatically
 created for each project. To get started, the project members just
 have to install the client of their choice (e.g., Tortoise SVN on
 Windows or svnX on 
-Mac OSX) and check out the repository. In addition to the inherent
+Mac OS X) and check out the repository. In addition to the inherent
 backup of every version within the repository a backup of the whole
 repository is generated daily. 
 
@@ -254,12 +253,15 @@ with their user base. These tools include:
 \end{itemize}
 
 \section{How to Get Started}
-%%A small guide through R-Forge---TODO: detailed description 
+%%A small guide through R-Forge---detailed explanation in user's manual 
 This section is intended to be a hands-on tutorial for new users. A
 more detailed guide to \R{}-Forge with additional 
 information is provided in the user's manual
-\citep{forge:usermanual:2008}. This manual also includes
-step-by-step guides to the topics we overview in this paper.
+\citep{forge:usermanual:2008}. 
+%%We recommend the reader to consult this manual for step-by-step
+%%instructions in case 
+%%This manual also includes
+%%step-by-step instructions to the topics we overview in this paper.
 
 \setkeys{Gin}{width=0.95\textwidth}
 \begin{figure*}[th]
@@ -313,8 +315,8 @@ new projects, are available to logged-in users.
 \subsection{Registering a Project}
 
 There are two possibilities to register a project: Clicking on
-\tab{Register Your Project} on the home page or by going to the \tab{My
-Page} tab and clicking on \tab{Register Project}~(see
+\tab{Register Your Project} on the home page or by going to the 
+\tab{My Page} tab and clicking on \tab{Register Project}~(see
 Figure~\ref{fig:my_page} below the main tabs). Both links lead to a
 form which has to be filled out in order to finish the registration
 process. In the text field ``Project Public Description'' the
@@ -386,7 +388,7 @@ respectively.
 
 \R{}-Forge automatically examines the \file{pkg} directory of
 every repository and builds the package sources as well as the package
-binaries on a daily basis for Mac OSX and Windows (if applicable). The
+binaries on a daily basis for Mac OS X and Windows (if applicable). The
 package builds 
 are provided in the \tab{R Packages} tab (see
 Figure~\ref{fig:rpackages_tab}) for download or can be 
