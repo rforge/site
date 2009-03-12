@@ -162,13 +162,13 @@ software.
 A central repository ensures that the developer
 has always access to the current version of the project's source
 code. Any of the authorized collaborators can ``checkout''
-(i.e. download) or ``update'' the project
+(i.e., download) or ``update'' the project
 file structure, make the necessary changes or additions, delete
 files from the current revision and finally ``commit'' changes or
 additions to the repository. More than
 that, SVN keeps track of the complete history of the project file
 structure. At any point in the development stage it is possible to go
-back to any stage in the history as well as to inspect and restore old
+back to any previous stage in the history to inspect and restore old
 files. This is called version control as every stage automatically is
 assigned a unique version number which increases over time. 
 
@@ -193,9 +193,9 @@ maintainer, the project leader or has registered the project originally.
 Other members of a project typically have either the role ``Senior 
 Developer'' or ``Junior Developer'' which both have permission to
 commit to the project SVN repository and examine the log files in the 
-\tab{R Packages} tab. The differences between those
+\tab{R Packages} tab (the differences between the two
 roles are subtle, e.g., senior developers additionally have administrative
-privileges in several places in the project.  
+privileges in several places in the project).  
 When we speak of developers in subsequent sections we refer to project
 members having the rights at least of a junior developer.
 
@@ -258,7 +258,8 @@ with their user base. These tools include:
 This section is intended to be a hands-on tutorial for new users. A
 more detailed guide to \R{}-Forge with additional 
 information is provided in the user's manual
-\citep{forge:usermanual:2008}.
+\citep{forge:usermanual:2008}. This manual also includes
+step-by-step guides to the topics we overview in this paper.
 
 \setkeys{Gin}{width=0.95\textwidth}
 \begin{figure*}[th]
@@ -269,7 +270,7 @@ information is provided in the user's manual
 \end{figure*}
 
 When accessing the URL \url{http://R-Forge.R-project.org/} the home
-page as seen in Figure~\ref{fig:home_page} is presented. Here one can
+page is presented (see Figure~\ref{fig:home_page}). Here one can
 
 \begin{itemize}
 \item login,
@@ -287,7 +288,7 @@ page as seen in Figure~\ref{fig:home_page} is presented. Here one can
 
 Registered users can access their personal
 page via the tab named \tab{My Page}. Figure~\ref{fig:my_page} shows
-the personal page of one of the authors.
+the personal page of the first author.
 
 \setkeys{Gin}{width=0.95\textwidth}
 \begin{figure*}[th]
@@ -318,7 +319,8 @@ Figure~\ref{fig:my_page} below the main tabs). Both links lead to a
 form which has to be filled out in order to finish the registration
 process. In the text field ``Project Public Description'' the
 registrant is supposed to enter a short and concise description of the
-project. This text will be shown in several places on \R{}-Forge. The text
+project. This text and the ``Project Full Name'' will be shown in
+several places on \R{}-Forge (see e.g., Figure~\ref{fig:home_page}). The text 
 entered in the field ``Project Purpose And Summarization'' is an
 additional information for the \R{}-Forge administrators, inspected
 for approval. ``Project Unix
@@ -340,7 +342,7 @@ visible only to the project administrators, and various other tabs
 depending on the features enabled for this project in the \tab{Admin}
 tab. To present the new project to a broader community the name of the
 project additionally is promoted on the home page under ``Recently
-Registered Projects''.
+Registered Projects'' (see Figure~\ref{fig:home_page}).
 
 Furthermore, within an hour after approval a default mailing list and
 the project's SVN repository containing a \file{README} file and two
@@ -356,7 +358,7 @@ generation of content for one (or more) \R{} package(s) in the \file{pkg}
 directory. Developers can either start committing changes via SVN as usual
 or---if the package is already version-controlled somewhere else---the
 corresponding parts of the repository including the history can be 
-migrated to \R{}-Forge (see Section~6 of the user's manual on how to do this).
+migrated to \R{}-Forge (see Section~6 of the user's manual).
 
 The \tab{SCM} tab of a project explains how the corresponding SVN
 repository located at \code{svn://svn.R-Forge.R-project.org/svnroot/foo}
@@ -372,7 +374,7 @@ key (updated hourly) to make use of public/private key
 authentication. Section~3.2 of the user's manual explains this process
 in more detail.
 
-To make use of the package building and checking feature
+To make use of the package builds and checks
 the package source code has to be put into the \file{pkg} directory
 of the repository (i.e., \file{pkg/DESCRIPTION},
 \file{pkg/R}, \file{pkg/man}, etc.) or, alternatively, a 
@@ -386,7 +388,8 @@ respectively.
 every repository and builds the package sources as well as the package
 binaries on a daily basis for Mac OSX and Windows (if applicable). The
 package builds 
-are provided in the \tab{R Packages} tab for download or can be
+are provided in the \tab{R Packages} tab (see
+Figure~\ref{fig:rpackages_tab}) for download or can be 
 installed directly in \R{} using 
 \code{install.packages("foo",
   repos="http://R-Forge.R-project.org")}. Furthermore, in the \tab{R
@@ -400,13 +403,13 @@ the latest successfully built source package (the \file{.tar.gz}) is
 automatically 
 copied to \url{ftp://CRAN.R-project.org/incoming/}. Note that packages
 are built once daily, i.e., the latest source package does not
-necessarily reflect the latest revision committed to the SVN. 
+include more recent code committed to the SVN repository. 
 
 Figure~\ref{fig:rpackages_tab} shows the \tab{R Packages} tab of the
 tm project (\url{http://R-Forge.R-project.org/projects/tm/}) as one of
 the project administrators would see it. Depending on whether you are
 a member of the project or not and your rights you will see only parts
-of the information provided for each package (see above).
+of the information provided for each package.
 
 \setkeys{Gin}{width=0.95\textwidth}
 \begin{figure*}[th]
@@ -430,7 +433,7 @@ page is shown. Here, one can
 \begin{itemize}
 \item examine the details about the project including a short
   description and a listing of the administrators and developers,
-\item follow a link leading to the (personal) project homepage,
+\item follow a link leading to the project homepage,
 \item examine the latest news announcements (if available),
 \item go to other sections of the project like
   \tab{Forums}, \tab{Tracker},
@@ -445,9 +448,9 @@ the \tab{Admin} tab via so-called ``Trove Categorization''.
 
 \section*{Recent and Future Developments}
 
-In this section, we briefly summarize the major milestones of
-\R{}-Forge development since the first release and give an outlook to
-future developments.
+In this section, we briefly summarize the major changes and updates to
+the \R{}-Forge system during the last months and give an outlook to
+future developments. 
 
 Recently added features and major changes include:
 
@@ -484,7 +487,7 @@ or under development include
 \begin{itemize}
 \item a Wiki,
 \item task management facilities,
-\item a re-organized tracker more compatible to \R{} package
+\item a re-organized tracker more compatible with \R{} package
   development and,
 \item an update of the underlying GForge system to its successor
   FusionForge~(\url{http://FusionForge.org/}).
