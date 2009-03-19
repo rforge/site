@@ -303,13 +303,14 @@ members having the rights at least of a junior developer.
 \label{sec:scmhowto}
 
 \proglang{R}-Forge uses \textbf{Subversion}~(SVN,
-\url{http://subversion.tigris.org}) for 
-source code management.
-Therefore you need an SVN client (e.g. ``Tortoise SVN'' on
-windows machines,~\url{http://tortoisesvn.tigris.org}). For security
+\url{http://subversion.tigris.org}) for source code management.
+You need an SVN client (e.g. ``Tortoise SVN'' on
+Windows machines,~\url{http://tortoisesvn.tigris.org}) to take full
+advantage of your SVN repository. For security
 reasons we use secure shell (SSH) tunneling for
 developer accounts which means that all network traffic is
-encrypted. Therefore you have to setup your machine accordingly.
+encrypted. This means that you have to setup your machine
+accordingly.
 
 \subsubsection{Windows}
 
@@ -318,7 +319,10 @@ on\newline
 \url{http://www.chiark.greenend.org.uk/~sgtatham/putty/}.
 \begin{enumerate}
 \item get and install the latest TortoiseSVN client from
-  \url{http://tortoisesvn.net/downloads}.
+  \url{http://tortoisesvn.net/downloads}. Note: Windows Vista users
+  have to take care that they choose the right installation package
+  for their architecture (i.e., Windows Vista 64-bit users have to
+  download the 64-bit installer).
 \item it is sufficient to use password authentication to write to the
   project repository (if you decided to do so please go to
   step~5). But for convenience purposes (avoiding password 
