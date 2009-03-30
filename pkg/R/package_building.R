@@ -107,7 +107,7 @@ build_packages <- function(email,
     path_to_pkg_tarballs <- control$path_to_pkg_tarballs
     if(!check_directory(path_to_pkg_tarballs))
       stop("Directory", path_to_pkg_tarballs, "missing!") 
-    avail_rforge <- available.packages(contriburl = contrib.url(paste("file:", path_to_pkg_tarballs, sep = ""), type = "source"), fields = "Revision")
+    avail_rforge <- available.packages(contriburl = contrib.url(paste("file:", path_to_pkg_tarballs, sep = ""), type = "source"), fields = "Repository/R-Forge/Revision")
     avail_src_pkgs <- avail_rforge[, 1]
     ## we take only tarballs into account which are hosted in R-Forge SVN reps
     avail_src_pkgs <- avail_src_pkgs[avail_src_pkgs %in% pkgs_all]
@@ -215,7 +215,7 @@ build_packages <- function(email,
       pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
       pkg_revision_local <- get_package_revision_from_sources(pkg)
-      pkg_revision_src  <- avail_rforge[Package = pkg, "Revision"]
+      pkg_revision_src  <- avail_rforge[Package = pkg, "Repository/R-Forge/Revision"]
       
       ## if the version of available src tarball is the same (or newer) than local sources
       ## then build from it (as it already contains the package vignette).
@@ -295,7 +295,7 @@ build_packages <- function(email,
       pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
       pkg_revision_local <- get_package_revision_from_sources(pkg)
-      pkg_revision_src  <- avail_rforge[Package = pkg, "Revision"]
+      pkg_revision_src  <- avail_rforge[Package = pkg, "Repository/R-Forge/Revision"]
 
       ## if the version of available src tarball is equal (or newer than) the version of local sources
       ## then build from it (as it already contains the package vignette).
@@ -539,7 +539,7 @@ get_package_revision_from_sources <- function(pkg, library = ".")
   sapply(pkg, .get_package_revision_from_sources, library)
 
 .get_package_revision_from_sources <- function(pkg, library){
-  suppressWarnings(pkg_revision <- tryCatch(packageDescription(pkg, lib.loc = library)$Revision, error = identity))
+  suppressWarnings(pkg_revision <- tryCatch(packageDescription(pkg, lib.loc = library)$"Repository/R-Forge/Revision", error = identity))
   if(inherits(pkg_revision, "error") | is.null(pkg_revision)){
     warning(paste("Could not retrieve revision number from package", pkg, ". Setting to 0L!"))
     pkg_revision <- 0L
