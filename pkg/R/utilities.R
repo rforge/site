@@ -151,7 +151,7 @@ paste(file.path(path_to_pkg_log, pkg), "-", platform,
 write_prolog <- function(pkg, file, path_to_pkg_src, type = c("build", "check"), what = c("tarball", "binary"), std.out = FALSE){
   type <- match.arg(type)
   what <- match.arg(what)
-  pkg_revision <- read.dcf(file = file.path(path_to_pkg_src, pkg, "DESCRIPTION"), fields = "Revision")
+  pkg_revision <- read.dcf(file = file.path(path_to_pkg_src, pkg, "DESCRIPTION"), fields = "Repository/R-Forge/Revision")
   ## R CMD build message
   if(type == "build")
     msg <- paste(date(), ": Building ", what, " for package ", pkg, " (SVN revision ", pkg_revision,
