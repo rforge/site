@@ -11,6 +11,7 @@ pkg_dir = "/srv/rsync/pkgs"
 
 ## svn repository
 svn_dir = "/srv/svn"
+svn_url = "svn://svn.r-forge.r-project.org/svnroot/"
 
 ## GForge plugin RPlugin -> target DB table
 table = "plugin_rforge_package_db"
@@ -61,7 +62,9 @@ for (rep in svnreps) {
 				conflict_error(pkg_name, pkgs[pkg_name], rep, vars['Maintainer'])
 				next
 			}
-			rt = getRevTime(file.path(svn_dir, rep), dirname(desc))
+			rt = getRevTime(file.path(svn_url, rep))
+			if (is.na(rt)) next
+			
 			rev = rt[[1]]; time = rt[[2]]
 			check_errors <- tryCatch(tools:::.check_package_description(descname), error=function(e) "ERROR")
 			if(length(check_errors) > 0) { cat("Improper Desc Format ", desc);next}
@@ -70,7 +73,7 @@ for (rep in svnreps) {
 			## build SQL and run it
 			insert = paste("INSERT INTO", table, "(pkg_name, unix_group_name, version, title, description, author, license, pkg_date, last_change, rev, maintainer, cran_release) VALUES (", 
 				qq(c(pkg_name, rep, vars['Version'], vars['Title'],
-				vars['Description'], vars['Author'], vars['License'], vars['Date'], time, rev, vars['Maintainer'], cran)), 
+				vars['Description'], vars['Author'], vars['License'], sanitizeDate(vars['Date']), time, rev, vars['Maintainer'], cran)), 
 				");")
 			cat("Run SQL: ", insert, "\n")
 			dbSendQuery(con, insert)
@@ -133,9 +136,9 @@ cat("\n- ", date(), " - done\n--------------------------\n\n");
 
 ## helper functions
 
-## save SQL parameter quoting
+## safe SQL parameter quoting
 qq <- function(x) {
-		x[is.na(x)]="" # we don't want literal 'NA' in the db
+		x[is.na(x)]="" # we don't want literal 'NA's in the db
 		paste(paste("'",gsub("'","''",x),"'",sep=""), collapse=", ")
 }
 
@@ -146,19 +149,37 @@ getUtcTime <- function(time) {
 		format(as.POSIXct(time), tz="GMT") 
 }
 
-
-## extract the cran version of pkg from packages_list
-get_cran_version <- function(pkg) {
-	stop() # TODO
-}
-
 ## send out email in case of naming conflict
 conflict_error <- function(pkg1, pkg2, rep, email) {
-	stop()
+	msg = sprintf("Error: Package %s was found in %s, 
+		but a package of the same name was found in %s.
+		Only the one in %s will be built.", pkg1, rep, pkg2, pkg2)
+	email = gsub("'", "'\\''", email); # shell escape
+	system(sprintf('echo "%s" | mail -s "R-Forge: Package name conflict" -c r-forge\@r-project.org \'%s\'', msg, email))
+	cat("Inserting ", pkg1, " failed!\n")
+	return(1)
 }
 
 ## get revison and time of that revision from svn 
-## maybe use getRevTime2 ???
-getRevTime <- function(repos, path) {
-	stop()
+getRevTime <- function(path) {
+	err = tryCatch(
+	{
+		cc = pipe(open="r", sprintf("svn info \"%s\"", path))
+		x = read.dcf(cc)
+		ret = list(rev=as.integer(x[1,'Revision']), 
+			time=as.POSIXct(x[1,'Last Changed Date']))
+		close(cc)
+		FALSE
+	}, error=function(e) TRUE)
+	if (err) return(NA)
+	else return(ret)
 }
+
+## Is the date in DESCRIPTION valid?
+## The DB 
+sanitizeDate <- function(date) {
+	posix_date = tryCatch(as.POSIXlt(date), error=function(e) NA)
+	if (is.na(posix_date) || posix_date[['year']] < 0) return("")
+	return(as.character(posix_date))
+}
+	
