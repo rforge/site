@@ -1,6 +1,6 @@
 ## rforge_prepare_pkgs in R
 
-library(RPostgreSQL)
+#library(RPostgreSQL)
 library(tools)
 
 logfile = "/var/log/R/Rbuild.log"
@@ -16,9 +16,76 @@ svn_url = "svn://svn.r-forge.r-project.org/svnroot/"
 ## GForge plugin RPlugin -> target DB table
 table = "plugin_rforge_package_db"
 
+
+
+
+
+## helper functions
+
+## safe SQL parameter quoting
+qq <- function(x) {
+		x[is.na(x)]="" # we don't want literal 'NA's in the db
+		paste(paste("'",gsub("'","''",x),"'",sep=""), collapse=", ")
+}
+
+## Convert local time to UTC
+getUtcTime <- function(time) {
+		# as.POSIXct is the only function that properly handles ISO8601 dates with timezones 
+		# as.POSIXlt, strptime, etc. are useless here
+		format(as.POSIXct(time), tz="GMT") 
+}
+
+## send out email in case of naming conflict
+conflict_error <- function(pkg1, pkg2, rep, email) {
+	msg = sprintf("Error: Package %s was found in %s, 
+		but a package of the same name was found in %s.
+		Only the one in %s will be built.", pkg1, rep, pkg2, pkg2)
+	email = gsub("'", "'\\''", email); # shell escape
+	system(sprintf('echo "%s" | mail -s "R-Forge: Package name conflict" -c r-forge@r-project.org \'%s\'', msg, email))
+	cat("Inserting ", pkg1, " failed!\n")
+	return(1)
+}
+
+## get revison and time of that revision from svn 
+getRevTime <- function(path) {
+	err = tryCatch(
+	{
+		cc = pipe(open="r", sprintf("svn info \"%s\"", path))
+		x = read.dcf(cc)
+		ret = list(rev=as.integer(x[1,'Revision']), 
+			time=as.POSIXct(x[1,'Last Changed Date']))
+		close(cc)
+		FALSE
+	}, error=function(e) TRUE)
+	if (err) return(NA)
+	else return(ret)
+}
+
+## Is the date in DESCRIPTION valid?
+## The DB 
+sanitizeDate <- function(date) {
+	posix_date = tryCatch(as.POSIXlt(date), error=function(e) NA)
+	if (is.na(posix_date) || posix_date[['year']] < 0) return("")
+	return(as.character(posix_date))
+}
+	
+
+
+
+
+
+
+
 ## doesn't work, but let's pretend it does...
-drv <- dbDriver("PostgreSQL")
-con <- dbConnect(drv, dbname="gforge", user="plugin_rforge", password="jenslf0r2");
+#drv <- dbDriver("PostgreSQL")
+#con <- dbConnect(drv, dbname="gforge", user="plugin_rforge", password="jenslf0r2");
+## dummies for SQl testing. Remove for production use
+
+
+
+con = 1
+dbSendQuery <- function(con, sql) {cat("SQL:\n", sql, "\n") }
+
 
 cat("--------------------------\n- Exportation of packages\n- ", date(), "\n\n");
 
@@ -43,7 +110,7 @@ for (rep in svnreps) {
 	
 	if (file.exists(paste(svn_dir, "/", rep, "/format", sep=""))) {
 		## get all DESCRIPTIONs per project
-		descs = grep("^pkg\/([^\/]+\/)?DESCRIPTION$", 
+		descs = grep("^pkg/([^/]+/)?DESCRIPTION$", 
 			system(sprintf("svnlook tree --full-paths %s/%s", svn_dir, rep), intern=TRUE), 
 			value=TRUE, perl=TRUE)
 		
@@ -88,7 +155,7 @@ for (rep in svnreps) {
 			vars['Repository/R-Forge/Project'] = rep
 			vars['Repository/R-Forge/Revision'] = rev
 			vars['Publication/Date'] = getUtcTime(time)
-			write.dcf(do.call(rbind, vars), file=filepath(pkg_name, "DESCRIPTION"))
+			write.dcf(matrix(vars, 1, length(vars), dimnames=list(NULL, names(vars))), file=file.path(pkg_name, "DESCRIPTION"))
 		}
 	}
 }
@@ -96,8 +163,8 @@ for (rep in svnreps) {
 ## Finish DB operations and clean up
 dbSendQuery(con, "COMMIT;")
 system(sprintf('rm -f "%s"/*.DESCRIPTION', pkg_dir))
-dbDisconnect(con)
-dbUnloadDriver(drv)
+#dbDisconnect(con)
+#dbUnloadDriver(drv)
 
 
 ## START copy from perl-script
@@ -131,55 +198,3 @@ cat("\n- ", date(), " - done\n--------------------------\n\n");
 ## DONE ##
 ##########
 
-
-
-
-## helper functions
-
-## safe SQL parameter quoting
-qq <- function(x) {
-		x[is.na(x)]="" # we don't want literal 'NA's in the db
-		paste(paste("'",gsub("'","''",x),"'",sep=""), collapse=", ")
-}
-
-## Convert local time to UTC
-getUtcTime <- function(time) {
-		# as.POSIXct is the only function that properly handles ISO8601 dates with timezones 
-		# as.POSIXlt, strptime, etc. are useless here
-		format(as.POSIXct(time), tz="GMT") 
-}
-
-## send out email in case of naming conflict
-conflict_error <- function(pkg1, pkg2, rep, email) {
-	msg = sprintf("Error: Package %s was found in %s, 
-		but a package of the same name was found in %s.
-		Only the one in %s will be built.", pkg1, rep, pkg2, pkg2)
-	email = gsub("'", "'\\''", email); # shell escape
-	system(sprintf('echo "%s" | mail -s "R-Forge: Package name conflict" -c r-forge\@r-project.org \'%s\'', msg, email))
-	cat("Inserting ", pkg1, " failed!\n")
-	return(1)
-}
-
-## get revison and time of that revision from svn 
-getRevTime <- function(path) {
-	err = tryCatch(
-	{
-		cc = pipe(open="r", sprintf("svn info \"%s\"", path))
-		x = read.dcf(cc)
-		ret = list(rev=as.integer(x[1,'Revision']), 
-			time=as.POSIXct(x[1,'Last Changed Date']))
-		close(cc)
-		FALSE
-	}, error=function(e) TRUE)
-	if (err) return(NA)
-	else return(ret)
-}
-
-## Is the date in DESCRIPTION valid?
-## The DB 
-sanitizeDate <- function(date) {
-	posix_date = tryCatch(as.POSIXlt(date), error=function(e) NA)
-	if (is.na(posix_date) || posix_date[['year']] < 0) return("")
-	return(as.character(posix_date))
-}
-	
