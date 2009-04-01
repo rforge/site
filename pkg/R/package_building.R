@@ -215,7 +215,12 @@ build_packages <- function(email,
       pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
       pkg_revision_local <- get_package_revision_from_sources(pkg)
-      pkg_revision_src  <- avail_rforge[Package = pkg, "Repository/R-Forge/Revision"]
+      ## FIXME: some packages do not get a Revision flag. Why?
+      pkg_revision_tmp  <- avail_rforge[Package = pkg, "Repository/R-Forge/Revision"]
+      pkg_revision_src <- if(is.na(pkg_revision_tmp)) 
+      		            0L
+			  else 
+			   pkg_revision_tmp 
       
       ## if the version of available src tarball is the same (or newer) than local sources
       ## then build from it (as it already contains the package vignette).
@@ -295,8 +300,13 @@ build_packages <- function(email,
       pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
       pkg_revision_local <- get_package_revision_from_sources(pkg)
-      pkg_revision_src  <- avail_rforge[Package = pkg, "Repository/R-Forge/Revision"]
-
+      ## FIXME: some packages do not get a Revision flag. Why?
+      pkg_revision_tmp  <- avail_rforge[Package = pkg, "Repository/R-Forge/Revision"]
+      pkg_revision_src <- if(is.na(pkg_revision_tmp)) 
+      		            0L
+			  else 
+			   pkg_revision_tmp 
+      
       ## if the version of available src tarball is equal (or newer than) the version of local sources
       ## then build from it (as it already contains the package vignette).
       if( pkg_revision_src >= pkg_revision_local ){
