@@ -8,6 +8,7 @@ check_packages <- function(email,
                            rforge_url         = "http://R-Forge.R-project.org",
                            cran_url           = "http://CRAN.R-project.org",
                            bioc_url           = "http://bioconductor.org/packages/release/bioc",
+                           omega_hat_url      = "http://www.omegahat.org/R",
                            control=list()
                            ){
   if(!inherits(control, "R-Forge_control"))
@@ -66,7 +67,7 @@ check_packages <- function(email,
   ## PACKAGE DB UPDATE
 
   ## FIXME: is it sufficient what we are doing here?
-  update_package_library(pkgs, path_to_pkg_src, c(cran_url, bioc_url), path_to_local_library, platform)
+  update_package_library(pkgs, path_to_pkg_src, c(cran_url, bioc_url, omega_hat_url), path_to_local_library, platform)
   
   ## LAST PREPARATION BEFORE CHECKING
 
