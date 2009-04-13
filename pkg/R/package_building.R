@@ -40,6 +40,7 @@ build_packages <- function(email,
                            rforge_url         = "http://R-Forge.R-project.org",
                            cran_url           = "http://CRAN.R-project.org",
                            bioc_url           = "http://bioconductor.org/packages/release/bioc",
+                           omega_hat_url      = "http://www.omegahat.org/R",
                            control            = list()){
 
   if(!inherits(control, "R-Forge_control"))
@@ -126,7 +127,7 @@ build_packages <- function(email,
     ## include Brian Ripley's Windows Repository
     other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
   }
-  update_package_library(c(pkgs, pkgs_other), path_to_pkg_src, c(cran_url, bioc_url, other_repositories), path_to_local_library, platform)
+  update_package_library(c(pkgs, pkgs_other), path_to_pkg_src, c(cran_url, bioc_url, omega_hat_url, other_repositories), path_to_local_library, platform)
 
   ## LAST PREPARATION BEFORE PACKAGE BUILD
   
