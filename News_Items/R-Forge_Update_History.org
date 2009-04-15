@@ -1,5 +1,33 @@
 * News Items postet in R-Forge Site Admin
 
+** R-Forge Update
+   We are pleased to see that R-Forge has more than 1000
+   registered users now. What's more, around 350 projects and
+   almost 400 hosted packages show that there is great interest in
+   R-Forge among the R community. And these numbers are constantly
+   increasing. 
+   
+   We made the following changes and updates to the R-Forge system:
+   
+   - R-Forge packages now additionally include the following meta
+     information in DESCRIPTION files:
+       - Repository: R-Forge
+       - Repository/R-Forge/Project: <project_unix_name>
+       - Repository/R-Forge/Revision: <revision_in_SVN>
+       - Publication/Date: <commit_date>
+     Note that this information is added on the serverside. If the
+     tags already exist they get overwritten. Nevertheless, you may
+     want to include this information in your DESCRIPTION file if you
+     submit your package to CRAN via the non-R-Forge way (the ftp
+     upload). CRAN uses/will use the information to automatically provide
+     some info (like the link to the R-Forge project) on the package
+     web sites.
+   - RForgeTools updated to 0.3-6: resolve Omegahat package
+     dependencies, help files, minor fixes.
+
+   Best regards,
+   The R-Forge Administration and Development Team
+
 ** R-Forge Update: Minor Improvements 
    Today we improved the package build system.
    - closed [#262] we added support to Brian Ripley's Windows packages repository
