@@ -90,7 +90,7 @@ build_packages <- function(email,
   if( length(donotcompile) ){
     for(pkg in donotcompile){
       arch <- "all"
-      if(platform == "Windows")
+      if(platform %in% c("Windows", "MacOSX"))
         arch <- architecture
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = arch)
       write_stoplist_notification(pkg, pkg_buildlog, "build", std.out = TRUE)
