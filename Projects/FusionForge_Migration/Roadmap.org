@@ -1,0 +1,71 @@
+Working Title: R-Forge 2.0
+Author: Stefan Theussl
+Last change: <2009-04-15 Wed>
+
+FusionForge (http://fusionforge.org) Migration
+To be released just before/around DSC 2009. 
+
+Test platform: R-Forge-devel.wu.ac.at
+
+Preliminary release Date: <2009-07-10 Fri>
+
+* R-Forge Manuals
+Due to <2009-06-30 Tue>
+** User's Manual Update
+
+** R-Forge Administration and Installation Manual Release
+See also Section the following sections for details.
+
+* Fusion Forge Installation
+Due to <2009-04-30 Tue>
+** Preliminary Work
+
+** Installation Instructions
+See https://fusionforge.org/mediawiki/index.php/Installing
+
+** Automated Setup
+create a Make file which automatically installs full R-Forge from
+backup
+** Documentation
+
+* Restore from Full Backup
+Due to <2009-05-31 Tue>
+** Backup PC restore
+
+** GForge Database
+
+** SVN Repositories
+
+** Mailing Lists
+
+** Further Services
+
+** Documentation
+Chapter in R-Forge installation manual includes restore procedure:
+database, svn, mailing lists, ...
+
+
+* Legal Wiki
+Due to <2009-06-30 Tue>
+** Project Setup
+Setup a project called "sitelegal" including a wiki only.
+
+** Contents
+Contents similar to SourceForge
+(http://apps.sourceforge.net/trac/sitelegal/wiki/Terms%20of%20Use)
+
+* R-Forge Logo
+Due to <2009-06-30 Tue>
+Update the Logo
+
+* RPlugin
+Due to <2009-05-31 Tue>
+** Plugin Validation
+Verify if plugin works on fresh FusionForge installation
+
+** Plugin Enhancements
+Should include the R-Forge theme
+
+
+* Testing
+Invite heavy users to test upgraded R-Forge

@@ -1,0 +1,11 @@
+Ideas for DSC 2009 presentation
+Author: Stefan Theussl
+Last change: 2009-04-14
+
+* R-Forge behind the scenes
+
+  - check/build process
+  - GForge elements, plugins
+  - trove categorization discussion
+
+* FusionForge upgrade (see also Roadmap in FusionForge_Migration)
