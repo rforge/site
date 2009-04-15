@@ -67,5 +67,7 @@ Verify if plugin works on fresh FusionForge installation
 Should include the R-Forge theme
 
 
+* RForgeTools
+rforge_extract_svn perl -> R migration
 * Testing
 Invite heavy users to test upgraded R-Forge
