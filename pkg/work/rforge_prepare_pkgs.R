@@ -90,7 +90,6 @@ dbSendQuery <- function(con, sql) {cat("SQL:\n", sql, "\n") }
 cat("--------------------------\n- Exportation of packages\n- ", date(), "\n\n");
 
 
-
 if (!file.exists(pkg_dir)) create.dir(pkg_dir, recursive=TRUE)
 
 setwd(pkg_dir)
@@ -113,7 +112,8 @@ for (rep in svnreps) {
 		descs = grep("^pkg/([^/]+/)?DESCRIPTION$", 
 			system(sprintf("svnlook tree --full-paths %s/%s", svn_dir, rep), intern=TRUE), 
 			value=TRUE, perl=TRUE)
-		
+
+                ## encapsulate redundant parts (external repository).
 		for (desc in descs) {
 			## export the DESCRIPTION
 			descname = paste(rep, ".", gsub("/", ".", desc), sep="")
@@ -193,6 +193,9 @@ write.dcf(do.call(rbind, pkg_db), file = file.path(path_to_pkg_src, "PACKAGES"))
 ## END copy from perl-script
 
 cat("\n- ", date(), " - done\n--------------------------\n\n");
+
+
+## external missing
 
 ##########
 ## DONE ##
