@@ -45,7 +45,7 @@ echo $contents; } ?>
 
 <h3>R-Forge Build Check Schedule</h3>
 
-<p><b>Exportation of R package sources</b> (this includes also an update of the R Packages tab): 4:00 and 16:00 CET.</p>
+<p><b>Exportation of R package sources</b> (this includes also an update of the R Packages tab): 3:00 and 15:00 CET.</p>
 <p><b>Building of R package tarballs</b>: 4:30 CET.</p>
 <p><b>Building of Windows binary packages</b>: 4:30 (R patched), 12:30 (R-devel) CET.</p>
 <p><b>Building of Mac binary packages</b>: 4:30 (R patched) CET.</p>
