@@ -71,6 +71,9 @@ check_packages <- function(email,
   
   ## LAST PREPARATION BEFORE CHECKING
 
+  ## create package data base holding information about available repositories
+  pkg_db_src <- create_package_db_src(svn = sprintf("file:///%s", path_to_pkg_src),
+                                      src = contrib.url(sprintf("file:///%s", path_to_pkg_root)))
   ## change to directory where the check output should go
   setwd(path_to_check_dir)
   ## delete 00LOCK, sometimes this interrupted the build process ...
@@ -128,7 +131,7 @@ check_packages <- function(email,
         cat(paste("Additional arguments to R CMD check:", check_arg, "\n"), file = pkg_checklog, append = TRUE)
     }
 
-    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, file.path(path_to_pkg_src, pkg), ">>",
+    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, check_from_location(pkg, pkg_db_src), ">>",
                                              pkg_checklog, "2>&1")))["elapsed"]
     ## Epilog
     write_epilog(pkg_checklog, timings[pkg], std.out = TRUE)

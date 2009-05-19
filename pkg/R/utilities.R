@@ -19,6 +19,52 @@ R_Forge_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
             class = "R-Forge_control")
 }
 
+## build package data base
+## reads PACKAGES file in given src (tarball) and SVN repositories
+
+## svn_url: package sources exported from SVN repository
+## src_url: built package sources, the .tar.gz 
+## win_url: built package binary (Windows), the .zip
+## mac_url: built package binary (Mac), the .tgz 
+
+create_package_db_src <- function(svn_url, src_url){
+  fields <- .get_rforge_repository_db_fields()
+  pkg_db <- list(svn = available.packages(svn_url, fields = fields),
+                 src = available.packages(src_url, fields = fields))
+  class(pkg_db) <- "pkg_db"
+  pkg_db
+}
+
+create_package_db_all <- function(svn_url, src_url, win_url, mac_url){
+  fields <- .get_rforge_repository_db_fields()
+  pkg_db <- list(svn = available.packages(svn_url, fields = fields),
+                 src = available.packages(src_url, fields = fields),
+                 win = available.packages(win_url, fields = fields),
+                 mac = available.packages(mac_url, fields = fields))
+  class(pkg_db) <- "pkg_db"
+  pkg_db
+}
+
+## returns the location given a package to be checked
+## priority tarball, svn. criterium: highest revision
+check_from_location <- function(pkg, pkg_db, field = "Repository/R-Forge/Revision"){
+  svn_revision <- pkg_db$svn[pkg, field]
+  src_revision <- tryCatch(pkg_db$src[pkg, field], error = identity)
+  if(inherits(src_revision, "error"))
+    src_revision <- NA
+  if(!any(c(is.na(svn_revision), is.na(src_revision))))
+    if(src_revision >= svn_revision){
+      path <- gsub("file:///", "", pkg_db$src[pkg, "Repository"])
+      return(file.path(path, sprintf("%s_%s.tar.gz", pkg, pkg_db$src[pkg, "Version"])))
+    }
+  path <- gsub("file:///", "", pkg_db$svn[pkg, "Repository"])
+  file.path(path, pkg)
+}
+
+.get_rforge_repository_db_fields <- function(){
+  c("Package", "Version", "Repository/R-Forge/Revision")
+}
+
 ## Function definition of version ordering functions
 ## given two version number, this function returns the order of them
 version_order <- function(x){
