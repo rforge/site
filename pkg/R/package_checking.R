@@ -73,7 +73,7 @@ check_packages <- function(email,
 
   ## create package data base holding information about available repositories
   pkg_db_src <- create_package_db_src(svn = sprintf("file:///%s", path_to_pkg_src),
-                                      src = contrib.url(sprintf("file:///%s", path_to_pkg_root)))
+                                      src = contrib.url(sprintf("file:///%s", path_to_pkg_root), type = "source"))
   ## change to directory where the check output should go
   setwd(path_to_check_dir)
   ## delete 00LOCK, sometimes this interrupted the build process ...
