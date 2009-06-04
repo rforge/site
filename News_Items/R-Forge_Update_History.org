@@ -1,6 +1,39 @@
 * News Items postet in R-Forge Site Admin
 
-** R-Forge Update
+** First issue of The R Journal & R-Forge paper (2009-05-29)
+   The first issue of The R Journal (successor of R News) has now been
+   published at http://journal.R-project.org/ . (See full announcement:
+   https://stat.ethz.ch/pipermail/r-announce/2009/000502.html ).
+
+   This issue features a special section with invited papers on the
+   future of R, including an introduction to R-Forge. Among others, this
+   paper provides a hands-on tutorial for new users to become familiar
+   with the core features of R-Forge.
+
+   Best regards, 
+   The R-Forge Administration and Development Team
+
+** R-Forge Update, Windows builds online
+   We made the following changes and updates to the R-Forge system:
+
+   - The Windows build machine is online again
+   - MacTex installation on Mac builder
+   - RForgeTools updated to 0.3-7: R CMD check is now checking the
+     package tarball if it is available. This solves some issues
+     (warnings) with packages containing vignettes.
+
+   Best regards,
+   The R-Forge Administration and Development Team
+
+** Maintenance work - build/check machines (Windows)
+   Windows build machines temporarily offline due to maintenance
+   work. This means that binary packages are currently not up-to-date. We
+   are sorry for the inconvenience caused.
+
+   Best regards,
+   The R-Forge Administration and Development Team
+
+** R-Forge Update (2009-04-16)
    We are pleased to see that R-Forge has more than 1000
    registered users now. What's more, around 350 projects and
    almost 400 hosted packages show that there is great interest in
@@ -28,7 +61,7 @@
    Best regards,
    The R-Forge Administration and Development Team
 
-** R-Forge Update: Minor Improvements 
+** R-Forge Update: Minor Improvements (2009-02-02)
    Today we improved the package build system.
    - closed [#262] we added support to Brian Ripley's Windows packages repository
      http://r-forge.r-project.org/tracker/index.php?func=detail&aid=262&group_id=34&atid=196 
