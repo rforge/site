@@ -61,7 +61,8 @@ check_packages <- function(email,
                                  sprintf("file:///%s", path_to_pkg_src))[, 1]
   ## Sort out packages that are on the exclude list (TODO: not hardcoding in function!)
   ## donotcompile <- c("seriation")
-  donotcompile <- ""
+  ## earthmovdist hangs at Makevars check (check goes infinite)
+  donotcompile <- c("earthmovdist")
   pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
   
   ## PACKAGE DB UPDATE
