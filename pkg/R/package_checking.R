@@ -127,7 +127,7 @@ check_packages <- function(email,
     write_prolog(pkg, pkg_checklog, path_to_pkg_src, type = "check", what = "tarball", std.out = TRUE)
     
     ## get additional arguments to R CMD check (e.g., --no-vignettes, --no-tests, ...)
-    check_arg <- get_check_arg(pkg, check_args)
+    check_arg <- get_check_args(pkg, check_args)
     if(length(check_arg))
       cat(paste("Additional arguments to R CMD check:", check_arg, "\n"), file = pkg_checklog, append = TRUE)
 
