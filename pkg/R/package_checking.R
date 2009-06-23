@@ -20,7 +20,6 @@ check_packages <- function(email,
   platform <- match.arg(platform) ## FIXME: automat. use info from .Platform?
   architecture <- match.arg(architecture)
   maj.version <- paste(R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
-  flavor <- R.Version()$status
   ## x86_32 on x86_64 allowed but not the other way round
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
     stop("Building x86_64 binaries not possible on an x86_32 architecture") 
@@ -33,10 +32,13 @@ check_packages <- function(email,
   stoplist <- control$stoplist
   ## local package library
   if(!check_directory(path_to_local_library, fix=TRUE))
-    stop(paste("There is no directory", dir,"!"))
+    stop(paste("There is no directory", path_to_local_library,"!"))
   ## check directory, this is where the work is done
   if(!check_directory(path_to_check_dir, fix=TRUE))
-    stop(paste("There is no directory", dir,"!"))
+    stop(paste("There is no directory", path_to_check_dir,"!"))
+  ## check directory, this is where the work is done
+  if(!check_directory(file.path(path_to_check_dir, "PKGS"), fix=TRUE))
+    stop(paste("There is no directory", file.path(path_to_check_dir, "PKGS"),"!"))
   ## R-Forge package sources
   if(!check_directory(path_to_pkg_src))
     stop("Directory", path_to_pkg_src, "missing!")
@@ -45,7 +47,7 @@ check_packages <- function(email,
   ## check if package root directory (the directory containing
   ## the src/contrib or bin/windows/contrib) exists.
   if(!check_directory(path_to_pkg_root, fix=TRUE))
-    stop(paste("There is no directory", dir,"!"))
+    stop(paste("There is no directory", path_to_pkg_root,"!"))
   ## get current working directory -> set back at FINALIZATION step
   old_wd <- getwd()
 
@@ -76,7 +78,7 @@ check_packages <- function(email,
   pkg_db_src <- create_package_db_src(svn = sprintf("file:///%s", path_to_pkg_src),
                                       src = contrib.url(sprintf("file:///%s", path_to_pkg_root), type = "source"))
   ## change to directory where the check output should go
-  setwd(path_to_check_dir)
+  setwd(file.path(path_to_check_dir, "PKGS"))
   ## delete 00LOCK, sometimes this interrupted the build process ...
   check_local_library(path_to_local_library)
   ## where is our R binary?
@@ -124,13 +126,10 @@ check_packages <- function(email,
                           architecture, "-checklog.txt", sep="")
     write_prolog(pkg, pkg_checklog, path_to_pkg_src, type = "check", what = "tarball", std.out = TRUE)
     
-
-    check_arg <- character()
-    if(!is.null(check_args)){
-      check_arg <- check_args[which(check_args["Package"] == pkg), "check_args"]
-      if(length(check_arg))
-        cat(paste("Additional arguments to R CMD check:", check_arg, "\n"), file = pkg_checklog, append = TRUE)
-    }
+    ## get additional arguments to R CMD check (e.g., --no-vignettes, --no-tests, ...)
+    check_arg <- get_check_arg(pkg, check_args)
+    if(length(check_arg))
+      cat(paste("Additional arguments to R CMD check:", check_arg, "\n"), file = pkg_checklog, append = TRUE)
 
     timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, check_from_location(pkg, pkg_db_src), ">>",
                                              pkg_checklog, "2>&1")))["elapsed"]
@@ -146,6 +145,9 @@ check_packages <- function(email,
     ## Close the virtual framebuffer X server 
     close_virtual_X11_fb(pid)
   }
+
+  ## provide check.csv et al.
+  finalize_check_results(path_to_check_dir, path_to_pkg_src, check_args, timings)
   
   ## send email to R-Forge maintainer which packages successfully were built
   notify_admins(pkgs_checked, donotcompile, email, platform, control, timings = timings, about = "check")

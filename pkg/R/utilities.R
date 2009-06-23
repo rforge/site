@@ -234,3 +234,12 @@ write_stoplist_notification <- function(pkg, file, type = c("build", "check"), s
   if(std.out)
     cat(msg)
 }
+
+get_check_args <- function(pkg, check_args){
+  check_arg <- character()
+  if(!is.null(check_args)){
+    check_arg <- check_args[which(check_args["Package"] == pkg), "check_args"]
+  }
+  check_arg
+}
+
