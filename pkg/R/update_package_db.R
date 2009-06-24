@@ -45,8 +45,7 @@ resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
   ## look out for available packages
   avail_repos <- available.packages(contriburl =
                                    contrib.url(repository_url))
-  avail_rforge <- available.packages(contriburl =
-                                     sprintf("file:///%s", path_to_pkg_src))
+  avail_rforge <- available.packages(contriburl = path_to_pkg_src)
   avail <- rbind(avail_rforge, avail_repos)
   ## What packages do we need from external repository
   pkgs <- pkgs[pkgs %in% rownames(avail_rforge)]

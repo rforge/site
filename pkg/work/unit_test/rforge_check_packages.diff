@@ -1,12 +1,15 @@
-65,67c65,67
+61a62,63
+> current_dir <- getwd()
+> 
+65,67c67,69
 < control\$path_to_pkg_src            <- "/srv/R/pkgs"             ## R-Forge pkg sourced
 < control\$path_to_pkg_log            <- "/srv/R/logs/$R_flavor"   ## Log directory
 < control\$path_to_pkg_root           <- "/srv/R/R-Forge"          ## R-Forge root (contains /src ,/bin)
 ---
-> control\$path_to_pkg_src            <- "../pkgs"             ## R-Forge pkg sourced
-> control\$path_to_pkg_log            <- "../logs/$R_flavor"   ## Log directory
-> control\$path_to_pkg_root           <- "../R-Forge"          ## R-Forge root (contains /src ,/bin)
-71c71
+> control\$path_to_pkg_src            <- file.path(current_dir, "../pkgs")             ## R-Forge pkg sourced
+> control\$path_to_pkg_log            <- file.path(current_dir, "../logs/$R_flavor")   ## Log directory
+> control\$path_to_pkg_root           <- file.path(current_dir, "../R-Forge")          ## R-Forge root (contains /src ,/bin)
+71c73
 < control\$path_to_check_dir          <- "/srv/R/R.check/$R_flavor"## path to check dir
 ---
-> control\$path_to_check_dir          <- "../R.check/$R_flavor"## path to check dir
+> control\$path_to_check_dir          <- file.path(current_dir, "../R.check/$R_flavor")## path to check dir

@@ -48,6 +48,8 @@ check_packages <- function(email,
   ## the src/contrib or bin/windows/contrib) exists.
   if(!check_directory(path_to_pkg_root, fix=TRUE))
     stop(paste("There is no directory", path_to_pkg_root,"!"))
+  ## source tarballs
+  URL_pkg_sources <- contrib.url(sprintf("file:///%s", path_to_pkg_root), type = "source")
   ## get current working directory -> set back at FINALIZATION step
   old_wd <- getwd()
 
@@ -58,25 +60,24 @@ check_packages <- function(email,
   if(file.exists(stoplist)){
     check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
   }else check_args <- NULL
-  ## sourcepackages available from R-Forge---exported svn reps
-  pkgs_all <- available.packages(contriburl =
-                                 sprintf("file:///%s", path_to_pkg_src))[, 1]
+  ## Source packages from R-Forge to be checked: successfully build tarballs
+  pkgs_all <- available.packages(contriburl = URL_pkg_sources)[, 1]
   ## Sort out packages that are on the exclude list (TODO: not hardcoding in function!)
   ## donotcompile <- c("seriation")
   ## earthmovdist hangs at Makevars check (check goes infinite)
   donotcompile <- c("earthmovdist")
   pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
   
-  ## PACKAGE DB UPDATE
+  ## PACKAGE DB UPDATE ##
 
   ## FIXME: is it sufficient what we are doing here?
-  update_package_library(pkgs, path_to_pkg_src, c(cran_url, bioc_url, omega_hat_url), path_to_local_library, platform)
+  update_package_library(pkgs, URL_pkg_sources, c(cran_url, bioc_url, omega_hat_url), path_to_local_library, platform)
   
   ## LAST PREPARATION BEFORE CHECKING
 
   ## create package data base holding information about available repositories
   pkg_db_src <- create_package_db_src(svn = sprintf("file:///%s", path_to_pkg_src),
-                                      src = contrib.url(sprintf("file:///%s", path_to_pkg_root), type = "source"))
+                                      src = URL_pkg_sources)
   ## change to directory where the check output should go
   setwd(file.path(path_to_check_dir, "PKGS"))
   ## delete 00LOCK, sometimes this interrupted the build process ...
@@ -117,7 +118,7 @@ check_packages <- function(email,
   #                       architecture, "-install.txt", sep=""),
   #                 "2>&1"))
   #}
-  ## And now the testing ... (only R-Forge pkgs)
+  ## And now the testing ... (only R-Forge pkg tarballs!)
   timings <- numeric(length(pkgs))
   names(timings) <- pkgs
   for(pkg in pkgs){
@@ -131,7 +132,9 @@ check_packages <- function(email,
     if(length(check_arg))
       cat(paste("Additional arguments to R CMD check:", check_arg, "\n"), file = pkg_checklog, append = TRUE)
 
-    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, check_from_location(pkg, pkg_db_src), ">>",
+    pkg_url <- file.path(gsub("file:///", "", pkg_db_src$src[pkg, "Repository"]),
+                         sprintf("%s_%s.tar.gz", pkg, pkg_db_src$src[pkg, "Version"]))
+    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, pkg_url, ">>",
                                              pkg_checklog, "2>&1")))["elapsed"]
     ## Epilog
     write_epilog(pkg_checklog, timings[pkg], std.out = TRUE)

@@ -72,6 +72,8 @@ build_packages <- function(email,
   ## the src/contrib or bin/windows/contrib) exists.
   if(!check_directory(path_to_pkg_root, fix=TRUE))
     stop(paste("There is no directory", dir,"!"))
+  ## source tarballs
+  URL_pkg_sources <- contrib.url(sprintf("file:///%s", path_to_pkg_root), type = "source")
   ## get current working directory -> set back at FINALIZATION step
   old_wd <- getwd()
   
@@ -97,7 +99,7 @@ build_packages <- function(email,
     }
   }
   
-  ## sourcepackages available from R-Forge---exported svn reps
+  ## Packages exported from R-Forge's SVN repositories
   pkgs_all <- available.packages(contriburl =
                                          sprintf("file:///%s", path_to_pkg_src))[, 1]
   ## platform specific packages or pkgs not avail as src tarball but
@@ -127,7 +129,7 @@ build_packages <- function(email,
     ## include Brian Ripley's Windows Repository
     other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
   }
-  update_package_library(c(pkgs, pkgs_other), path_to_pkg_src, c(cran_url, bioc_url, omega_hat_url, other_repositories), path_to_local_library, platform)
+  update_package_library(c(pkgs, pkgs_other), URL_pkg_sources, c(cran_url, bioc_url, omega_hat_url, other_repositories), path_to_local_library, platform)
 
   ## LAST PREPARATION BEFORE PACKAGE BUILD
   

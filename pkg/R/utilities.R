@@ -45,22 +45,6 @@ create_package_db_all <- function(svn_url, src_url, win_url, mac_url){
   pkg_db
 }
 
-## returns the location given a package to be checked
-## priority tarball, svn. criterium: highest revision
-check_from_location <- function(pkg, pkg_db, field = "Repository/R-Forge/Revision"){
-  svn_revision <- pkg_db$svn[pkg, field]
-  src_revision <- tryCatch(pkg_db$src[pkg, field], error = identity)
-  if(inherits(src_revision, "error"))
-    src_revision <- NA
-  if(!any(c(is.na(svn_revision), is.na(src_revision))))
-    if(src_revision >= svn_revision){
-      path <- gsub("file:///", "", pkg_db$src[pkg, "Repository"])
-      return(file.path(path, sprintf("%s_%s.tar.gz", pkg, pkg_db$src[pkg, "Version"])))
-    }
-  path <- gsub("file:///", "", pkg_db$svn[pkg, "Repository"])
-  file.path(path, pkg)
-}
-
 .get_rforge_repository_db_fields <- function(){
   c("Package", "Version", "Repository/R-Forge/Revision")
 }
@@ -243,3 +227,20 @@ get_check_args <- function(pkg, check_args){
   check_arg
 }
 
+
+## DEPRECATED: only tarballs get checked
+## returns the location given a package to be checked
+## priority tarball, svn. criterium: highest revision
+check_from_location <- function(pkg, pkg_db, field = "Repository/R-Forge/Revision"){
+  svn_revision <- pkg_db$svn[pkg, field]
+  src_revision <- tryCatch(pkg_db$src[pkg, field], error = identity)
+  if(inherits(src_revision, "error"))
+    src_revision <- NA
+  if(!any(c(is.na(svn_revision), is.na(src_revision))))
+    if(src_revision >= svn_revision){
+      path <- gsub("file:///", "", pkg_db$src[pkg, "Repository"])
+      return(file.path(path, sprintf("%s_%s.tar.gz", pkg, pkg_db$src[pkg, "Version"])))
+    }
+  path <- gsub("file:///", "", pkg_db$svn[pkg, "Repository"])
+  file.path(path, pkg)
+}

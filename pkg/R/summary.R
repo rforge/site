@@ -57,7 +57,7 @@ finalize_check_results <- function(check_results_dir, path_to_pkg_src, check_arg
   write_check_SUMMARY(file = file.path(check_results_dir, "SUMMARY"), Rcheck, PKGS, path_to_pkg_src)
 
   for(file in check_results_files){
-    file.copy(file.path(check_results_dir, file), results_archive)
+    file.copy(file, results_archive)
   }
 
   write_check_diffs(check_results_dir)  
