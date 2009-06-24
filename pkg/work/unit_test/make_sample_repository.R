@@ -11,12 +11,16 @@ pkgs <- source_pkgs[source_pkgs %in% avail_tarballs[, 1]]
 
 sampled <- sample(pkgs, 10)
 
+## unpacked sources first
 for(pkg in sampled){
-  ## unpacked sources first
   file.copy(file.path(source_dir, pkg), target_source_dir, recursive = TRUE)
-  ## then tarballs
+}
+
+## then tarballs (-1 package to simulate at least 1 unbuildable package)
+for(pkg in sampled[-1]){
   file.copy(file.path(contrib.url(repository_root), sprintf("%s_%s.tar.gz", pkg, avail_tarballs[pkg, "Version"])), contrib.url(target_repository_root))
 }
+
 
 ## Write PACKAGES
 

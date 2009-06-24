@@ -36,9 +36,6 @@ check_packages <- function(email,
   ## check directory, this is where the work is done
   if(!check_directory(path_to_check_dir, fix=TRUE))
     stop(paste("There is no directory", path_to_check_dir,"!"))
-  ## check directory, this is where the work is done
-  if(!check_directory(file.path(path_to_check_dir, "PKGS"), fix=TRUE))
-    stop(paste("There is no directory", file.path(path_to_check_dir, "PKGS"),"!"))
   ## R-Forge package sources
   if(!check_directory(path_to_pkg_src))
     stop("Directory", path_to_pkg_src, "missing!")
@@ -78,6 +75,13 @@ check_packages <- function(email,
   ## create package data base holding information about available repositories
   pkg_db_src <- create_package_db_src(svn = sprintf("file:///%s", path_to_pkg_src),
                                       src = URL_pkg_sources)
+  if( file.exists( file.path(path_to_check_dir, "PKGS_pre") ) )
+    unlink( file.path(path_to_check_dir, "PKGS_pre"), recursive = TRUE )
+  if( file.exists( file.path(path_to_check_dir, "PKGS") ) )
+    system( sprintf("mv %s %s", file.path(path_to_check_dir, "PKGS"), file.path(path_to_check_dir, "PKGS_pre")) )
+  ## check/create directory, this is where the work is done
+  if(!check_directory(file.path(path_to_check_dir, "PKGS"), fix=TRUE))
+    stop(paste("There is no directory", file.path(path_to_check_dir, "PKGS"),"!"))
   ## change to directory where the check output should go
   setwd(file.path(path_to_check_dir, "PKGS"))
   ## delete 00LOCK, sometimes this interrupted the build process ...
@@ -153,7 +157,7 @@ check_packages <- function(email,
   finalize_check_results(path_to_check_dir, path_to_pkg_src, check_args, timings)
   
   ## send email to R-Forge maintainer which packages successfully were built
-  notify_admins(pkgs_checked, donotcompile, email, platform, control, timings = timings, about = "check")
+  notify_admins(pkgs_checked, donotcompile, email, platform, control, path_to_check_dir, timings = timings, about = "check")
   ## go back to old working directory
   setwd(old_wd)
   TRUE
