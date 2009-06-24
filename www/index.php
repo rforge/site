@@ -45,17 +45,27 @@ echo $contents; } ?>
 
 <h3>R-Forge Build Check Schedule</h3>
 
-<p><b>Exportation of R package sources</b> (this includes also an update of the R Packages tab): 3:00 and 15:00 CET.</p>
-<p><b>Building of R package tarballs</b>: 4:30 CET.</p>
-<p><b>Building of Windows binary packages</b>: 4:30 (R patched), 12:30 (R-devel) CET.</p>
-<p><b>Building of Mac binary packages</b>: 4:30 (R patched) CET.</p>
-<p><b>Checking of packages (Linux)</b>: 6:00 (patched), 14:00 (devel) CET.</p>
-<p><b>Checking of packages (Windows)</b>: 6:00 (patched), 14:00 (devel) CET.</p>
-<p><b>Checking of packages (Mac)</b>: 6:00 (patched) CET.</p>
-<p><b>Synchronization of /contrib directory</b> (e.g., copy package builds/logs to R-Forge): 1:00, 5:00 ,9:00, 13:00, 17:00 and 21:00 CET.</p>
-<p><b>Synchronization of check results</b>: 2:00 ,6:00 ,10:00 ,14:00, 18:00 and 22:00 CET.</p>
+<p><b>Rebuild R</b>: 19:00 CET.</p>
+<hr>
+<p><b>Exportation of R package sources</b> (this also includes an update of the R Packages tab): 21:00 CET.</p>
+<p><b>Sync unpacked package sources to build machine</b>: 21:45 CET.</p>
+<p><b>Building of R source packages (.tar.gz)</b>: 22:00 CET.</p>
+<p><b>Sync package sources (.tar.gz) to R-Forge</b>: 23:30 CET.</p>
+<hr>
+<p><b>Sync package sources (.tar.gz) to build machines</b>: 23:45 CET.</p>
+<p><b>Building of Windows binary packages</b>: 0:00 (patched), 12:30 (devel) CET.</p>
+<p><b>Building of Mac OS X (universal) binary packages</b>: 0:00 (patched) CET.</p>
+<p><b>Sync package binaries (.zip, .tgz) and build logs to R-Forge</b>: 2:30 CET.</p>
+<hr>
+<p><b>Sync package sources to check machines (.tar.gz)</b>: 1:30 CET.</p>
+<p><b>Checking of packages (Linux)</b>: 2:00 (devel), 10:00 (patched) CET.</p>
+<p><b>Checking of packages (Windows)</b>: 2:00 (devel), 10:00 (patched) CET.</p>
+<p><b>Checking of packages (Mac)</b>: 2:00 (patched) CET.</p>
+<p><b>Sync check results to R-Forge</b>: 10:00, 18:00 CET.</p>
+<hr>
+<p>Build/check cycle completed.</p>
 
-<p> For general information about the project please visit the <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/">project summary page</a>. </p>
+<p> For general information about this project please visit the <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/">project summary page</a>. </p>
 
 </body>
 </html>
