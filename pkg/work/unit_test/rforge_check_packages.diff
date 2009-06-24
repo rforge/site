@@ -1,0 +1,12 @@
+65,67c65,67
+< control\$path_to_pkg_src            <- "/srv/R/pkgs"             ## R-Forge pkg sourced
+< control\$path_to_pkg_log            <- "/srv/R/logs/$R_flavor"   ## Log directory
+< control\$path_to_pkg_root           <- "/srv/R/R-Forge"          ## R-Forge root (contains /src ,/bin)
+---
+> control\$path_to_pkg_src            <- "../pkgs"             ## R-Forge pkg sourced
+> control\$path_to_pkg_log            <- "../logs/$R_flavor"   ## Log directory
+> control\$path_to_pkg_root           <- "../R-Forge"          ## R-Forge root (contains /src ,/bin)
+71c71
+< control\$path_to_check_dir          <- "/srv/R/R.check/$R_flavor"## path to check dir
+---
+> control\$path_to_check_dir          <- "../R.check/$R_flavor"## path to check dir

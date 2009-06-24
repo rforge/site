@@ -1,4 +1,4 @@
-source_dir <- "/srv/rsync/pkgs"
+source_dir <- "/srv/R/pkgs"
 source_pkgs <- dir(source_dir)
 target_source_dir <- "pkgs"
 repository_root <- "/srv/R/R-Forge"
