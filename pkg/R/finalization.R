@@ -43,7 +43,7 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   unique(packages)
 }
 
-notify_admins <- function(packages, donotcompile, email, platform, control, path_to_check_dir, timings = NULL, about = c("build", "check")){
+notify_admins <- function(packages, donotcompile, email, platform, control, path_to_check_dir = NULL, timings = NULL, about = c("build", "check")){
   writeLines(paste("Preparing to send", about, "summary to", email, "..."))
   about <- match.arg(about)
   proc_time_minutes <- round(proc.time()["elapsed"]/60, 2L)
@@ -72,9 +72,11 @@ notify_admins <- function(packages, donotcompile, email, platform, control, path
     timings_table <-  paste(formatDL(names(sorted), round(sorted, 2), "table"), note)
   }
 
+  ## after a package check process finishes send some additional information
   add_msg <- ""
-  if(file.exists(file.path(path_to_check_dir, "check.csv.diff")))
-    add_msg <- readLines(file.path(path_to_check_dir, "check.csv.diff"))
+  if(!is.null(path_to_check_dir))
+    if(file.exists(file.path(path_to_check_dir, "check.csv.diff")))
+      add_msg <- readLines(file.path(path_to_check_dir, "check.csv.diff"))
   
   ## Text
   write(c(paste("R-Forge", platform, about, "log:"), " ",
