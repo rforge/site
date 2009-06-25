@@ -10,6 +10,9 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   ## Remember old working directory
   old_dir <- file_path_as_absolute(getwd())
   setwd(build_dir)
+
+  ## first delete old packages
+  system(paste("rm -f", file.path(contrib_dir, paste("*", file_type, sep = ""))))
   files <- dir()
   files <- files[grep(file_type, files)]
   for(i in files){
@@ -21,7 +24,7 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   ## remove old PACKAGES file
   setwd(contrib_dir)
   system(paste("rm -f PACKAGES*"))
-  ## now find out which packages have old versions
+  ## now find out which packages have old versions DEPRECATED! -> to be removed
   tmp <- dir()
   splitted <- strsplit(tmp, "_")
   packages <- sapply(splitted, "[", 1)
@@ -35,6 +38,7 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
       system(paste("rm -f", tmp[ind_package_to_remove]))
     }
   }
+  
   ## Write a new PACKAGES and PACKAGES.gz file
   write_PACKAGES(dir = contrib_dir, fields = fields, type = pkg_type)
 
