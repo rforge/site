@@ -13,6 +13,7 @@
 "htmlhelp","Microsoft EULA",NA,4.74.8702.0,"http://msdn.microsoft.com/en-us/library/ms669985(VS.85).aspx","HTML Help Workshop"
 "ImageMagick","ImageMagick License",6.4.3,6.5.4,"http://www.imagemagick.org/script/binary-releases.php","portable Win32 static at 16 bits-per-pixel"
 "Java","SUN",NA,1.6-10,"http://java.sun.com/","Java 6 Software Development Kit"
+"libcurl","MIT/X derivate license",NA,7.19-5,"http://curl.haxx.se/download.html","libcurl ssl static"
 "miktex",NA,NA,2.7,"http://miktex.org/","Full LaTeX installation"
 "PostgreSQL","BSD",8.3,8.4.0-1,"http://www.postgresql.org/download/windows","PostgreSQL binaries"
 "qt","LGPL",NA,4.5.2,"http://www.qtsoftware.com/downloads","qt framework"
