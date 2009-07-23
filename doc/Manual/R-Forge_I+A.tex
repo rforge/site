@@ -54,7 +54,7 @@
 \noindent Copyright 2006--2008 \RFORGE{}\\
 
 \vspace{0.5cm}
-\includegraphics{CCAL.png} 
+%\includegraphics{CCAL.png} 
 \vspace{1cm}
 
 \noindent The content in this manual is licensed
@@ -101,10 +101,52 @@ Subversion~\citep[SVN,
 see][]{forge:Pilato+Collins-Sussman+Fitzpatrick:2004} or Concurrent
 Versions System~\citep[CVS, see][]{forge:Cederqvist:2006}
 
+
+\newpage
 \section{Installation}
 \label{sec:installation}
 
 \subsection{GForge}
+
+\vspace{0.5cm}
+\textbf{\large We use Xen virtualization infrastructure:
+
+\begin{itemize}
+	\item xsrforge.wu.ac.at: Xen Server (dom0)
+	\item r-forge.wu.ac.at: R-Forge live instance (xmrforge2)
+	\item r-forge-devel.wu.ac.at: R-Forge devel instance (xmrforge1)
+\end{itemize}
+
+This installation instruction describes setting up the R-Forge devel instance.
+
+A backup of the base Debian system is created as an 
+LVM snapshot (xmrforge1-disk-snapshot).
+
+\begin{enumerate}
+	\item Systemconfiguration:
+
+hostname: xmrforge1 (already done.)
+Debian flavor: Lenny
+
+	\item /etc/apt/sources.list
+add the following entries:
+
+## CRAN Debian Packages
+deb http://cran.r-project.org/bin/linux/debian lenny-cran/
+## FusionForge packages
+deb http://fusionforge.fusionforge.org/debian lenny main
+
+add key information
+gpg --recv-keys 06F90DE5381BA480
+gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -
+
+
+	\item base packages
+
+xmrforge1:~# aptitude install subversion joe emacs ess r-base r-recommended bzip2 rsync less
+
+	\item checkout radmin
+\end{enumerate}
 
 \section{Components}
 \label{sec:registration}
