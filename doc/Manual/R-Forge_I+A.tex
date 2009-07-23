@@ -132,21 +132,26 @@ LVM snapshot (xmrforge1-disk-snapshot).
 
 	add the following entries:	
 	
-	## CRAN Debian Packages
+\begin{verbatim}
+## CRAN Debian Packages
 deb http://cran.r-project.org/bin/linux/debian lenny-cran/
 ## FusionForge packages
 deb http://fusionforge.fusionforge.org/debian lenny main
+\end{verbatim}
 
 add key information
 
+\begin{verbatim}
 gpg --recv-keys 06F90DE5381BA480
-\newline
 gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -
+\end{verbatim}
 	
 	\item base packages
 	
 	\item checkout radmin
 \end{enumerate}
+
+
 
 \section{Components}
 \label{sec:registration}
