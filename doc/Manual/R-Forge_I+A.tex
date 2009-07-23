@@ -109,7 +109,7 @@ Versions System~\citep[CVS, see][]{forge:Cederqvist:2006}
 \subsection{GForge}
 
 \vspace{0.5cm}
-\textbf{\large We use Xen virtualization infrastructure:
+We use Xen virtualization infrastructure:
 
 \begin{itemize}
 	\item xsrforge.wu.ac.at: Xen Server (dom0)
@@ -124,27 +124,27 @@ LVM snapshot (xmrforge1-disk-snapshot).
 
 \begin{enumerate}
 	\item Systemconfiguration:
-
-hostname: xmrforge1 (already done.)
-Debian flavor: Lenny
-
+	
+	hostname: xmrforge1 (already done.)
+\newline	Debian flavor: Lenny
+	
 	\item /etc/apt/sources.list
-add the following entries:
 
-## CRAN Debian Packages
+	add the following entries:	
+	
+	## CRAN Debian Packages
 deb http://cran.r-project.org/bin/linux/debian lenny-cran/
 ## FusionForge packages
 deb http://fusionforge.fusionforge.org/debian lenny main
 
 add key information
+
 gpg --recv-keys 06F90DE5381BA480
+\newline
 gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -
-
-
+	
 	\item base packages
-
-xmrforge1:~# aptitude install subversion joe emacs ess r-base r-recommended bzip2 rsync less
-
+	
 	\item checkout radmin
 \end{enumerate}
 
