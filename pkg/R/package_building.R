@@ -102,9 +102,12 @@ build_packages <- function(email,
   ## Packages exported from R-Forge's SVN repositories
   pkgs_all <- available.packages(contriburl =
                                          sprintf("file:///%s", path_to_pkg_src))[, 1]
-  ## platform specific packages or pkgs not avail as src tarball but
-  ## can be exported from SVN repository (indicator for Windows or Mac package ?)
-  pkgs_other = ""
+  ## Sort out packages that are on the exclude list
+  pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
+  
+  ## create package data base holding information about available repositories
+  pkg_db_src <- create_package_db_src(svn = sprintf("file:///%s", path_to_pkg_src),
+                                      src = URL_pkg_sources)
   if(platform != "Linux"){
     ## where are the source tarballs already available from R-Forge?
     path_to_pkg_tarballs <- control$path_to_pkg_tarballs
@@ -113,14 +116,9 @@ build_packages <- function(email,
     avail_rforge <- available.packages(contriburl = contrib.url(paste("file:", path_to_pkg_tarballs, sep = ""), type = "source"), fields = "Repository/R-Forge/Revision")
     avail_src_pkgs <- avail_rforge[, 1]
     ## we take only tarballs into account which are hosted in R-Forge SVN reps
-    avail_src_pkgs <- avail_src_pkgs[avail_src_pkgs %in% pkgs_all]
-    pkgs_other <- setdiff(pkgs_all, avail_src_pkgs)
+    avail_src_pkgs <- avail_src_pkgs[avail_src_pkgs %in% pkgs]
   }
-
-  ## Sort out packages that are on the exclude list
-  pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
-  pkgs_other <- remove_excluded_pkgs(pkgs_other, donotcompile)
-
+  
   ## PACKAGE DB UPDATE
 
   ## FIXME: is it sufficient what we are doing here?
@@ -129,7 +127,7 @@ build_packages <- function(email,
     ## include Brian Ripley's Windows Repository
     other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
   }
-  update_package_library(c(pkgs, pkgs_other), URL_pkg_sources, c(cran_url, bioc_url, omega_hat_url, other_repositories), path_to_local_library, platform)
+  update_package_library(c(pkgs), URL_pkg_sources, c(cran_url, bioc_url, omega_hat_url, other_repositories), path_to_local_library, platform)
 
   ## LAST PREPARATION BEFORE PACKAGE BUILD
   
@@ -148,7 +146,7 @@ build_packages <- function(email,
                                  "contrib", maj.version)
   }else {
     ## UNIX SOURCE directory
-    path_to_contrib_dir <- file.path(path_to_pkg_root, "src/contrib")
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "src", "contrib")
   }
   if(!check_directory(path_to_contrib_dir, fix=TRUE, recursive=TRUE))
       stop(paste("There is no directory", dir,"!"))
@@ -181,16 +179,20 @@ build_packages <- function(email,
     for(pkg in pkgs){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
-      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "tarball", std.out = TRUE)
+      write_prolog(pkg, pkg_buildlog, pkg_db_src, type = "build", what = "tarball", std.out = TRUE)
       
+      ## timer start
+      proc_start <- proc.time()
+
       build_args <- if(pkg %in% no_vignettes)
         "--no-vignettes" else ""
 
-      ## BUILD
-      timings[pkg] <- system.time(
-                                  .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
-      )["elapsed"]
-
+      ## build tarball from sources
+      .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
+    
+      ## save timing
+      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
+    
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
@@ -202,22 +204,20 @@ build_packages <- function(email,
   }else if(platform == "Windows"){
 
     ## Initialize timings
-    timings <- numeric(length(pkgs))
-    names(timings) <- pkgs
+    timings <- numeric(length(avail_src_pkgs))
+    names(timings) <- avail_src_pkgs
     
     for( pkg in avail_src_pkgs ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
+      write_prolog(pkg, pkg_buildlog, pkg_db_src, type = "build", what = "binary", std.out = TRUE)
 
       ## BUILD
       ## timer start
       proc_start <- proc.time()
 
       ## look out for version and revision number	
-      pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
-      pkg_revision_local <- get_package_revision_from_sources(pkg)
       ## FIXME: some packages do not get a Revision flag. Why?
       pkg_revision_tmp  <- avail_rforge[Package = pkg, "Repository/R-Forge/Revision"]
       pkg_revision_src <- if(is.na(pkg_revision_tmp)) 
@@ -225,21 +225,9 @@ build_packages <- function(email,
 			  else 
 			   pkg_revision_tmp 
       
-      ## if the version of available src tarball is the same (or newer) than local sources
-      ## then build from it (as it already contains the package vignette).
-      if( pkg_revision_src >= pkg_revision_local ){
-
-        .build_binary_from_tarball_win(pkg, pkg_version_src, path_to_pkg_tarballs, R, pkg_buildlog)     
+      ## now build package from package tarball       
+      .build_binary_from_tarball_win(pkg, pkg_version_src, path_to_pkg_tarballs, R, pkg_buildlog)     
       
-      ## Otherwise it is a brandnew version and we build it directly from uncompressed package sources    
-      } else { 
-        
-	 build_args <- if(pkg %in% no_vignettes)
-        "--no-vignettes" else ""
-	
-        .build_binary_from_sources_win(pkg, pkg_version_local, R, pkg_buildlog, build_args)
-
-      }
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
       
@@ -247,34 +235,6 @@ build_packages <- function(email,
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
     
-    ## build binaries which are not available as src tarball (maybe Windows only packages?)
-    for( pkg in pkgs_other ){
-      ## Prolog
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
-
-      ## timer start
-      proc_start <- proc.time()
-
-      ## does the pkg exist?
-      if(!file.exists(pkg))
-        next
-      
-      ## look out for version number
-      pkg_version_local <- get_package_version_from_sources(pkg)
-      
-      build_args <- if(pkg %in% no_vignettes)
-        "--no-vignettes" else ""
-	
-      .build_binary_from_sources_win(pkg, pkg_version_local, R, pkg_buildlog, build_args)
-
-      ## save timing
-      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-
-      ## Epilog
-      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
-    }
-
     ## Cleanup
     ## delete 00LOCK, sometimes this interrupted the build process ...
     check_local_library(path_to_local_library)
@@ -293,74 +253,29 @@ build_packages <- function(email,
     for(pkg in avail_src_pkgs){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
+      write_prolog(pkg, pkg_buildlog, pkg_db_src, type = "build", what = "binary", std.out = TRUE)
 
       ## timer start
       proc_start <- proc.time()
       ## path to pkg buildlog 
 
       ## look out for version number	
-      pkg_version_local <- get_package_version_from_sources(pkg)
       pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
-      pkg_revision_local <- get_package_revision_from_sources(pkg)
       ## FIXME: some packages do not get a Revision flag. Why?
       pkg_revision_tmp  <- avail_rforge[Package = pkg, "Repository/R-Forge/Revision"]
       pkg_revision_src <- if(is.na(pkg_revision_tmp)) 
       		            0L
 			  else 
 			   pkg_revision_tmp 
-      
-      ## if the version of available src tarball is equal (or newer than) the version of local sources
-      ## then build from it (as it already contains the package vignette).
-      if( pkg_revision_src >= pkg_revision_local ){
-
-        .build_binary_from_tarball_mac(pkg, pkg_version_src, path_to_pkg_tarballs, R, pkg_buildlog)
-
-      ## Otherwise it is a brandnew version and we build it directly from local source
-      } else {
-      
-        build_args <- if(pkg %in% no_vignettes)
-          "--no-vignettes" else ""
-
-        .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog, build_args)
-
-      }
-      ## save timing
-      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-
-      ## Epilog
-      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
-    } #</FOR>
-
-    ## BUILDING FROM SOURCES
-    ## build binaries which are not available as src tarball (MacOS only packages?)
-    for( pkg in pkgs_other ){
-      ## Prolog
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      write_prolog(pkg, pkg_buildlog, path_to_pkg_src, type = "build", what = "binary", std.out = TRUE)
-
-      ## timer start
-      proc_start <- proc.time()
-      
-      ## does the pkg exist?
-      if(!file.exists(pkg))
-        next
-
-      ## look out for version number
-      pkg_version_local <- get_package_version_from_sources(pkg)
-
-      build_args <- if(pkg %in% no_vignettes)
-        "--no-vignettes" else ""
-
-
-      .build_binary_from_sources_mac(pkg, pkg_version_local, R, pkg_buildlog, build_args)
+     
+     ## now build package from package tarball
+     .build_binary_from_tarball_mac(pkg, pkg_version_src, path_to_pkg_tarballs, R, pkg_buildlog)
 
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
-
     } #</FOR>
 
     ## Cleanup: close framebuffer

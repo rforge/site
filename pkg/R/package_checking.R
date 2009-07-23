@@ -25,10 +25,16 @@ check_packages <- function(email,
     stop("Building x86_64 binaries not possible on an x86_32 architecture") 
   ## check for necessary directories---create them if possible
   path_to_pkg_src <- control$path_to_pkg_src
+  print(path_to_pkg_src)
   path_to_pkg_log <- control$path_to_pkg_log
+  print(path_to_pkg_log)
   path_to_pkg_root <- control$path_to_pkg_root
+  print(path_to_pkg_root)
   path_to_check_dir <- control$path_to_check_dir
+  print(path_to_check_dir)
   path_to_local_library <- control$path_to_local_library
+  print(path_to_local_library)
+
   stoplist <- control$stoplist
   ## local package library
   if(!check_directory(path_to_local_library, fix=TRUE))
@@ -129,7 +135,7 @@ check_packages <- function(email,
     ## Prolog
     pkg_checklog <- paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
                           architecture, "-checklog.txt", sep="")
-    write_prolog(pkg, pkg_checklog, path_to_pkg_src, type = "check", what = "tarball", std.out = TRUE)
+    write_prolog(pkg, pkg_checklog, pkg_db_src, type = "check", what = "tarball", std.out = TRUE)
     
     ## get additional arguments to R CMD check (e.g., --no-vignettes, --no-tests, ...)
     check_arg <- get_check_args(pkg, check_args)

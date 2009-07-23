@@ -6,16 +6,17 @@ R_Forge_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
                             mail_programme = "mail",
                             path_to_check_dir = "",
                             cpu_time_limit = 600){
-  structure(list(path_to_pkg_src  = path_to_pkg_src,
+  structure(list(cpu_time_limit = cpu_time_limit,
+                 mail_domain_name_of_sender = mail_domain_name_of_sender,
+                 mail_programme = mail_programme,
+                 mail_relay_server = mail_relay_server,
+                 path_to_check_dir = path_to_check_dir,
+                 path_to_local_library = path_to_local_library,
+                 path_to_local_texmf = path_to_local_texmf,
                  path_to_pkg_log  = path_to_pkg_log,
                  path_to_pkg_root = path_to_pkg_root,
-                 path_to_local_texmf = path_to_local_texmf,
-                 path_to_local_library = path_to_local_library,
-                 stoplist = stoplist,
-                 mail_domain_name_of_sender = mail_domain_name_of_sender,
-                 mail_relay_server = mail_relay_server,
-                 mail_programme = mail_programme,
-                 cpu_time_limit = cpu_time_limit),
+                 path_to_pkg_src  = path_to_pkg_src,
+                 stoplist = stoplist),
             class = "R-Forge_control")
 }
 
@@ -178,10 +179,20 @@ paste(file.path(path_to_pkg_log, pkg), "-", platform,
                                "-", architecture, "-buildlog.txt", sep = "")
 }
 
-write_prolog <- function(pkg, file, path_to_pkg_src, type = c("build", "check"), what = c("tarball", "binary"), std.out = FALSE){
+write_prolog <- function(pkg, file, pkg_db, type = c("build", "check"), what = c("tarball", "binary"), std.out = FALSE){
   type <- match.arg(type)
   what <- match.arg(what)
-  pkg_revision <- read.dcf(file = file.path(path_to_pkg_src, pkg, "DESCRIPTION"), fields = "Repository/R-Forge/Revision")
+  field = "Repository/R-Forge/Revision"
+  if(what == "tarball"){
+     pkg_revision <- tryCatch(pkg_db$src[pkg, field], error = identity)
+     if(inherits(pkg_revision, "error"))
+        pkg_revision <- NA
+  }
+  else {
+     pkg_revision <- tryCatch(pkg_db$src[pkg, field], error = identity)
+     if(inherits(pkg_revision, "error"))
+        pkg_revision <- NA
+  }
   ## R CMD build message
   if(type == "build")
     msg <- paste(date(), ": Building ", what, " for package ", pkg, " (SVN revision ", pkg_revision,
