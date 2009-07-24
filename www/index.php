@@ -47,7 +47,7 @@ echo $contents; } ?>
 
 <p><b>Rebuild R</b>: 19:00 CET.</p>
 <hr>
-<p><b>Exportation of R package sources</b> (this also includes an update of the R Packages tab): 21:00 CET.</p>
+<p><b>Exportation of R package sources</b> (this also includes an update of the R Packages tab): 20:30 CET.</p>
 <p><b>Sync unpacked package sources to build machine</b>: 21:45 CET.</p>
 <p><b>Building of R source packages (.tar.gz)</b>: 22:00 CET.</p>
 <p><b>Sync package sources (.tar.gz) to R-Forge</b>: 23:30 CET.</p>
