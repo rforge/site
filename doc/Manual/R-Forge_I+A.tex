@@ -12,7 +12,7 @@
 
 \title{R-Forge Installation and Administration Manual, ALPHA}
 \author{\RFORGE}
-\date{\today}
+\date{\today}} \newline } \newline 
 
 \let\code=\texttt
 \let\email=\texttt
@@ -23,7 +23,7 @@
 \begin{document}
 
 \pagestyle{empty}
-
+} \newline 
 
 
 \begin{titlepage}
@@ -171,8 +171,24 @@ add key information
 
 \fboxrule=0.5mm
 \fcolorbox{black}{gray}
-{theussl@xmrforge1:~$ mkdir svn \newline {cd svn} \newline svn co svn://svn-statmath.wu.ac.at/radmin radmin}
+{theussl@xmrforge1:~$ mkdir svn 
+{cd svn} 
+svn co svn://svn-statmath.wu.ac.at/radmin radmin}
 %$
+
+
+\item configure ssh daemon 
+\fboxrule=0.5mm
+\fcolorbox{black}{gray}
+{copy sshd_config from radmin repository}
+
+\item configure rsync daemon 
+\fboxrule=0.5mm
+\fcolorbox{black}{gray}
+{copy rsyncd.conf from radmin repository and add line to inetd.conf}
+
+TODO * homeverzeichnis nach /srv linken
+
 \end{enumerate}
 
 
