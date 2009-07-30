@@ -128,42 +128,51 @@ LVM snapshot (xmrforge1-disk-snapshot).
 	hostname: xmrforge1 (already done.)
 \newline	Debian flavor: Lenny
 	
-	\item /etc/apt/sources.list
+\fboxrule=0.5mm
+\fcolorbox{black}{gray}
+{/etc/apt/sources.list}	
 
 	add the following entries:	
 	
 
-	 CRAN Debian Packages
-deb http://cran.r-project.org/bin/linux/debian lenny-cran/
-	 FusionForge packages
-deb http://fusionforge.fusionforge.org/debian lenny main
+CRAN Debian Packages
+\newline
+\fboxrule=0.5mm
+\fcolorbox{black}{gray}
+{deb http://cran.r-project.org/bin/linux/debian lenny-cran/}
 
+\newline FusionForge packages
+
+\newline
+\fboxrule=0.5mm
+\fcolorbox{black}{gray}
+{deb http://fusionforge.fusionforge.org/debian lenny main}
 
 add key information
 
-\begin{tabular}{|r|r|}
-\hline
-\ {gpg --recv-keys 06F90DE5381BA480 }\
-\\
-\hline
-\end{tabular}
+\fboxrule=0.5mm
+\fcolorbox{black}{gray}
+{gpg --recv-keys 06F90DE5381BA480}
 
-
-%	\item "gpg --recv-keys 06F90DE5381BA480"
-	\item "gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -"
+\fboxrule=0.5mm
+\fcolorbox{black}{gray}
+{gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -}
 
 	
-	\item base packages
-	
-	\item checkout radmin
-
 
 	\item base packages
 
-xmrforge1:~# aptitude install subversion joe emacs ess r-base r-recommended bzip2 rsync less
+\newline
+\fboxrule=0.5mm
+\fcolorbox{black}{gray}
+{xmrforge1:~# aptitude install subversion joe emacs ess r-base r-recommended bzip2 rsync less}
 
 	\item checkout radmin
 
+\fboxrule=0.5mm
+\fcolorbox{black}{gray}
+{theussl@xmrforge1:~$ mkdir svn \newline {cd svn} \newline svn co svn://svn-statmath.wu.ac.at/radmin radmin}
+%$
 \end{enumerate}
 
 
