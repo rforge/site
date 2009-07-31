@@ -15,7 +15,8 @@
 
 \title{R-Forge Installation and Administration Manual, ALPHA}
 \author{\RFORGE}
-\date{\today}} \newline } \newline 
+\date{\today}
+
 
 \let\code=\texttt
 \let\email=\texttt
@@ -25,9 +26,7 @@
 
 \begin{document}
 
-\pagestyle{empty}
-} \newline 
-
+\pagestyle{empty} 
 
 \begin{titlepage}
 
@@ -128,8 +127,8 @@ LVM snapshot (xmrforge1-disk-snapshot).
 \begin{enumerate}
 	\item Systemconfiguration:
 	
-	hostname: xmrforge1 (already done.)
-\newline	Debian flavor: Lenny
+	hostname: xmrforge1 (already done.)\\
+        Debian flavor: Lenny
 	
 \fboxrule=0.5mm
 \fcolorbox{black}{gray}
@@ -138,15 +137,14 @@ LVM snapshot (xmrforge1-disk-snapshot).
 	add the following entries:	
 	
 
-CRAN Debian Packages
-\newline
+CRAN Debian Packages\\
+
 \fboxrule=0.5mm
 \fcolorbox{black}{gray}
 {deb http://cran.r-project.org/bin/linux/debian lenny-cran/}
+\\
+FusionForge packages
 
-\newline FusionForge packages
-
-\newline
 \fboxrule=0.5mm
 \fcolorbox{black}{gray}
 {deb http://fusionforge.fusionforge.org/debian lenny main}
@@ -165,25 +163,25 @@ add key information
 
 	\item base packages
 
-\newline
+
 \fboxrule=0.5mm
 \fcolorbox{black}{gray}
-{xmrforge1:~# aptitude install subversion joe emacs ess r-base r-recommended bzip2 rsync less}
+{xmrforge1:~\# aptitude install subversion joe emacs ess r-base r-recommended bzip2 rsync less}
 
 	\item checkout radmin
 
 \fboxrule=0.5mm
 \fcolorbox{black}{gray}
-{theussl@xmrforge1:~$ mkdir svn 
-{cd svn} 
-svn co svn://svn-statmath.wu.ac.at/radmin radmin}
-%$
+{theussl@xmrforge1:~\$ mkdir svn 
+cd svn
+svn co svn://svn-statmath.wu.ac.at/radmin radmin
+}
 
 
 \item configure ssh daemon 
 \fboxrule=0.5mm
 \fcolorbox{black}{gray}
-{copy sshd_config from radmin repository}
+{copy sshd\_config from radmin repository}
 
 \item configure rsync daemon 
 \fboxrule=0.5mm
