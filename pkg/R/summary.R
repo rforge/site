@@ -30,7 +30,7 @@ finalize_check_results <- function(check_results_dir, path_to_pkg_src, check_arg
   if(!check_directory(file.path(check_results_dir, "Results"), fix=TRUE))
     stop(paste("There is no directory", file.path(check_results_dir, "Results"),"!"))
   
-  today <- format(Sys.time(), "%F")
+  today <- format(Sys.time(), "%Y-%m-%d")
   results_archive <- file.path(check_results_dir, "Results", today)
 
   if(!check_directory(results_archive, fix=TRUE))
