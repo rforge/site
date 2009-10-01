@@ -86,7 +86,9 @@ build_packages <- function(email,
     check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
   }else check_args <- NULL
   no_install <- grep("--install=no", check_args[["check_args"]])
-  donotcompile <- check_args[no_install, "Package"]
+
+  #donotcompile <- check_args[no_install, "Package"]
+  donotcompile <- ""
   no_vignettes <- check_args[grep("--no-vignettes", check_args[["check_args"]]), "Package"]
 
   if( length(donotcompile) ){
@@ -100,7 +102,7 @@ build_packages <- function(email,
   }
   
   ## Packages exported from R-Forge's SVN repositories
-  pkgs_all <- available.packages(contriburl =
+  pkgs_all <- available.packages2(contriburl =
                                          sprintf("file:///%s", path_to_pkg_src))[, 1]
   ## Sort out packages that are on the exclude list
   pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
@@ -146,7 +148,7 @@ build_packages <- function(email,
                                  "contrib", maj.version)
   }else {
     ## UNIX SOURCE directory
-    path_to_contrib_dir <- file.path(path_to_pkg_root, "src", "contrib")
+    path_to_contrib_dir <- contrib.url(path_to_pkg_root, type = "source")
   }
   if(!check_directory(path_to_contrib_dir, fix=TRUE, recursive=TRUE))
       stop(paste("There is no directory", dir,"!"))
@@ -184,12 +186,29 @@ build_packages <- function(email,
       ## timer start
       proc_start <- proc.time()
 
-      build_args <- if(pkg %in% no_vignettes)
-        "--no-vignettes" else ""
+      ## build only a new tarball if there is a new revision in the SVN
+      ## FIXME: we probably need to check this at SVN export
+      tarball_revision <- tryCatch(as.integer(pkg_db_src$src[pkg, "Repository/R-Forge/Revision"]),
+                                   error = identity)
+      build <- TRUE
+      if(!inherits(tarball_revision, "error")){
+        source_revision <- as.integer(pkg_db_src$svn[pkg, "Repository/R-Forge/Revision"])
+        if(!any(is.na(c(source_revision, tarball_revision))))
+          if(source_revision <= tarball_revision){
+            status <- .copy_tarball_from_repository(pkg, contrib.url(path_to_pkg_root), path_to_pkg_src,
+                                                    pkg_db_src$src[pkg, "Version"], pkg_buildlog)
+            build <- !status
+          }
+      }
+      
+      if(build){
+        build_args <- if(pkg %in% no_vignettes)
+          "--no-vignettes" else ""
 
-      ## build tarball from sources
-      .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
-    
+        ## build tarball from sources
+        .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
+      }
+
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
     
@@ -304,6 +323,11 @@ build_packages <- function(email,
                ">>", pkg_buildlog, "2>&1"))
   pkg_version <- get_package_version_from_sources(pkg)
   invisible(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
+}
+
+.copy_tarball_from_repository <- function(pkg, pkg_root, pkg_src, pkg_version, pkg_buildlog){
+  cat("Package up to date. Not building ...\n", file = pkg_buildlog, append = TRUE)
+  file.copy(file.path(pkg_root, paste(pkg, "_", pkg_version, ".tar.gz", sep = "")), pkg_src)
 }
 
 ## OS: Windows

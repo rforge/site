@@ -8,19 +8,27 @@
 source("~/svn/RForgeTools/R/utilities.R")
 source("~/svn/RForgeTools/R/update_package_db.R")
 
+## local library path (this is where the packages get installed to)
+maj.version <- paste(R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
+local_lib <- file.path(Sys.getenv("R_LIBS"), maj.version)
+## we have to set 'R_LIBS' again otherwise package dependencies are not found
+Sys.setenv("R_LIBS" = local_lib)
+
 ## IMPORTANT:
 ## setup control file
 control <- list()
-control$path_to_pkg_src            <- "/srv/R/tmp"             ## R-Forge pkg sourced tmp for testing purposes
+control$path_to_pkg_src            <- "/srv/R/pkgs"        ## R-Forge pkg sourced tmp for testing purposes
 control$path_to_pkg_log            <- "/home/theussl/log"             ## Log directory
-control$path_to_pkg_root           <- "/home/theussl/test"          ## R-Forge root (contains /src ,/bin)
+control$path_to_pkg_root           <- "/srv/R/R-Forge"          ## R-Forge root (contains /src ,/bin)
 control$path_to_local_texmf        <- "/srv/R/share/texmf"      ## path to local texmf
-control$path_to_local_library      <- Sys.getenv("R_LIBS")      ## path to local pkg library
+control$path_to_local_library      <- local_lib      ## path to local pkg library
 control$stoplist                   <- ""                      ## path to stoplist
+control$cpu_time_limit             <- 600           ## CPU time limit
 ## mail configuration
 control$mail_domain_name_of_sender <- system("hostname -f", intern = TRUE) ## "xmaragorn64.wu-wien.ac.at" 
-control$mail_relay_server <- "statmath.wu-wien.ac.at"           ## only necessary with sendEmail
+control$mail_relay_server <- "statmath.wu.ac.at"           ## only necessary with sendEmail
 control$mail_programme <- "mail"                                ## on Windows: sendEmail
+class(control) <- "R-Forge_control"
 
 ## start building ...
 ## typically here is a call 

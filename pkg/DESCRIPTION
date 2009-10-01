@@ -1,6 +1,6 @@
 Package: RForgeTools
-Version: 0.4-2
-Date: 2009-07-23
+Version: 0.4-3
+Date: 2009-10-01
 Title: R-Forge Build and Check Tools
 Description: This package contains platform-independent package building and quality management code used on the R-Forge servers. Furthermore, this package provides a set of tools for analyzing the R-Forge web logs.
 Author: Stefan Theussl
