@@ -92,13 +92,16 @@ resolve_dependencies <- function(pkgs, available){
     x <- list(as.vector(x))
     names(x) <- pkgs
   }
-  bundles <- utils:::.find_bundles(available)
-  x <- lapply(x, function(x) if (length(x)) {
-    for (bundle in names(bundles)) x[x %in% bundles[[bundle]]] <- bundle
-         x <- x[!x %in% c("R", "NA")]
-    unique(x)
+  ## bundles are defunct in 2.11 ...
+  bundles <- tryCatch(utils:::.find_bundles(available), error = identity)
+  if(! inherits(bundles, "error") ){
+    x <- lapply(x, function(x) if (length(x)) {
+      for (bundle in names(bundles)) x[x %in% bundles[[bundle]]] <- bundle
+      x <- x[!x %in% c("R", "NA")]
+      unique(x)
+    }
+    else x)
   }
-  else x)
   x
 }
 
