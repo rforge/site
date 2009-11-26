@@ -30,7 +30,7 @@ R_Forge_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
 
 create_package_db_src <- function(svn_url, src_url){
   fields <- .get_rforge_repository_db_fields()
-  pkg_db <- list(svn = available.packages(svn_url, fields = fields),
+  pkg_db <- list(svn = available.packages2(svn_url, fields = fields),
                  src = available.packages(src_url, fields = fields))
   class(pkg_db) <- "pkg_db"
   pkg_db

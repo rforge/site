@@ -73,7 +73,7 @@ build_packages <- function(email,
   if(!check_directory(path_to_pkg_root, fix=TRUE))
     stop(paste("There is no directory", dir,"!"))
   ## source tarballs
-  URL_pkg_sources <- contrib.url(sprintf("file:///%s", path_to_pkg_root), type = "source")
+  URL_pkg_sources <- contrib.url(sprintf("file://%s", path_to_pkg_root), type = "source")
   ## get current working directory -> set back at FINALIZATION step
   old_wd <- getwd()
   
@@ -85,11 +85,14 @@ build_packages <- function(email,
   if(file.exists(stoplist)){
     check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
   }else check_args <- NULL
-  no_install <- grep("--install=no", check_args[["check_args"]])
 
-  #donotcompile <- check_args[no_install, "Package"]
+  ## for Linux builds we don't want to build vignettes ich checkargs have:
+  no_install   <- check_args[ grep("--install=no",   check_args[["check_args"]]), "Package" ]
+  fake_install <- check_args[ grep("--install=fake", check_args[["check_args"]]), "Package" ]
+  no_vignettes <- check_args[ grep("--no-vignettes", check_args[["check_args"]]), "Package" ]
+
+  ## donotcompile <- no_install
   donotcompile <- ""
-  no_vignettes <- check_args[grep("--no-vignettes", check_args[["check_args"]]), "Package"]
 
   if( length(donotcompile) ){
     for(pkg in donotcompile){
@@ -103,12 +106,12 @@ build_packages <- function(email,
   
   ## Packages exported from R-Forge's SVN repositories
   pkgs_all <- available.packages2(contriburl =
-                                         sprintf("file:///%s", path_to_pkg_src))[, 1]
+                                         sprintf("file://%s", path_to_pkg_src))[, 1]
   ## Sort out packages that are on the exclude list
   pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
   
   ## create package data base holding information about available repositories
-  pkg_db_src <- create_package_db_src(svn = sprintf("file:///%s", path_to_pkg_src),
+  pkg_db_src <- create_package_db_src(svn = sprintf("file://%s", path_to_pkg_src),
                                       src = URL_pkg_sources)
   if(platform != "Linux"){
     ## where are the source tarballs already available from R-Forge?
@@ -202,9 +205,10 @@ build_packages <- function(email,
       }
       
       if(build){
-        build_args <- if(pkg %in% no_vignettes)
-          "--no-vignettes" else ""
-
+        build_args <- if( pkg %in% c(no_vignettes, no_install, fake_install) )
+          "--no-vignettes"
+        else
+          ""
         ## build tarball from sources
         .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
       }
