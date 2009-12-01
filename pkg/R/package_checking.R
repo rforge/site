@@ -15,6 +15,10 @@ check_packages <- function(email,
     stop("No R-Forge control object given")
 
   ## INITIALIZATION
+
+  ## Warning: temporary global check args should not be set!
+  ##global_check_arg <- NULL
+  global_check_arg <- "--no-examples --no-tests --no-vignettes"
   
   ## match arguments
   platform <- match.arg(platform) ## FIXME: automat. use info from .Platform?
@@ -135,17 +139,28 @@ check_packages <- function(email,
     ## Prolog
     pkg_checklog <- paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
                           architecture, "-checklog.txt", sep="")
-    write_prolog(pkg, pkg_checklog, pkg_db_src, type = "check", what = "tarball", std.out = TRUE)
+    write_prolog(pkg, pkg_checklog, pkg_db_src, type = "check",
+                 what = "tarball", std.out = TRUE)
     
-    ## get additional arguments to R CMD check (e.g., --no-vignettes, --no-tests, ...)
+    ## additional arguments to R CMD check (--no-vignettes, --no-tests, etc.)
     check_arg <- get_check_args(pkg, check_args)
+    ## FIXME: global check args
+    ##        there should be a default check args for new packages
+    ##        should be checked only if the admins allow it
+    if( (!is.null(global_check_arg)) && (length(check_arg) == 0) )
+      check_arg <- global_check_arg
     if(length(check_arg))
       cat(paste("Additional arguments to R CMD check:", check_arg, "\n"), file = pkg_checklog, append = TRUE)
-
+    
     pkg_url <- file.path(gsub("file:///", "", pkg_db_src$src[pkg, "Repository"]),
                          sprintf("%s_%s.tar.gz", pkg, pkg_db_src$src[pkg, "Version"]))
-    timings[pkg] <- system.time(system(paste(R, "CMD check", check_arg, pkg_url, ">>",
-                                             pkg_checklog, "2>&1")))["elapsed"]
+    ## NOTE: On Windows we should use shell() instead of system()
+    ##       otherwise pipes and redirections fail (see also ?system)
+    timings[pkg] <- ifelse( platform == "Windows",    
+      system.time(shell(paste(R, "CMD check", check_arg, pkg_url, ">>",
+                              pkg_checklog, "2>&1")))["elapsed"],
+      system.time(system(paste(R, "CMD check", check_arg, pkg_url, ">>",
+                                             pkg_checklog, "2>&1")))["elapsed"] )
     ## Epilog
     write_epilog(pkg_checklog, timings[pkg], std.out = TRUE)
   }

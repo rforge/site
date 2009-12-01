@@ -84,21 +84,27 @@ build_packages <- function(email,
   ## when checking packages the stoplist includes additional arguments to check process
   if(file.exists(stoplist)){
     check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
-  }else check_args <- NULL
-
-  ## for Linux builds we don't want to build vignettes ich checkargs have:
+  }else check_args <- NULL  
+  if(length(no_install))
+    no_install <- check_args[no_install, 1]
+  
+  ## for Linux builds we don't want to build vignettes when checkargs have:
   no_install   <- check_args[ grep("--install=no",   check_args[["check_args"]]), "Package" ]
   fake_install <- check_args[ grep("--install=fake", check_args[["check_args"]]), "Package" ]
   no_vignettes <- check_args[ grep("--no-vignettes", check_args[["check_args"]]), "Package" ]
 
   ## donotcompile <- no_install
   donotcompile <- ""
+  if(platform %in% c("Windows", "MacOSX")){
+    donotcompile <- c(donotcompile, no_install)
+  }
 
   if( length(donotcompile) ){
     for(pkg in donotcompile){
       arch <- "all"
-      if(platform %in% c("Windows", "MacOSX"))
+      if(platform %in% c("Windows", "MacOSX")){
         arch <- architecture
+      }
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture = arch)
       write_stoplist_notification(pkg, pkg_buildlog, "build", std.out = TRUE)
     }
@@ -356,10 +362,11 @@ build_packages <- function(email,
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
 .build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
-  system(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
+  shell(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
                file.path(path_to_pkg_tarballs, "src", "contrib",
                          paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),
-               ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+                 ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+  ##               ">>", pkg_buildlog))#, invisible = TRUE)
   invisible(paste(pkg, "_", pkg_version, ".zip", sep = ""))
 }
 

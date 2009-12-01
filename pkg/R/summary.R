@@ -1,6 +1,11 @@
 ## TODO: time_i.out
-finalize_check_results <- function(check_results_dir, path_to_pkg_src, check_args, timings,
-                                       check_results_files = c("SUMMARY", "check.csv", "time_c.out")){
+finalize_check_results <- function(check_results_dir, 
+                                   path_to_pkg_src, 
+                                   check_args, 
+                                   timings,
+                                   check_results_files = c("SUMMARY", 
+                                                           "check.csv", 
+                                                           "time_c.out")){
   ## search check directory for check results
   ## check_results_dir <- "/srv/rsync/R-Forge.check/R-devel"
   ## path_to_pkg_src <- "/srv/R/pkgs"
@@ -9,11 +14,17 @@ finalize_check_results <- function(check_results_dir, path_to_pkg_src, check_arg
   Rcheck <- Rcheck[grep(".Rcheck$", Rcheck)]
   ## successfully checked
   ##pkgs <- gsub(".Rcheck$", "", Rcheck)
-  
+  path_to_install_logs <- file.path(check_results_dir, "installout")
+  if(!file.exists(path_to_install_logs))
+    dir.create(path_to_install_logs)
   ## provide DESCRIPTION metadata in directories with check results
+  ## FIXME: only works on Linux as path_to_pkg_src is only there available
   for(dir in Rcheck){
     pkg <- gsub(".Rcheck$", "", dir)
-    file.copy(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), file.path(PKGS, dir, "00package.dcf"))
+    file.copy(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), 
+              file.path(PKGS, dir, "00package.dcf"))
+    file.copy(file.path(PKGS, dir, "00install.out"), 
+              file.path(path_to_install_logs, sprintf("%s_install.out", pkg)))
   }
   
   ## save old check results
@@ -28,7 +39,8 @@ finalize_check_results <- function(check_results_dir, path_to_pkg_src, check_arg
   }
 
   if(!check_directory(file.path(check_results_dir, "Results"), fix=TRUE))
-    stop(paste("There is no directory", file.path(check_results_dir, "Results"),"!"))
+    stop(paste("There is no directory", file.path(check_results_dir, "Results"),
+               "!"))
   
   today <- format(Sys.time(), "%Y-%m-%d")
   results_archive <- file.path(check_results_dir, "Results", today)
@@ -48,13 +60,16 @@ finalize_check_results <- function(check_results_dir, path_to_pkg_src, check_arg
   ##mv Work/time_c.out time_c.out
   ##mv Work/time_i.out time_i.out
 
-  write_check_timings(file = file.path(check_results_dir, "time_c.out"), Rcheck, timings)
+  write_check_timings(file = file.path(check_results_dir, "time_c.out"), 
+                      Rcheck, timings)
   
   ## Create check.csv.
-  write_check_csv(file = file.path(check_results_dir, "check.csv"), Rcheck, PKGS, path_to_pkg_src, check_args)
+  write_check_csv(file = file.path(check_results_dir, "check.csv"), Rcheck, 
+                  PKGS, path_to_pkg_src, check_args)
 
   ## Create SUMMARY.
-  write_check_SUMMARY(file = file.path(check_results_dir, "SUMMARY"), Rcheck, PKGS, path_to_pkg_src)
+  write_check_SUMMARY(file = file.path(check_results_dir, "SUMMARY"), Rcheck, 
+                      PKGS, path_to_pkg_src)
 
   for(file in check_results_files){
     file.copy(file, results_archive)
@@ -81,10 +96,14 @@ write_check_csv <- function(Rcheck, check_dir, path_to_pkg_src, check_args, file
     suppressWarnings(priority <- tryCatch(read.dcf(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), "Priority")[1], error = identity))
     if(inherits(priority, "error"))
       priority <- NA
-    suppressWarnings(maintainer <- tryCatch(read.dcf(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), "Maintainer")[1], error = identity))
+    suppressWarnings(maintainer <- tryCatch(read.dcf(file.path(path_to_pkg_src, 
+      pkg, "DESCRIPTION"), "Maintainer")[1], error = identity))
     if(inherits(maintainer, "error"))
       maintainer <- NA
-    checklog <- readLines(file.path(check_dir, dir, "00check.log"))
+    suppressWarnings(checklog <- tryCatch(readLines(file.path(check_dir, dir, 
+      "00check.log")), error = identity))
+    if(inherits(checklog, "error"))
+      checklog <- "ERROR: no check log found (RForgeTools)"      
     warnings <- grep("WARNING$", checklog, fixed = TRUE, useBytes = TRUE)
     errors <- grep("ERROR", checklog, fixed = TRUE, useBytes = TRUE)
     if(length(errors))
@@ -113,7 +132,10 @@ write_check_SUMMARY <- function(Rcheck, check_dir, path_to_pkg_src, file = "SUMM
   for(i in 1:len){
     dir <- Rcheck[i]
     pkg <- gsub(".Rcheck$", "", dir)
-    checklog <- readLines(file.path(check_dir, dir, "00check.log"))
+    suppressWarnings(checklog <- tryCatch(readLines(file.path(check_dir, dir, 
+      "00check.log")), error = identity))
+    if(inherits(checklog, "error"))
+      checklog <- "ERROR: no check log found (RForgeTools)"
     problems <- grep("(^\\*\tRd files|^\'*\tnon-standard|(WARNING|ERROR)$)", checklog)
     suppressWarnings(maintainer <- tryCatch(read.dcf(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), "Maintainer")[1], error = identity))
     if(inherits(maintainer, "error"))
@@ -141,8 +163,12 @@ write_check_diffs <- function(check_dir, files = "check.csv"){
   files <- file.path(check_dir, files)
   for(file in files){
     if(file.exists(sprintf("%s.prev", file))){
-      system(sprintf("diff %s.prev %s > %s.diff", file, file, file))
-      system(sprintf("test -s %s.diff || rm -f %s.diff", file, file))
+      ifelse( .Platform$OS.type == "windows",
+              shell(sprintf("diff %s.prev %s > %s.diff", file, file, file)),
+              system(sprintf("diff %s.prev %s > %s.diff", file, file, file)) )
+      ifelse( .Platform$OS.type == "windows",
+             shell(sprintf("test -s %s.diff || rm -f %s.diff", file, file)),
+             system(sprintf("test -s %s.diff || rm -f %s.diff", file, file)) )
     }
     
     if(file.exists(sprintf("%s.diff", file))){
