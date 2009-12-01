@@ -1,164 +1,50 @@
-## rforge_prepare_pkgs in R
+## rforge_prepare_pkgs
+## Author: Stefan Theussl
+## The following functions search for DESCRIPTION under directory pkg of all R-Forge
+## SVN repositories. It then exports all found DESCRIPTION files, builds up
+## the package database and exports the package source codes. 
 
-#library(RPostgreSQL)
+## NOTE: can be removed when it is included in the RForgeTools package
+library(RdbiPgSQL)
 library(tools)
 
-logfile = "/var/log/R/Rbuild.log"
+## 
+logfile <- "~/Rbuild_temp.log"
+#logfile <- "/var/log/R/Rbuild.log"
 
 # directory where the work is done
 # Note: $pkg_dir should absolute (required for the R code)
-pkg_dir = "/srv/rsync/pkgs"
+pkg_dir <- "/home/theussl/pkgs_temp"
+#pkg_dir <- "/srv/rsync/pkgs"
 
 ## svn repository
-svn_dir = "/srv/svn"
-svn_url = "svn://svn.r-forge.r-project.org/svnroot/"
+svn_dir <- "/srv/svn"
+svn_url <- "svn://svn.r-forge.r-project.org/svnroot/"
 
 ## GForge plugin RPlugin -> target DB table
-table = "plugin_rforge_package_db"
+table <- "plugin_rforge_package_db"
+
+
+con <- dbConnect(PgSQL(), dbname="gforge", user="plugin_rforge", password="jenslf0r2");
 
 
 
 
-
-## helper functions
-
-## safe SQL parameter quoting
-qq <- function(x) {
-		x[is.na(x)]="" # we don't want literal 'NA's in the db
-		paste(paste("'",gsub("'","''",x),"'",sep=""), collapse=", ")
-}
-
-## Convert local time to UTC
-getUtcTime <- function(time) {
-		# as.POSIXct is the only function that properly handles ISO8601 dates with timezones 
-		# as.POSIXlt, strptime, etc. are useless here
-		format(as.POSIXct(time), tz="GMT") 
-}
-
-## send out email in case of naming conflict
-conflict_error <- function(pkg1, pkg2, rep, email) {
-	msg = sprintf("Error: Package %s was found in %s, 
-		but a package of the same name was found in %s.
-		Only the one in %s will be built.", pkg1, rep, pkg2, pkg2)
-	email = gsub("'", "'\\''", email); # shell escape
-	system(sprintf('echo "%s" | mail -s "R-Forge: Package name conflict" -c r-forge@r-project.org \'%s\'', msg, email))
-	cat("Inserting ", pkg1, " failed!\n")
-	return(1)
-}
-
-## get revison and time of that revision from svn 
-getRevTime <- function(path) {
-	err = tryCatch(
-	{
-		cc = pipe(open="r", sprintf("svn info \"%s\"", path))
-		x = read.dcf(cc)
-		ret = list(rev=as.integer(x[1,'Revision']), 
-			time=as.POSIXct(x[1,'Last Changed Date']))
-		close(cc)
-		FALSE
-	}, error=function(e) TRUE)
-	if (err) return(NA)
-	else return(ret)
-}
-
-## Is the date in DESCRIPTION valid?
-## The DB 
-sanitizeDate <- function(date) {
-	posix_date = tryCatch(as.POSIXlt(date), error=function(e) NA)
-	if (is.na(posix_date) || posix_date[['year']] < 0) return("")
-	return(as.character(posix_date))
-}
-	
-
-
-
-
-
-
-
-## doesn't work, but let's pretend it does...
-#drv <- dbDriver("PostgreSQL")
-#con <- dbConnect(drv, dbname="gforge", user="plugin_rforge", password="jenslf0r2");
-## dummies for SQl testing. Remove for production use
-
-
-
-con = 1
 dbSendQuery <- function(con, sql) {cat("SQL:\n", sql, "\n") }
 
 
-cat("--------------------------\n- Exportation of packages\n- ", date(), "\n\n");
+##cat("--------------------------\n- Exportation of packages\n- ", date(), "\n\n");
 
-
-if (!file.exists(pkg_dir)) create.dir(pkg_dir, recursive=TRUE)
-
-setwd(pkg_dir)
-system("rm -rf *");
 
 pkgs = character()
 
 dbSendQuery(con, "BEGIN;")
 dbSendQuery(con, paste("DELETE FROM", table, ";"));
 
-packages_db = read.dcf(url("http://cran.at.r-project.org/src/contrib/PACKAGES"))
 
-svnreps = list.files(svn_dir)
 
-for (rep in svnreps) {
-	cat(":", rep, ":\n")
-	
-	if (file.exists(paste(svn_dir, "/", rep, "/format", sep=""))) {
-		## get all DESCRIPTIONs per project
-		descs = grep("^pkg/([^/]+/)?DESCRIPTION$", 
-			system(sprintf("svnlook tree --full-paths %s/%s", svn_dir, rep), intern=TRUE), 
-			value=TRUE, perl=TRUE)
 
-                ## encapsulate redundant parts (external repository).
-		for (desc in descs) {
-			## export the DESCRIPTION
-			descname = paste(rep, ".", gsub("/", ".", desc), sep="")
-			system(sprintf("svn export file://%s/%s/%s %s", 
-				svn_dir, rep, desc, descname))
-			vars = tryCatch(tools:::.read_description(descname), error=function(e) "ERROR")
-			if (vars[1]=="ERROR") {warning("Improper Desc Format");next}
-			### ^^^ Test this!
-			
-			## do checks, collect info
-			pkg_name = vars['Package']
-			if (! is.na(pkgs[pkg_name])) {
-				conflict_error(pkg_name, pkgs[pkg_name], rep, vars['Maintainer'])
-				next
-			}
-			rt = getRevTime(file.path(svn_url, rep))
-			if (is.na(rt)) next
-			
-			rev = rt[[1]]; time = rt[[2]]
-			check_errors <- tryCatch(tools:::.check_package_description(descname), error=function(e) "ERROR")
-			if(length(check_errors) > 0) { cat("Improper Desc Format ", desc);next}
-			cran = packages_db[which(packages_db[,'Package']==pkg_name),'Version'] # version on cran
-			
-			## build SQL and run it
-			insert = paste("INSERT INTO", table, "(pkg_name, unix_group_name, version, title, description, author, license, pkg_date, last_change, rev, maintainer, cran_release) VALUES (", 
-				qq(c(pkg_name, rep, vars['Version'], vars['Title'],
-				vars['Description'], vars['Author'], vars['License'], sanitizeDate(vars['Date']), time, rev, vars['Maintainer'], cran)), 
-				");")
-			cat("Run SQL: ", insert, "\n")
-			dbSendQuery(con, insert)
-			
-			## Export the complete package from SVN
-			descdir = dirname(desc)
-			system(sprintf("svn export file://%s/%s/%s %s",
-				svn_dir, rep, descdir, pkg_name))
-			
-			## Patch DESCRIPTION with custom fields
-			vars['Repository'] = 'R-Forge'
-			vars['Repository/R-Forge/Project'] = rep
-			vars['Repository/R-Forge/Revision'] = rev
-			vars['Publication/Date'] = getUtcTime(time)
-			write.dcf(matrix(vars, 1, length(vars), dimnames=list(NULL, names(vars))), file=file.path(pkg_name, "DESCRIPTION"))
-		}
-	}
-}
+
 
 ## Finish DB operations and clean up
 dbSendQuery(con, "COMMIT;")
@@ -200,4 +86,6 @@ cat("\n- ", date(), " - done\n--------------------------\n\n");
 ##########
 ## DONE ##
 ##########
+
+
 
