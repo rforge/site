@@ -95,7 +95,7 @@ build_packages <- function(email,
   ## donotcompile <- no_install
   donotcompile <- character(0)
   if(platform %in% c("Windows", "MacOSX")){
-    donotcompile <- c(donotcompile, no_install)
+    donotcompile <- unique(c(donotcompile, no_install))
   }
 
   if( length(donotcompile) ){
@@ -275,7 +275,7 @@ build_packages <- function(email,
     timings <- numeric(length(avail_src_pkgs))
     names(timings) <- avail_src_pkgs
     
-    for( pkg in avail_src_pkgs ){
+    for( pkg in pkgs ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
       write_prolog(pkg, pkg_buildlog, pkg_db_src,
@@ -344,7 +344,7 @@ build_packages <- function(email,
     names(timings) <- avail_src_pkgs
 
     ## BUILDING FROM PKG TARBALLS
-    for(pkg in avail_src_pkgs){
+    for(pkg in pkgs){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
       write_prolog(pkg, pkg_buildlog, pkg_db_src,
