@@ -23,8 +23,10 @@ R_Forge_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
 ## build package data base
 ## reads PACKAGES file in given src (tarball) and SVN repositories
 
-## svn_url: package sources exported from SVN repository
-## src_url: built package sources, the .tar.gz 
+## svn_url: package sources exported from SVN repository,
+##          or on binary builders the tarballs
+## src_url: built package sources, the .tar.gz,
+##          or on binary builders the binaries (see below win and mac urls)
 ## win_url: built package binary (Windows), the .zip
 ## mac_url: built package binary (Mac), the .tgz 
 
@@ -49,6 +51,7 @@ create_package_db_all <- function(svn_url, src_url, win_url, mac_url){
 .get_rforge_repository_db_fields <- function(){
   c("Package", "Version", "Repository/R-Forge/Revision")
 }
+
 
 ## Function definition of version ordering functions
 ## given two version number, this function returns the order of them
