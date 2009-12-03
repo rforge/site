@@ -15,7 +15,7 @@
 "graphviz","GPL",2.21,2.25,"http://www.graphviz.org/Download_windows.php","Graph Visualization Software"
 "gs","GPL",8.63,8.64,"http://pages.cs.wisc.edu/~ghost/","GPL Ghostscript"
 "gsl","GPL",1.12,1.12,"http://www.stats.ox.ac.uk/pub/Rtools/libgsl.zip","GNU Scientific Library"
-"GTK+","LGPL",2.10.11,2.16.4,"http://www.gtk.org/download-windows.html","gtk+ Framework"
+"GTK+","LGPL",2.12.9,2.16.4,"http://downloads.sourceforge.net/gladewin32/","gtk+ Framework"
 "hdf5-support","http://www.hdfgroup.org/products/licenses.html",1.6.5,NA,"http://hdf.ncsa.uiuc.edu/HDF5/","Hierarchical Data Format 5"
 "htmlhelp","Microsoft EULA",4.74.8702.0,4.74.8702.0,"http://msdn.microsoft.com/en-us/library/ms669985(VS.85).aspx","HTML Help Workshop"
 "ImageMagick","ImageMagick License",6.4.3,6.5.4,"http://www.imagemagick.org/script/binary-releases.php","portable Win32 static at 16 bits-per-pixel"
@@ -40,3 +40,4 @@
 "WordNet","",3.0,NA,"",""
 "tiff","",3.8.2,NA,"",""
 "Zlib","http://www.zlib.net/zlib_license.html",1.2.3,NA,"http://gnuwin32.sourceforge.net/packages/zlib.htm","Zlib"
+
