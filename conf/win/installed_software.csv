@@ -9,7 +9,7 @@
 "FWTools",NA,NA,2.2.8,"http://fwtools.maptools.org/","Open source GIS binary kit for Windows and Linux: provides among others proj and GDAL"
 "fftw","GPL-2",3.1.2,3.2.2,"http://www.fftw.org/install/windows.html","C subroutine library for computing the discrete Fourier transform"
 "gd",NA,2.0.33,2.0.33,"http://www.libgd.org/Downloads","gd"
-"gdal","",1.6.1,NA,"",""
+"gdal","",1.6.3,NA,"http://spatial.nhh.no/R/rgdal","rgdal requirements prepared by Roger Bivand"
 "ggobi","Common Public License",2.1.7,2.1.8,"http://www.ggobi.org/downloads/","Open source visualization program for exploring high-dimensional data"
 "gmp","",4.2.4,NA,"",""
 "graphviz","GPL",2.21,2.25,"http://www.graphviz.org/Download_windows.php","Graph Visualization Software"
