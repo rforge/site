@@ -34,7 +34,8 @@ build_packages <- function(email,
                            architecture  = c("x86_32", "x86_64"),
                            rforge_url    = "http://R-Forge.R-project.org",
                            cran_url      = "http://CRAN.R-project.org",
-                           bioc_url      = "http://bioconductor.org/packages/release/bioc",
+                           bioc_url      =
+                             "http://bioconductor.org/packages/release/bioc",
                            omega_hat_url = "http://www.omegahat.org/R",
                            control       = list()){
 
@@ -285,7 +286,7 @@ build_packages <- function(email,
       ## timer start
       proc_start <- proc.time()
 
-      ## look out for version (tarball, thus svn in pkg!)
+      ## get current package version (tarball, thus svn in pkg!)
       pkg_version_src   <- pkg_db_src$svn[pkg, "Version"]
       
       ## FIXME: some packages do not get a Revision flag. Why?
@@ -354,30 +355,50 @@ build_packages <- function(email,
       proc_start <- proc.time()
       ## path to pkg buildlog 
 
-      ## look out for version number	
-      pkg_version_src   <- avail_rforge[Package = pkg, "Version"]
+       ## get current package version (tarball, thus svn in pkg!)
+      pkg_version_src   <- pkg_db_src$svn[pkg, "Version"]
+      
       ## FIXME: some packages do not get a Revision flag. Why?
-      pkg_revision_tmp  <- avail_rforge[Package = pkg,
-                                        "Repository/R-Forge/Revision"]
-      pkg_revision_src <- if(is.na(pkg_revision_tmp)) 
-      		            0L
-			  else 
-			   pkg_revision_tmp 
+      binary_revision <-
+        tryCatch(as.integer(pkg_db_src$src[pkg, "Repository/R-Forge/Revision"]),
+                 error = identity)      
+      build <- TRUE
+      ## for devel we build all packages
+      if( !(R.version$status == "Under development (unstable)") ){
+        ## otherwise we build only new revisions
+        ## FIXME: reverse depend tests et al have to be considered
+        if( !inherits(binary_revision, "error") ){
+          tarball_revision <-
+            as.integer( pkg_db_src$svn[pkg, "Repository/R-Forge/Revision"] )
+          if( !any(is.na(c(tarball_revision, binary_revision))) )
+            if( tarball_revision <= binary_revision ){
+              status <-
+                .copy_binary_from_repository( pkg,
+                                             path_to_contrib_dir,
+                                             path_to_pkg_src,
+                                             pkg_db_src$src[pkg, "Version"],
+                                             pkg_buildlog)
+              build <- !status
+            }
+        }
+      }
+      
+      if(build){
+        ## now build the package from package tarball
+        .build_binary_from_tarball_mac(pkg,
+                                       pkg_version_src,
+                                       path_to_pkg_tarballs,
+                                       R,
+                                       pkg_buildlog)     
+      }
      
-     ## now build package from package tarball
-     .build_binary_from_tarball_mac(pkg,
-                                    pkg_version_src,
-                                    path_to_pkg_tarballs,
-                                    R,
-                                    pkg_buildlog)
-
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     } #</FOR>
-
+    
     ## Cleanup: close framebuffer
     close_virtual_X11_fb(pid)
   } else stop(paste("Strange platform: ", platform, "! I'm confused ...",
