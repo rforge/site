@@ -11,7 +11,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
     pid <- start_virtual_X11_fb()
   }
   ## first update all installed packages if necessary
-  update.packages(lib = lib, repos = repository_url, ask = FALSE)
+  update.packages(lib = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE)
 
   ## pkg list and dependency structure
   pkgs_dep <- resolve_dependency_structure(pkgs, repository_url, path_to_pkg_src)

@@ -131,7 +131,7 @@ build_packages <- function(email,
       stop(paste("There is no directory", dir,"!"))
 
   if(platform != "Linux"){
-    ## source tarballs
+    ## sources to be considered in dependency check
     URL_pkg_sources <- contrib.url(sprintf("file:%s", path_to_pkg_root),
                                    type = "source")
   
@@ -158,14 +158,14 @@ build_packages <- function(email,
     ## Sort out packages that are on the exclude list
     pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
 
-    ## svn sources
-    URL_pkg_sources <- contrib.url(sprintf("file://%s", path_to_pkg_root),
-                                 type = "source")
+    ## sources to be considered in dependency check
+    URL_pkg_sources <- sprintf("file://%s", path_to_pkg_src)
   
     ## create package data base holding information about available repositories
     pkg_db_src <- create_package_db_src(svn = sprintf("file://%s",
                                           path_to_pkg_src),
-                                        src = URL_pkg_sources)
+                                        src = contrib.url(sprintf("file://%s", path_to_pkg_root),
+                                          type = "source"))
   }
   
   ## PACKAGE DB UPDATE
