@@ -131,6 +131,10 @@ build_packages <- function(email,
       stop(paste("There is no directory", dir,"!"))
 
   if(platform != "Linux"){
+    ## source tarballs
+    URL_pkg_sources <- contrib.url(sprintf("file:%s", path_to_pkg_root),
+                                   type = "source")
+  
     ## where are the source tarballs already available from R-Forge?
     path_to_pkg_tarballs <- control$path_to_pkg_tarballs
     if( !check_directory(path_to_pkg_tarballs) )
@@ -170,10 +174,6 @@ build_packages <- function(email,
   other_repositories <- NULL
 
   if(platform == "Windows"){
-    ## source tarballs
-    URL_pkg_sources <- contrib.url(sprintf("file:%s", path_to_pkg_root),
-                                   type = "source")
-  
     ## include Brian Ripley's Windows Repository
     other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
   }
@@ -374,10 +374,10 @@ build_packages <- function(email,
             if( tarball_revision <= binary_revision ){
               status <-
                 .copy_binary_from_repository( pkg,
-                                             path_to_contrib_dir,
-                                             path_to_pkg_src,
-                                             pkg_db_src$src[pkg, "Version"],
-                                             pkg_buildlog)
+                                              path_to_contrib_dir,
+                                              path_to_pkg_src,
+                                              pkg_db_src$src[pkg, "Version"],
+                                              pkg_buildlog)
               build <- !status
             }
         }
@@ -441,7 +441,9 @@ build_packages <- function(email,
                                           pkg_version, pkg_buildlog){
   cat("Package up to date. Not building ...\n", file = pkg_buildlog,
       append = TRUE)
-  file.copy(file.path(pkg_root, paste(pkg, "_", pkg_version, ".zip",
+  ## FIXME: is there an easier way to retrieve the file suffix?
+  filesuffix <- ifelse( .Platform$OS.type == "unix", ".tgz", ".zip")
+  file.copy(file.path(pkg_root, paste(pkg, "_", pkg_version, filesuffix,
                                       sep = "")), pkg_src, overwrite = TRUE)
 }
 
