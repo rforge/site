@@ -1,5 +1,27 @@
 * News Items postet in R-Forge Site Admin
 
+** R-Forge Update (2009-12-10)
+
+   We made the following changes and updates to the R-Forge system:
+   
+   - Added a graphic showing the stages of the package build and check
+     system (http://site.r-forge.r-project.org/).
+   - Added a globlal check flag. Packages hosted on R-Forge are now
+     checked using "--no-examples --no-tests --no-vignettes" as
+     additional flags to R CMD check due to the heavy compute time
+     needed for a complete run. Developers may apply that their 
+     packages are listed in a so-called white list to enable run-time
+     checks again. More details will follow.
+   - RForgeTools updated to 0.4-4: This update includes a lot of small
+     fixes regarding package dependencies and their
+     installation. Furthermore, packages are only built if the SVN
+     revision changes, otherwise the previous tarball or binary
+     is kept.
+
+   Best regards,
+   The R-Forge Administration and Development Team
+
+
 ** First issue of The R Journal & R-Forge paper (2009-05-29)
    The first issue of The R Journal (successor of R News) has now been
    published at http://journal.R-project.org/ . (See full announcement:
