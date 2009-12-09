@@ -61,7 +61,7 @@ echo $contents; } ?>
 <hr>
 <p>Build/check cycle completed.</p>
 
-<img src="./images/Rbuild.jpeg" alt="Build/Check cycle" /> 
+<img src="./images/Rbuild.jpeg" width=70% alt="Build/Check cycle" /> 
 
 <h3>Resolving Package Dependencies</h3>
 
@@ -71,7 +71,7 @@ repositories) possibly with a higher version number. Let <i>d_CRAN(P)</i>
 and <i>d_R-Forge(P)</i> be the dependencies of a package <i>P</i> hosted on
 CRAN and R-Forge, respectively. How does R-Forge consider these dependencies? 
 Our current solution is to calculate the dependency structure in the following
-way: First all <i>d_CRAN(P)</i> and then <i>d_R-Forge(P)<i> \ <i>d_CRAN(P)</i> 
+way: First all <i>d_CRAN(P)</i> and then <i>d_R-Forge(P)</i> \ <i>d_CRAN(P)</i> 
 are installed. This allows that all <i>d(P)</i> are available
 but forces the system to use <i>d_CRAN(P)</i> with higher priority. This
 decision reflects the fact that CRAN packages are known to
