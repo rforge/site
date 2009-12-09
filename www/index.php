@@ -1,12 +1,8 @@
-
-<!-- This is the project specific website template -->
-<!-- It can be changed as liked or replaced by other content -->
-
 <?php
 
 $domain=ereg_replace('[^\.]*\.(.*)$','\1',$_SERVER['HTTP_HOST']);
 $group_name=ereg_replace('([^\.]*)\..*$','\1',$_SERVER['HTTP_HOST']);
-$themeroot='http://r-forge.r-project.org/themes/rforge/';
+$themeroot='http://R-Forge.R-project.org/themes/rforge/';
 
 echo '<?xml version="1.0" encoding="UTF-8"?>';
 ?>
@@ -58,12 +54,29 @@ echo $contents; } ?>
 <p><b>Sync package binaries (.zip, .tgz) and build logs to R-Forge</b>: 2:30 CET.</p>
 <hr>
 <p><b>Sync package sources to check machines (.tar.gz)</b>: 1:30 CET.</p>
-<p><b>Checking of packages (Linux)</b>: 2:00 (devel), 10:00 (patched) CET.</p>
-<p><b>Checking of packages (Windows)</b>: 2:00 (devel), 10:00 (patched) CET.</p>
-<p><b>Checking of packages (Mac)</b>: 2:00 (patched) CET.</p>
-<p><b>Sync check results to R-Forge</b>: 10:00, 18:00 CET.</p>
+<p><b>Check packages (Linux)</b>: 2:00 (devel), 10:00 (patched) CET.</p>
+<p><b>Check packages (Windows)</b>: 2:00 (devel), 10:00 (patched) CET.</p>
+<p><b>Check packages (Mac)</b>: 2:00 (patched) CET.</p>
+<p><b>Sync check results to R-Forge</b>: 11:00, 19:00 CET.</p>
 <hr>
 <p>Build/check cycle completed.</p>
+
+<img src="./images/Rbuild.jpeg" alt="Build/Check cycle" /> 
+
+<h3>Resolving Package Dependencies</h3>
+
+Suppose for example that R-Forge may also host development
+releases of packages already available from CRAN (or other
+repositories) possibly with a higher version number. Let <i>d_CRAN(P)</i>
+and <i>d_R-Forge(P)</i> be the dependencies of a package <i>P</i> hosted on
+CRAN and R-Forge, respectively. How does R-Forge consider these dependencies? 
+Our current solution is to calculate the dependency structure in the following
+way: First all <i>d_CRAN(P)</i> and then <i>d_R-Forge(P)<i> \ <i>d_CRAN(P)</i> 
+are installed. This allows that all <i>d(P)</i> are available
+but forces the system to use <i>d_CRAN(P)</i> with higher priority. This
+decision reflects the fact that CRAN packages are known to
+be stable and work. However, in certain circumstances developers may
+want the system to use (some of) <i>d_R-Forge(P)</i> instead. This feature is not implemented yet.
 
 <p> For general information about this project please visit the <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/">project summary page</a>. </p>
 
