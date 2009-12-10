@@ -36,6 +36,8 @@ build_packages <- function(email,
                            cran_url      = "http://CRAN.R-project.org",
                            bioc_url      =
                              "http://bioconductor.org/packages/release/bioc",
+                           bioc_data     =
+                             "http://bioconductor.org/packages/release/data/annotation",
                            omega_hat_url = "http://www.omegahat.org/R",
                            control       = list()){
 

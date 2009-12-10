@@ -12,7 +12,8 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   }
   ## first update all installed packages if necessary
   update.packages(lib = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE)
-
+  writeLines("Done.")
+  writeLines("Resolve dependency structure ...")
   ## pkg list and dependency structure
   pkgs_dep <- resolve_dependency_structure(pkgs, repository_url, path_to_pkg_src)
 
@@ -23,12 +24,19 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## should be installed from CRAN or other repositories
   ## TODO: considering the install order
   pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], rownames(pkgs_installed))
-  pkgs_to_install_rforge <- setdiff(pkgs_dep[["R_FORGE"]], rownames(pkgs_installed))
-  if(length(pkgs_to_install) >= 2)
+  pkgs_to_install_rforge <- setdiff(pkgs_dep[["R_FORGE"]], unique(c(pkgs_to_install, rownames(pkgs_installed))))
+  writeLines("Done.")
+  if(length(pkgs_to_install)){
+    writeLines("Install missing packages from third party repositories ...")
     install.packages(pkgs_to_install, lib = lib, contriburl = contrib.url(repository_url), ...)
+    writeLines("Done.")
+  }
   ## FIXME: hard coded R-Forge tar.gz source dir
-  if(length(pkgs_to_install_rforge) >= 2)
+  if(length(pkgs_to_install_rforge)){
+    writeLines("Install missing packages from R-Forge ...")
     install.packages(pkgs_to_install_rforge, lib = lib, contriburl = contrib.url("http://R-Forge.R-project.org"), ...)
+    writeLines("Done.")
+  }
   if((platform == "Linux") | (platform == "MacOSX")){
     ## Close the virtual framebuffer X server 
     close_virtual_X11_fb(pid)
