@@ -7,8 +7,12 @@
 \usepackage{url}
 \usepackage{a4wide}
 \usepackage [ table ]{ xcolor }
-\usepackage{colortbl}
-\usepackage{graphicx} 
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphics} 
+\usepackage{braket}
 \sloppy
 
 \newcommand{\RFORGE}{R-Forge Administration and Development Team}
@@ -105,6 +109,7 @@ Versions System~\citep[CVS, see][]{forge:Cederqvist:2006}
 
 
 \newpage
+
 \section{Installation}
 \label{sec:installation}
 
@@ -127,68 +132,73 @@ LVM snapshot (xmrforge1-disk-snapshot).
 \begin{enumerate}
 	\item Systemconfiguration:
 	
-	hostname: xmrforge1 (already done.)\\
+	hostname: xmrforge1 (already done.)
         Debian flavor: Lenny
-	
-\fboxrule=0.5mm
-\fcolorbox{black}{gray}
-{/etc/apt/sources.list}	
+
+\medskip
+\definecolor{light-gray}{gray}{0.95}	
+\fboxrule=0.2mm
+\noindent \fcolorbox{black}{light-gray}{\code{/etc/apt/sources.list}}
+\medskip	
 
 	add the following entries:	
 	
 
-CRAN Debian Packages\\
+CRAN Debian Packages
 
-\fboxrule=0.5mm
-\fcolorbox{black}{gray}
-{deb http://cran.r-project.org/bin/linux/debian lenny-cran/}
-\\
+echo ''deb http://cran.r-project.org/bin/linux/debian lenny-cran/'' >> /etc/apt/sources.list
+
+
 FusionForge packages
 
-\fboxrule=0.5mm
-\fcolorbox{black}{gray}
-{deb http://fusionforge.fusionforge.org/debian lenny main}
+\code {deb http://fusionforge.fusionforge.org/debian lenny main}
 
 add key information
 
-\fboxrule=0.5mm
-\fcolorbox{black}{gray}
-{gpg --recv-keys 06F90DE5381BA480}
+\medskip
+\definecolor{light-gray}{gray}{0.95}	
+\fboxrule=0.2mm
+\noindent \fcolorbox{black}{light-gray}{\code{gpg --recv-keys
+    06F90DE5381BA480}}
+\medskip
 
-\fboxrule=0.5mm
-\fcolorbox{black}{gray}
-{gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -}
+\medskip
+\definecolor{light-gray}{gray}{0.95}	
+\fboxrule=0.2mm
+\noindent \fcolorbox{black}{light-gray}{\code{gpg --export --armor
+    06F90DE5381BA480 | sudo apt-key add -}}
+\medskip
 
 	
 
 	\item base packages
 
-
-\fboxrule=0.5mm
-\fcolorbox{black}{gray}
-{xmrforge1:~\# aptitude install subversion joe emacs ess r-base r-recommended bzip2 rsync less}
+\medskip
+\definecolor{light-gray}{gray}{0.95}	
+\fboxrule=0.2mm
+\noindent \fcolorbox{black}{light-gray}{\code{aptitude install
+    subversion joe}}
+{\code{emacs ess r-base r-recommended bzip rsync less}}
+\medskip
 
 	\item checkout radmin
 
-\fboxrule=0.5mm
-\fcolorbox{black}{gray}
-{theussl@xmrforge1:~\$ mkdir svn 
-cd svn
-svn co svn://svn-statmath.wu.ac.at/radmin radmin
-}
+\medskip
+\definecolor{light-gray}{gray}{0.95}	
+\fboxrule=0.2mm
+\noindent \fcolorbox{black}{light-gray}{\code{~\$ mkdir svn cd svn svn co svn://svn-statmath.wu.ac.at/radmin radmin}}
+\medskip
 
 
 \item configure ssh daemon 
-\fboxrule=0.5mm
-\fcolorbox{black}{gray}
-{copy sshd\_config from radmin repository}
+
+copy sshd\_config from radmin repository
 
 \item configure rsync daemon 
-\fboxrule=0.5mm
-\fcolorbox{black}{gray}
-{copy rsyncd.conf from radmin repository and add line to inetd.conf}
 
-TODO * homeverzeichnis nach /srv linken
+copy rsyncd.conf from radmin repository and add line to inetd.conf
+
+Optopnal * homeverzeichnis nach /srv linken
 
 \end{enumerate}
 
@@ -197,11 +207,67 @@ TODO * homeverzeichnis nach /srv linken
 \label{sec:registration}
 
 \subsection{Filesystem}
+
+Filesystem on R-Forge 
+
 \subsection{Serverfarm---map}
+
+
+\includegraphics{gforge.jpg}
+
 \subsection{GForge}
+
+GForge is an open source software originally created for
+SourceForge. GForge has a GNU license and provides project hosting,
+version control, bug-tracking, and messagign.
+
+
+Install FusionForge base system
+
+
+* aptitude install gforge gforge-plugin-scmsvn gforge-mta-postfix postfix
+
+Further configuration: 
+postfix: Internet site 
+mailman: Missing site list 
+
+
+
+\par More under \url{http://gforge.org/gf}
+
 \subsection{Postfix}
+Postfix is an open source mail transfer agent requires that the file system can rename a file to a near-by
+directory without changing the file's inode number.
+
+More about Postfix under \url{http://www.postfix.org/}
+
 \subsection{Subversion}
+
+Subverion is a version control system used to maintain current and
+historical versions of files and source code as well as web pages and
+documentation.
+More about SVN under \url{http://subversion.tigris.org/}
+
 \subsection{Mailman}
+Mailman needs a so-called "site list", which is the list from
+which password reminders and such are sent out from.  This list
+needs to be created before mailman will start. To create
+the list, run "newlist mailman" and follow the instructions on-screen.
+Note that you also need to start mailman after that, using
+\code{/etc/init.d/mailman} start.
+
+GForge administrator password: <some password>
+
+proFTP: from inetd
+
+changed config files: postfix/main.cf, postfix/aliases, etc/nsswitch.conf, proftp.conf
+
+* Further installation: 
+\definecolor{light-gray}{gray}{0.95}
+\fboxrule=0.2mm
+\noindent \fcolorbox{black}{light-gray}{\code{apt-get install postgresql-contrib gforge-plugin-mediawiki}}
+
+
 
 \section{Release and Quality Management System}
 \label{sec:release_and_QM}
