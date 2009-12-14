@@ -32,8 +32,13 @@ R_Forge_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
 
 create_package_db_src <- function(svn_url, src_url){
   fields <- .get_rforge_repository_db_fields()
+  avail_src <- tryCatch(available.packages(src_url, fields = fields),
+                        error = identity)
+  if( inherits(avail_src, "error" ) )
+    avail_src <- list()
+  
   pkg_db <- list(svn = available.packages2(svn_url, fields = fields),
-                 src = available.packages(src_url, fields = fields))
+                 src = avail_src)
   class(pkg_db) <- "pkg_db"
   pkg_db
 }
