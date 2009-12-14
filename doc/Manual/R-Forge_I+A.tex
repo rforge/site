@@ -109,7 +109,6 @@ Versions System~\citep[CVS, see][]{forge:Cederqvist:2006}
 
 
 \newpage
-
 \section{Installation}
 \label{sec:installation}
 
@@ -151,14 +150,16 @@ CRAN Debian Packages
     http://cran.r-project.org/bin/linux/debian lenny-cran/"  /etc/apt/sources.list}}
 \medskip
 
+\fbox{echo "deb
+    http://cran.r-project.org/bin/linux/debian lenny-cran/"  /etc/apt/sources.list}
+
 FusionForge packages
 \medskip
 \definecolor{light-gray}{gray}{0.95}	
 \fboxrule=0.2mm
 
-\noindent \fcolorbox{black}{light-gray}{\verb{echo "deb
-    http://fusionforge.fusionforge.org/debian lenny main/"  /etc/apt/sources.list}}
-
+\noindent \fcolorbox{black}{light-gray}{\verb{echo"deb
+    http://fusionforge.fusionforge.org/debian lenny main/" /etc/apt/sources.list}}
 \medskip
 
 Add key information (optional (if the retrieval of third - party keys
@@ -167,7 +168,7 @@ is reqested, do the following:
 \medskip
 \definecolor{light-gray}{gray}{0.95}	
 \fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{# gpg --recv-keys 06F90DE5381BA480}}
+\noindent \fcolorbox{black}{light-gray}{\code{#gpg --recv-keys 06F90DE5381BA480}}
 \medskip
 
 \medskip
