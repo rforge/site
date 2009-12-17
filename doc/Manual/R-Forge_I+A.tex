@@ -150,9 +150,6 @@ CRAN Debian Packages
     http://cran.r-project.org/bin/linux/debian lenny-cran/"  /etc/apt/sources.list}}
 \medskip
 
-\fbox{echo "deb
-    http://cran.r-project.org/bin/linux/debian lenny-cran/"  /etc/apt/sources.list}
-
 FusionForge packages
 \medskip
 \definecolor{light-gray}{gray}{0.95}	
@@ -177,7 +174,6 @@ is reqested, do the following:
 \noindent \fcolorbox{black}{light-gray}
 {\code{# gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -}}
 \medskip
-
 	
 
 	\item Install base packages
@@ -665,7 +661,7 @@ Copy download script
 \noindent \fcolorbox{black}{light-gray}{\code{chown root.cranadmin /usr/local/bin/bioc.sh}}
 \par \noindent \fcolorbox{black}{light-gray} {\code{chmod 775 /usr/local/bin/bioc.sh}}\medskip
 
-Firewall: port aufmachen
+Firewall: port open
 
 \subsection{Install java}
 
