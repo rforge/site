@@ -184,8 +184,15 @@ is reqested, do the following:
 \medskip
 \definecolor{light-gray}{gray}{0.95}	
 \fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{ aptitude install subversion joe emacs ess r-base r-recommended bzip rsync less}}
+\fcolorbox{black}{light-gray}{\code{ aptitude install subversion joe emacs ess r-base r-recommended bzip rsync less}}
 \medskip
+
+\fcolorbox{black}{light-gray}{0.95}
+\lstset{framexleftmargin=0.2mm, frame=colorbox, rulesepcolor=\color{light-gray}{gray}
+\begin{lstlisting}{numbers=left}{\code}
+aptitude install subversion joe
+emacs ess r-base r-recommended bzip rsync less
+\end{lstlisting}
 
 	\item Checkout radmin
 
@@ -198,11 +205,11 @@ is reqested, do the following:
 \medskip
 
 
-\item configure ssh daemon 
+       \item configure ssh daemon 
 
 copy sshd\_config from radmin repository
 
-\item configure rsync daemon 
+       \item configure rsync daemon 
 
 copy rsyncd.conf from radmin repository and add line to inetd.conf
 
