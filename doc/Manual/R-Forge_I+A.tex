@@ -27,6 +27,7 @@
 \newcommand{\pkg}[1]{{\normalfont\fontseries{b}\selectfont #1}}
 \newcommand{\proglang}[1]{\textsf{#1}}
 \newcommand{\class}[1]{`\code{#1}'}
+\let\file=\class
 
 \begin{document}
 
@@ -140,24 +141,26 @@ hostname: xmrforge1 (already done.)
 \par Debian flavor: Lenny
 	
 
-add the following entries:	
-CRAN Debian Packages
-\par
+add the following entries to your \file{/ect/apt/sources.list}:	
+\begin{itemize}
+\item CRAN Debian Packages \par
+\definecolor{light-gray}{gray}{0.95}
+\fboxrule=0.2mm
+\noindent \fcolorbox{black}{light-gray}
+ {\code {deb http://cran.r-project.org/bin/linux/debian
+lenny-cran/ main}}
+\medskip
+
+
+\item FusionForge packages
+\end{itemize}
 \medskip
 \definecolor{light-gray}{gray}{0.95}	
 \fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code {echo "deb
-    http://cran.r-project.org/bin/linux/debian lenny-cran/"  /etc/apt/sources.list}}
+\noindent \fcolorbox{black}{light-gray}{\code{deb
+   http://fusionforge.fusionforge.org/debian/dist/lenny/main/}}
 \medskip
 
-FusionForge packages
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-
-\noindent \fcolorbox{black}{light-gray}{\verb{echo"deb
-    http://fusionforge.fusionforge.org/debian lenny main/" /etc/apt/sources.list}}
-\medskip
 
 Add key information (optional (if the retrieval of third - party keys
 is reqested, do the following:
@@ -165,14 +168,14 @@ is reqested, do the following:
 \medskip
 \definecolor{light-gray}{gray}{0.95}	
 \fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{#gpg --recv-keys 06F90DE5381BA480}}
+\noindent \fcolorbox{black}{light-gray}{\code{ gpg --recv-keys 06F90DE5381BA480}}
 \medskip
 
 \medskip
 \definecolor{light-gray}{gray}{0.95}	
 \fboxrule=0.2mm
 \noindent \fcolorbox{black}{light-gray}
-{\code{# gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -}}
+{\code{ gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -}}
 \medskip
 	
 
@@ -181,7 +184,7 @@ is reqested, do the following:
 \medskip
 \definecolor{light-gray}{gray}{0.95}	
 \fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{# aptitude install subversion joe emacs ess r-base r-recommended bzip rsync less}}
+\noindent \fcolorbox{black}{light-gray}{\code{ aptitude install subversion joe emacs ess r-base r-recommended bzip rsync less}}
 \medskip
 
 	\item Checkout radmin
