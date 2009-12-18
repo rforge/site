@@ -24,7 +24,7 @@ finalize_check_results <- function(check_results_dir,
     file.copy(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), 
               file.path(PKGS, dir, "00package.dcf"))
     file.copy(file.path(PKGS, dir, "00install.out"), 
-              file.path(path_to_install_logs, sprintf("%s_install.out", pkg)))
+              file.path(path_to_install_logs, sprintf("%s_install.out", pkg)), overwrite = TRUE)
   }
   
   ## save old check results
