@@ -7,12 +7,14 @@
 \usepackage{url}
 \usepackage{a4wide}
 \usepackage [ table ]{ xcolor }
-\usepackage{color}
 \usepackage{amssymb,amsmath}
 \usepackage{amsfonts}
 \usepackage{graphicx} 
 \usepackage{braket}
 \usepackage{listings}
+\usepackage{color}
+\definecolor{light-gray}{gray}{0.95}
+
 \sloppy
 
 \newcommand{\RFORGE}{R-Forge Administration and Development Team}
@@ -135,105 +137,89 @@ A backup of the base Debian system is created as an
 LVM snapshot (xmrforge1-disk-snapshot).
 
 \begin{enumerate}
-	\item Systemconfiguration:
+\item Systemconfiguration:
 	
 hostname: xmrforge1 (already done.)
-\par Debian flavor: Lenny
-	
+\par Debian flavor: Lenny	
 
 add the following entries to your \file{/ect/apt/sources.list}:	
 \begin{itemize}
-\item CRAN Debian Packages \par
-\definecolor{light-gray}{gray}{0.95}
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}
- {\code {deb http://cran.r-project.org/bin/linux/debian
-lenny-cran/ main}}
-\medskip
-
-
+\item CRAN Debian Packages 
+\end{itemize}
+\lstset{basicstyle=\ttfamily, backgroundcolor=\color{light-gray},
+  framexleftmargin=0pt, framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+deb http://cran.r-project.org/bin/linux/debian lenny-cran/ main
+\end{lstlisting}
+\begin{itemize}
 \item FusionForge packages
 \end{itemize}
 \medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{deb
-   http://fusionforge.fusionforge.org/debian/dist/lenny/main/}}
-\medskip
+\lstset{basicstyle=\ttfamily, backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+deb http://fusionforge.fusionforge.org/debian/dist/lenny/main/
+\end{lstlisting}
 
-
-Add key information (optional (if the retrieval of third - party keys
+Add key information (optional) if the retrieval of third - party keys
 is reqested, do the following:
 
 \medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{ gpg --recv-keys 06F90DE5381BA480}}
+\lstset{basicstyle=\ttfamily, backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+# gpg --recv-keys 06F90DE5381BA480
+\end{lstlisting}
 \medskip
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}
-{\code{ gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -}}
-\medskip
-	
+\lstset{basicstyle=\ttfamily, backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+# gpg --export --armor 06F90DE5381BA480 | sudo apt-key add -
+\end{lstlisting}
+
 
 	\item Install base packages
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\fcolorbox{black}{light-gray}{\code{ aptitude install subversion joe emacs ess r-base r-recommended bzip rsync less}}
-\medskip
-
-\fcolorbox{black}{light-gray}{0.95}
-\lstset{framexleftmargin=0.2mm, frame=colorbox, rulesepcolor=\color{light-gray}{gray}
-\begin{lstlisting}{numbers=left}{\code}
-aptitude install subversion joe
-emacs ess r-base r-recommended bzip rsync less
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+# aptitude install subversion joe
+# emacs ess r-base r-recommended 
+# bzip rsync less
 \end{lstlisting}
 
 	\item Checkout radmin
-
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{\$ mkdir svn}}
-\par \noindent \fcolorbox{black}{light-gray}{\code{\$ cd svn}}
-\par \noindent \fcolorbox{black}{light-gray}{\code{\$ svn co svn://svn-statmath.wu.ac.at/radmin radmin}}
 \medskip
 
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+$ mkdir svn
+$ cd svn
+$ svn co svn://svn-statmath.wu.ac.at/radmin radmin
+\end{lstlisting}
 
        \item configure ssh daemon 
-
 copy sshd\_config from radmin repository
-
        \item configure rsync daemon 
-
 copy rsyncd.conf from radmin repository and add line to inetd.conf
-
 Optional * homeverzeichnis nach /srv linken
-
 \end{enumerate}
-
-
 \section{Components}
 \label{sec:registration}
-
 \subsection{Filesystem}
-
 Filesystem on R-Forge 
-
 o File System Information (Xen Server)
 		Filesystem            Size  Used Avail Use% Mounted on
 		/dev/sda2              76G  7.1G   65G  10% /
 		tmpfs                 5.9G     0  5.9G   0% /lib/init/rw
 		udev                   10M   52K   10M   1% /dev
 		tmpfs                 5.9G     0  5.9G   0% /dev/shm
-
 	o Volume Group Information:
+
 \begin{lstlisting}
+
   --- Volume group ---
   VG Name               vgforge0
   System ID             
