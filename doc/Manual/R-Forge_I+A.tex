@@ -197,19 +197,22 @@ is reqested, do the following:
 \begin{lstlisting}[frame=single, framerule=0.95pt]
 $ mkdir svn
 $ cd svn
-$ svn co svn://svn-statmath.wu.ac.at/radmin radmin
+$ svn co svn://svn-statmath.wu.ac.at/radmin radmin 
 \end{lstlisting}
 
-       \item configure ssh daemon 
+        \item configure ssh daemon 
 copy sshd\_config from radmin repository
-       \item configure rsync daemon 
+        \item configure rsync daemon 
 copy rsyncd.conf from radmin repository and add line to inetd.conf
 Optional * homeverzeichnis nach /srv linken
 \end{enumerate}
-\section{Components}
-\label{sec:registration}
-\subsection{Filesystem}
-Filesystem on R-Forge 
+
+ \section{Components}
+ \label{sec:registration}
+
+ \subsection{Filesystem}
+ Filesystem on R-Forge 
+ 
 o File System Information (Xen Server)
 		Filesystem            Size  Used Avail Use% Mounted on
 		/dev/sda2              76G  7.1G   65G  10% /
@@ -218,8 +221,7 @@ o File System Information (Xen Server)
 		tmpfs                 5.9G     0  5.9G   0% /dev/shm
 	o Volume Group Information:
 
-\begin{lstlisting}
-
+\begin{verbatim}
   --- Volume group ---
   VG Name               vgforge0
   System ID             
@@ -382,7 +384,8 @@ xsrforge:/home/theussl/svn/radmin/Install-Notes# lvdisplay
   Allocation             inherit
   Read ahead sectors     0
   Block device           253:14
-\end{lstlisting}
+
+\end{verbatim}
 
 \subsection{Serverfarm---map}
 
@@ -396,11 +399,11 @@ version control, bug-tracking, and messagign.
 
 Install FusionForge base system
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{aptitude install gforge gforge-plugin-scmsvn gforge-mta-postfix postfix}}
-\medskip
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+aptitude install gforge gforge-plugin-scmsvn gforge-mta-postfix postfix
+\end{lstlisting}
 
 \par
 Further configuration: 
@@ -423,20 +426,21 @@ changed config files: postfix/main.cf, postfix/aliases, etc/nsswitch.conf, proft
 
 Further installation: 
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{apt-get install postgresql-contrib gforge-plugin-mediawiki}}
-\medskip
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+apt-get install postgresql-contrib gforge-plugin-mediawiki
+\end{lstlisting}
 
 
 \subsubsection{GForge setup}
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{apt-get install gforge}}
-\medskip
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+apt-get install gforge
+\end{lstlisting}
+
 
 If the installation process breaks, do the following:
 \begin{enumerate}
@@ -445,17 +449,18 @@ cp -r /home/theussl/r-forge.bak/etc/apache2/ssl /etc/apache2/ssl
 \item edit gforge.conf and insert the location of the ssl certificate and key
 vi /etc/gforge/gforge.conf
 \item 
-\begin{lstlisting} tell postgresql to listen on tcp sockets (tcpip_socket = true)
+\begin{lstlisting}
 vi /etc/postgresql/7.4/main/postgresql.conf
 /etc/init.d/postgresql-7.4 restart
 \end{lstlisting}
 
 \item continue with 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{apt-get install gforge}}
-\medskip
+
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+apt-get install gforge
+\end{lstlisting}
 
 \item afterwards: change /etc/gforge/gforge.conf and run
 gforge-config
@@ -463,42 +468,43 @@ gforge-config
 vi /etc/php4/apache2/php.ini
 
 \item install svn plugin
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{apt-get install gforge-plugin-scmsvn}}
-\medskip
 
-\item \begin{lstlisting}replace /usr/lib/gforge/plugins/scmsvn/bin/svn_update.pl with the script from radmin rep
-\item copy svnsetup.sh from radmin rep to /usr/local/bin/
-\item verify that the svnbasedir repository exists in /svnroot/
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+apt-get install gforge-plugin-scmsvn
+\end{lstlisting}
+
+\begin{lstlisting} replace /usr/lib/gforge/plugins/scmsvn/bin/svn_update.pl with the script from radmin rep
+copy svnsetup.sh from radmin rep to /usr/local/bin/
+verify that the svnbasedir repository exists in /svnroot/
 \end{lstlisting}
 
 \item link gforge www dir to /srv
+\begin{lstlisting}
 cd /usr/share/gforge
-\begin{lstlisting}R-Forge:/usr/share/gforge# mv www www.old
+R-Forge:/usr/share/gforge# mv www www.old
 R-Forge:/usr/share/gforge# ln -s /srv/www/ www
 
-\item FIXME /svnroot should point to /srv/svn
+FIXME /svnroot should point to /srv/svn
 ln -s /var/lib/gforge/chroot/svnroot/ /svnroot
-
 
 r-forge:/home/theussl# /usr/lib/mailman/bin/newlist mailman
 
-\item make changes according to manual
+make changes according to manual
 emacs /usr/lib/mailman/Mailman/mm_cfg.py
 \end{lstlisting}
 \end{enumerate}
 
 The following steps have to be done after installation and each update
-\begin{lstlisting}
+
 Setup gforge scripts accordingly (gforge-scripts@r-forge-root)
 - SVN: dumps predefined structure in fresh repositories
 - SSH-KEYS: deny shell login, port forwarding etc. in gforge ssh key creation
 - VIEW-CVS: change location of viewcvs script accordingly
 
 Further changes made to gforge
-
+\begin{lstlisting}
 - copy favicon from svn to /srv/www/
 - copy Base.tab from svn to /srv/www/include/languages/Base.tab
 - uncomment Top Project Download lines in /srv/www/include/features_boxes.php 
@@ -510,11 +516,13 @@ svn-commit statistics don't work
 - DROP INDEX statscvsgrp_oid;
 - (Index was: '"statscvsgrp_oid" UNIQUE, btree ("month", "day")')
 
-
 Setting up plugin_rforge in the DB
-
+\end{lstlisting}
 - create the table
 
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
 CREATE TABLE plugin_rforge_package_db (
     pkg_name character varying(255) NOT NULL PRIMARY KEY,
     unix_group_name character varying(30) NOT NULL,
@@ -528,12 +536,17 @@ CREATE TABLE plugin_rforge_package_db (
     rev integer
 );
 CREATE INDEX plugin_rforge_package_db_unixgn ON plugin_rforge_package_db (unix_group_name);
-
+\end{lstlisting}
 
 - create user with rights in the table
+
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
     CREATE user plugin_rforge password 'jenslf0r2';
     GRANT all on plugin_rforge_package_db to plugin_rforge;
 \end{lstlisting}
+
 \par More under \url{http://gforge.org/gf}
 
 \subsection{Postfix}
@@ -564,24 +577,27 @@ proFTP: from inetd
 changed config files: postfix/main.cf, postfix/aliases, etc/nsswitch.conf, proftp.conf
 \par
 Further installation: 
-\par \definecolor{light-gray}{gray}{0.95}
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{apt-get install postgresql-contrib gforge-plugin-mediawiki}}
-\medskip
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+apt-get install postgresql-contrib gforge-plugin-mediawiki
+\end{lstlisting}
+
 
 \subsection{\proglang{R} - Installation}
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{apt-get install r-base r-recommended}}
-\medskip
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+apt-get install r-base r-recommended
+\end{lstlisting}
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{apt-get install rsync}}
-\medskip
+
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+apt-get install rsync
+\end{lstlisting}
 
 
 * check results:
@@ -612,24 +628,13 @@ sh /usr/local/bin/
 chmod 775 /usr/local/bin/get-Rpub.sh
 chown root.cranadmin /usr/local/bin/get-Rpub.sh
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{mkdir /srv/R/}}
-\medskip
-\par
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{mkdir /srv/R/CRAN}}
-\medskip
-\par
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{chmod -R 2775 /srv/R}}
-\medskip
-
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+mkdir /srv/R/
+mkdir /srv/R/CRAN
+chmod -R 2775 /srv/R
+\end{lstlisting}
 
 touch /var/log/rsync.log
 chown root.cranadmin /var/log/rsync.log
@@ -640,33 +645,32 @@ get-Rpub.sh
 Bioconductor mirror
 cronjob
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{cp /home/theussl/svn/radmin/R-forge-root/etc/cron.daily/bioc /etc/cron.daily/}}
-\medskip
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+cp /home/theussl/svn/radmin/R-forge-root/etc/cron.daily/bioc /etc/cron.daily/
+\end{lstlisting}
 
 Copy download script
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{cp
-    /home/theussl/svn/radmin/R-forge-root/usr/local/bin/bioc.sh
-    /usr/local/bin/}}
-\noindent \fcolorbox{black}{light-gray}{\code{chown root.cranadmin /usr/local/bin/bioc.sh}}
-\par \noindent \fcolorbox{black}{light-gray} {\code{chmod 775 /usr/local/bin/bioc.sh}}\medskip
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+cp /home/theussl/svn/radmin/R-forge-root/usr/local/bin/bioc.sh /usr/local/bin/
+chown root.cranadmin /usr/local/bin/bioc.sh
+chmod 775 /usr/local/bin/bioc.sh
+\end{lstlisting}
+
 
 Firewall: port open
 
 \subsection{Install java}
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{edit /etc/apt/sources.list}}
-\medskip
-
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+edit /etc/apt/sources.list
+\end{lstlisting}
 
 For sun-java5 packages in unstable
 deb http://ftp.at.debian.org/debian/ sid non-free
@@ -676,16 +680,14 @@ Edit /etc/apt/apt.conf
 // set the default release to etch
 APT::Default-Release "etch";
 
-\medskip
-\definecolor{light-gray}{gray}{0.95}	
-\fboxrule=0.2mm
-\noindent \fcolorbox{black}{light-gray}{\code{apt-get -t unstable install sun-java6-jdk sun-java6-jre}}
-\medskip
-
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt]
+apt-get -t unstable install sun-java6-jdk sun-java6-jre
+\end{lstlisting}
 
 Use vim as default editor
 update-alternatives --config editor
-
 
 
 \section{Release and Quality Management System}
