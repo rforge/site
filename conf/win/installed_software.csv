@@ -26,6 +26,7 @@
 "libcurl","MIT/X derivate license",7.19-2,7.19-5,"http://curl.haxx.se/download.html","libcurl ssl static"
 "libcurl64","MIT/X derivate license",7.19-4,NA,"http://pecl2.php.net/downloads/php-windows-builds/php-libs/VC9/x64/","libcurl 64bit"
 "libiconv","",1.13,NA,"",""
+"libitpp","GPL",4.0.7,NA,"http://sourceforge.net/apps/wordpress/itpp/","IT++ is a C++ library of mathematical, signal processing and communication routines"
 "libjpeg","special",6b-4,NA,"http://gnuwin32.sourceforge.net/packages/jpeg.htm","library and tools for JPEG images"
 "libmpfr","GPL",2.4.1,2.4.1,"http://www.stats.ox.ac.uk/pub/RWin/mpfr.zip",""
 "libpng","",1.2.29,NA,"",""
