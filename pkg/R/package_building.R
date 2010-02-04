@@ -5,26 +5,11 @@
 ## TODO LIST (there are more points in Uwe's functions):
 
 ## file URLs of local mirrors: contriburl = sprintf("file:///%s", dir)
-## do not download from cran.r-prokect.org
+## do not download from cran.r-project.org
 ## should we include a tmp directory
 ## if so a cleanup is necessary
 ## Clean /tmp dir
 ##  system("rm -rf c:\\tmp\\*")
-## How can we get flavor from R environment
-## can be useful when sending reportsa
-## do we need the following things used in shell scripts
-## R profile for checking.
-  #R_profile=${R_scripts_dir}/check_profile.R
-  #export _R_CHECK_WEAVE_VIGNETTES_ = no
-  #export _R_CHECK_SUBDIRS_STRICT_ = yes
-## Set permissions right
-  #umask 022
-## from the Windows build environment
-## source("d:/Rcompile/CRANpkg/make/CRANbinaries.R")
-## source("d:/Rcompile/CRANpkg/make/CRANcheckSummaryWin.R")
-## source("d:/Rcompile/CRANpkg/make/maintainers.R")
-##options(warn=1)
-
 
 ## this is where the work is done
 ## takes a control object containing control parameters, the platform,
@@ -78,6 +63,10 @@ build_packages <- function(email,
   ## PACKAGE SIGHTING
   
   ## STOP LIST: packages which should not be compiled
+  ## BLACK_LIST: packages which cause severe problems (removed from R CMD build)
+  ## TODO: blacklist hardcoded at the moment
+  blacklist <- c("RepiToolsExamples")
+                 
   ## FIXME: probably too strict at the moment. E.g., RWinEdt does not get build
   ## when checking packages the stoplist includes additional arguments to check
   ## process
@@ -96,7 +85,7 @@ build_packages <- function(email,
                                    check_args[["check_args"]]), "Package" ]
 
   ## donotcompile <- no_install
-  donotcompile <- character(0)
+  donotcompile <- blacklist
   if(platform %in% c("Windows", "MacOSX")){
     donotcompile <- unique(c(donotcompile, no_install))
   }
