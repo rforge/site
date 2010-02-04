@@ -65,8 +65,8 @@ build_packages <- function(email,
   ## STOP LIST: packages which should not be compiled
   ## BLACK_LIST: packages which cause severe problems (removed from R CMD build)
   ## TODO: blacklist hardcoded at the moment
-  blacklist <- c("RepiToolsExamples")
-                 
+  blacklist <- c("RepitoolsExamples")
+  
   ## FIXME: probably too strict at the moment. E.g., RWinEdt does not get build
   ## when checking packages the stoplist includes additional arguments to check
   ## process
