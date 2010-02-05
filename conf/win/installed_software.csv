@@ -30,7 +30,7 @@
 "libjpeg","special",6b-4,NA,"http://gnuwin32.sourceforge.net/packages/jpeg.htm","library and tools for JPEG images"
 "libmpfr","GPL",2.4.1,2.4.1,"http://www.stats.ox.ac.uk/pub/RWin/mpfr.zip",""
 "libpng","",1.2.29,NA,"",""
-"libsbml","LGPL",2.3.4,2.3.4,"http://www.sbml.org/","Systems Biology Markup Language"
+"libsbml","LGPL",NA,2.3.4,"http://www.sbml.org/","Systems Biology Markup Language"
 "libxml","MIT",2.7.3,2.7.3,"http://xmlsoft.org/sources/win32/","libXML"
 "libxml64","MIT",2.7.3,NA,"http://pecl2.php.net/downloads/php-windows-builds/php-libs/VC9/x64/","libXML 64bit"
 "merlin","http://www.sph.umich.edu/csg/abecasis/MERLIN/FAQ.html",1.1.2,1.1.2,"http://www.sph.umich.edu/csg/abecasis/MERLIN/download/","Merlin-rapid analysis of dense genetic maps using sparse gene flow trees"
