@@ -18,8 +18,8 @@ check_packages <- function(email,
   ## INITIALIZATION
 
   ## Warning: temporary global check args should not be set!
-  ##global_check_arg <- NULL
-  global_check_arg <- "--no-examples --no-tests --no-vignettes"
+  global_check_arg <- NULL
+  ##global_check_arg <- "--no-examples --no-tests --no-vignettes"
   
   ## match arguments
   platform <- match.arg(platform) ## FIXME: automat. use info from .Platform?
