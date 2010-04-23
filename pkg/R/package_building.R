@@ -185,7 +185,10 @@ build_packages <- function(email,
   ## delete 00LOCK, sometimes this interrupted the build process ...
   check_local_library(path_to_local_library)
   ## where is our R binary?
-  R <- file.path(R.home(), "bin", "R")
+  #R <- ifelse( platform == "Windows",
+  #             file.path(R.home(), "bin", "i386", "R"),
+  #             file.path(R.home(), "bin", "R") )
+  R <- file.path( R.home(), "bin", "R" )
   ## Set environment variables which are necessary for building
   ## (or creating vignettes)
   Sys.setenv(R_LIBS = path_to_local_library)
@@ -444,10 +447,10 @@ build_packages <- function(email,
 ## FIXME: currently sources and resulting tarball are in the current working dir
 .build_binary_from_sources_win <- function(pkg, pkg_version, R, pkg_buildlog, build_args = ""){
   ## first we have to build the tarball (important for vignettes)
-  system(paste(paste(R, "cmd", sep = ""), "build", build_args, pkg, 
+  system(paste(R, "CMD", "build", build_args, pkg, 
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
   ## then build the binary
-  system(paste(paste(R, "cmd", sep = ""), "INSTALL --build", 
+  system(paste(R, "CMD", "INSTALL --build", 
                    paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), 
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
   ## and finally delete the tarball
@@ -460,7 +463,7 @@ build_packages <- function(email,
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
 .build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
-  shell(paste(paste(R, "cmd", sep=""), "INSTALL --build", 
+  shell(paste(R, "CMD", "INSTALL --build", 
                file.path(path_to_pkg_tarballs, "src", "contrib",
                          paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
