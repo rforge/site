@@ -1,0 +1,12 @@
+#!/usr/bin/env Rscript
+## This script creates the initial database (rf) for the R-Forge system.
+## Typically, this script is run by the user 'postgres'
+## Initial Version: Stefan Theussl, 2010-05-22 
+
+suppressMessages( library("rfTools") )
+
+## Install rf DB on new system
+con <- dbConnect(PgSQL(), user="postgres")
+rfc <- rf_db_install( con )
+dbDisconnect(con)
+writeLines( sprintf("Database '%s' successfully installed.", rfc$db_name) )

@@ -5,8 +5,13 @@
 ## the package database and exports the package source codes. 
 
 ## NOTE: can be removed when it is included in the RForgeTools package
-library(RdbiPgSQL)
-library(tools)
+
+
+##############################
+## Install rf DB on new system
+##############################
+
+con <- dbConnect(PgSQL(), user="postgres", password="")
 
 ## 
 logfile <- "~/Rbuild_temp.log"
@@ -25,9 +30,33 @@ svn_url <- "svn://svn.r-forge.r-project.org/svnroot/"
 table <- "plugin_rforge_package_db"
 
 
-con <- dbConnect(PgSQL(), dbname="gforge", user="plugin_rforge", password="jenslf0r2");
 
 
+rf_get_pkgs_from_db <- function( rf ){
+  dbSendQuery( rf_get_db_con(rf), sprintf("SELECT pkg_name,version,rev FROM %s", table) )
+}
+
+rf_get_db_con <- function( rf ){
+  stopifnot( inherits(rf, "rf") )
+  rf$db_con
+}
+
+rf_create <- function( conf <- system.file( package = "rfTools" ) ){
+  structure( list(db_con = dbConnect(PgSQL(),
+                                     dbname="gforge",
+                                     user="plugin_rforge",
+                                     password="jenslf0r2")),
+             class = "rf" )
+}
+
+
+db
+.get_initial_sql_queries <- function(){
+  c("CREATE TABLE "
+}
+
+
+pkgs_in_db <- 
 
 
 dbSendQuery <- function(con, sql) {cat("SQL:\n", sql, "\n") }

@@ -1,0 +1,8 @@
+import( "tools" )
+
+export( "rf_db_install",
+        "rf_db_remove",
+        "rf_read_configuration",
+        "rf_write_configuration")
+
+S3method( "print", "rf" )

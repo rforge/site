@@ -1,0 +1,16 @@
+#!/usr/bin/env Rscript
+## This script creates the schema for the R-Forge (rf) database.
+## Typically, this script is run by the R-Forge "build" user 
+## Initial Version: Stefan Theussl, 2010-05-22 
+
+suppressMessages( library("rfTools") )
+
+config_file <- Sys.getenv("_RF_CONFIG_")
+stopifnot( file.exists(config_file) )
+
+## Install rf DB on new system
+rfc <- rf_read_configuration( config_file )
+rfc <- rf_db_insert_schema( rfc )
+rf_write_configuration( rfc, file = config_file )
+
+writeLines( sprintf("Schema for database '%s' successfully created.", rfc$db_name) )
