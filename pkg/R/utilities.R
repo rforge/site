@@ -53,6 +53,17 @@ create_package_db_all <- function(svn_url, src_url, win_url, mac_url){
   pkg_db
 }
 
+.get_check_timings_from_file <- function( file ){
+  stopifnot( file.exists(file) )
+  timings <- read.dcf( file )
+  structure( as.numeric(timings), names = colnames(timings) )
+}
+
+get_packages_exceeding_check_time_limit <- function( file, limit = 600 ){
+  timings <- .get_check_timings_from_file( file )
+  names(timings)[timings > limit]
+}
+
 .get_rforge_repository_db_fields <- function(){
   c("Package", "Version", "Repository/R-Forge/Revision")
 }
