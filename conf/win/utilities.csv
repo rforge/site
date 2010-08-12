@@ -1,0 +1,9 @@
+email software: sendEmail.exe oder blat.exe
+prozess killer: Daphne
+rsync server: "cwRsyncServer","various, see homepage",NA,3.1.0,"http://www.itefix.no/i2/node/10650/","rsync for Windows"
+"bzip2","",1.0.5,NA,"",""
+"Rtools","GPL-2",2.12,2.11,"http://www.murdoch-sutherland.com/Rtools/","GNU Compilers, linkers, perl, tcl, etc."
+"miktex","http://miktex.org/copying",2.7,2.7,"http://miktex.org/","Full LaTeX installation"
+"gs","GPL",8.63,8.64,"http://pages.cs.wisc.edu/~ghost/","GPL Ghostscript"
+? "Apache-ant","Apache Licence 2.0",NA,1.7.1,"http://ant.apache.org/","Java make pendant"
+"merlin","http://www.sph.umich.edu/csg/abecasis/MERLIN/FAQ.html",1.1.2,1.1.2,"http://www.sph.umich.edu/csg/abecasis/MERLIN/download/","Merlin-rapid analysis of dense genetic maps using sparse gene flow trees"
