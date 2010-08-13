@@ -17,21 +17,21 @@ Sys.setenv("R_LIBS" = local_lib)
 ## IMPORTANT:
 ## setup control file
 control <- list()
-control$path_to_pkg_src            <- "/srv/R/pkgs"        ## R-Forge pkg sourced tmp for testing purposes
+control$path_to_pkg_src            <- "/home/theussl/src/R-Forge"        ## R-Forge pkg sourced tmp for testing purposes
 control$path_to_pkg_log            <- "/home/theussl/log"             ## Log directory
-control$path_to_pkg_root           <- "/srv/R/R-Forge"          ## R-Forge root (contains /src ,/bin)
+control$path_to_pkg_root           <- "/home/theussl/src/R-Forge_contrib"          ## R-Forge root (contains /src ,/bin)
 control$path_to_local_texmf        <- "/srv/R/share/texmf"      ## path to local texmf
 control$path_to_local_library      <- local_lib      ## path to local pkg library
 control$stoplist                   <- ""                      ## path to stoplist
 control$cpu_time_limit             <- 600           ## CPU time limit
 ## mail configuration
-control$mail_domain_name_of_sender <- system("hostname -f", intern = TRUE) ## "xmaragorn64.wu-wien.ac.at" 
+control$mail_domain_name_of_sender <- system("hostname -f", intern = TRUE) ## "xmaragorn64.wu-wien.ac.at"
 control$mail_relay_server <- "statmath.wu.ac.at"           ## only necessary with sendEmail
 control$mail_programme <- "mail"                                ## on Windows: sendEmail
 class(control) <- "R-Forge_control"
 
 ## start building ...
-## typically here is a call 
+## typically here is a call
 ## build_packages(email        = "stefan.theussl@wu-wien.ac.at",
 ##               platform     = "Linux",
 ##               architecture = "x86_64",
@@ -48,7 +48,7 @@ cran_url <- "http://CRAN.R-project.org"
   maj.version <- paste(R.Version()$maj,unlist(strsplit(R.Version()$min,"[.]"))[1],sep=".")
   ## x86_32 on x86_64 allowed but not the other way round
   if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
-    stop("Building x86_64 binaries not possible on an x86_32 architecture") 
+    stop("Building x86_64 binaries not possible on an x86_32 architecture")
   ## handle different path separators
   path_separator <- c(unix = "/", windows = "\\")
   path_separator <- path_separator[.Platform$OS.type]
@@ -74,10 +74,10 @@ cran_url <- "http://CRAN.R-project.org"
   old_wd <- getwd()
 
   ## PACKAGE SIGHTING
-  
+
   ## STOP LIST: packages which should not be compiled
   donotcompile <- if(file.exists(stoplist)){
-    scan(stoplist, what = character(0)) 
+    scan(stoplist, what = character(0))
   }else ""
   ## sourcepackages available from R-Forge---exported svn reps
   avail_src <- dir(path_to_pkg_src)
@@ -102,7 +102,7 @@ cran_url <- "http://CRAN.R-project.org"
   repository_url <- cran_url
   lib <- path_to_local_library
   update.packages(lib = lib, repos = repository_url, ask = FALSE)
-  
+
   ##source("${R_scripts_dir}/packages.R")
   ##source("${R_scripts_dir}/R_Forge_utils.R")
   ##dir <- file_path_as_absolute(getwd())

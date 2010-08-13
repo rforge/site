@@ -60,7 +60,7 @@
 
 %% Copyright notices
 %%\noindent Copyright 2006--2007 Stefan Theussl\\
-\noindent Copyright 2006--2008 \RFORGE{}\\
+\noindent Copyright 2006--2010 \RFORGE{}\\
 
 \vspace{0.5cm}
 %\includegraphics{CCAL.png} 
@@ -85,10 +85,12 @@ standard license to this work will ensure the authors' right to make
 this work freely and openly available (see
 \url{http://creativecommons.org/licenses/by-sa/2.0/} for details). 
 
-\vspace{0.5cm}
-The current members of the \RFORGE{} are Kurt Hornik, Martin Kober,
-David Meyer, Stefan Theu\ss{}l and Achim Zeileis. To contact the
-authors please write an email to \email{R-Forge@R-project.org}.
+\vspace{0.5cm} 
+
+The current members of the \RFORGE{} are Kurt Hornik,
+Marco Maier, David Meyer, Stefan Theu\ss{}l and Achim Zeileis. Former
+members: Martin Kober. To contact the authors please write an email to
+\email{R-Forge@R-project.org}.
 
 \newpage
 
@@ -103,7 +105,17 @@ authors please write an email to \email{R-Forge@R-project.org}.
 
 \section{Introduction}
 
-Operating System Debian, reference to Rnews Article
+The R-Forge system is based on several building blocks: the main
+server hosting the web site and several servers providing the package
+builds and the quality assurance system.
+
+In order to provide an easy managable, reliable and flexible
+infrastructure we rely on virtualization technology, i.e., all systems
+run the operating system Debian GNU/Linux under a Xen
+hypervisor. Thus, R-Forge combines several virtual machines to one
+single entity.
+
+, reference to Rnews Article
 R-Forge~User's~Manual
 
 Subversion~\citep[SVN,
@@ -112,13 +124,45 @@ Versions System~\citep[CVS, see][]{forge:Cederqvist:2006}
 
 
 \newpage
+\section{The R-Forge Infrastructure}
+
+The R-Forge infrastructure consists of several servers hosting the
+two core components \textit{web presentation} and \textit{release and
+  quality management system (RQMS)}. The servers involved are listed
+in table~\ref{tab:server_overview}.
+
+%\todo{We need to generate table~\ref{tab:server_overview}
+%  automatically using R.}
+
+% \begin{table}
+% \label{tab:server_overview}
+% \begin{tabular}[c|c|c]
+
+% \end{tabular}
+% \end{table}
+
+
+We should use a running Rserve daemon on each server to indicate the
+servers purpose and what kind of application or operating system runs
+on it.
+
+\subsection{Serverfarm---map}
+
+\includegraphics[width=15cm]{Rbuild}
+
+\begin{itemize}
+\item
+\item
+\item
+\end{itemize}
+
 \section{Installation}
 \label{sec:installation}
 
 \subsection{Setup basis Debian Instance}
 
-Before start working with the FusionForge, please install Virtual Machine using the latest
-Debian stable Distribution. 
+Before start working with the FusionForge, please install Virtual
+Machine using the latest Debian stable Distribution. 
 
 \vspace{0.5cm}
 We use Xen virtualization infrastructure:
@@ -131,7 +175,8 @@ We use Xen virtualization infrastructure:
 
 \subsection{FusionForge}
 
-The installation instruction describes setting up the R-Forge ``devel'' instance.
+The installation instruction describes setting up the R-Forge
+``devel'' instance. 
 
 A backup of the base Debian system is created as an 
 LVM snapshot (xmrforge1-disk-snapshot).
@@ -199,7 +244,7 @@ $ mkdir svn
 $ cd svn
 $ svn co svn://svn-statmath.wu.ac.at/radmin radmin 
 \end{lstlisting}
-
+%$
         \item configure ssh daemon 
 copy sshd\_config from radmin repository
         \item configure rsync daemon 
@@ -386,10 +431,6 @@ xsrforge:/home/theussl/svn/radmin/Install-Notes# lvdisplay
   Block device           253:14
 
 \end{verbatim}
-
-\subsection{Serverfarm---map}
-
-\includegraphics[width=15cm]{Rbuild}
 
 \subsection{GForge}
 
@@ -693,10 +734,47 @@ update-alternatives --config editor
 \section{Release and Quality Management System}
 \label{sec:release_and_QM}
 
-\subsection{Serverfarm}
+For the most up to date information about installing an R-Forge build
+server see \file{Install-build\_check\_server-Howto.org} in radmin repository.
+
 \subsection{Mac OSX}
 \subsection{Linux}
+In order to create the virtual machine definition for \ldots{} we use
+the following command:
+
+\begin{lstlisting}[frame=single, framerule=0.95pt, language=bash]
+xen-create-image --hostname=xmaragorn --lvm=rootvg
+\end{lstlisting}
+
+\subsubsection{Rserve}
+install Debian package \pkg{r-cran-rserve}.
 \subsection{Windows}
+We base our instructions on Windows 7 Enterprise 64 bit, but they
+should work on any other recent Windows versions as well. The name of
+the virtual machine providing the Windows system is called
+\textit{xmhera}.
+
+Things to be done:
+\begin{enumerate}
+\item Set up a restricted user account named \code{rforge}
+\item Set up rsync daemon (DeltaCopy,
+  \url{http://www.aboutmyip.com/AboutMyXApp/DeltaCopy.jsp}), DeltaCopyRaw.zip
+\item (devel) automatically mount nfs share (xmgallagher) on P:
+\item (devel) set up Rserve
+\end{enumerate}
+
+\subsection{Virtual Machine Setup}
+
+In order to create the virtual machine definition for xmhera we use
+the following command:
+
+\lstset{backgroundcolor=\color{light-gray}, framexleftmargin=0pt,
+  framexrightmargin=15pt}
+\begin{lstlisting}[frame=single, framerule=0.95pt, language=bash]
+xen-create-image -n xmhera
+lvcreate -L20480M -n xmhera-disk rootvg
+\end{lstlisting}
+
 
 %% Acknowledgements from Rnews article
 \section{Acknowledgements}
@@ -709,7 +787,7 @@ of the Wirtschaftsuniversit\"at Wien for
 their support and for providing us with additional hardware as well as a
 professional server infrastructure. 
 Thanks to Philippe Grosjean for
-providing a Mac~OS description (Section~\ref{sec:scm-macosx}).
+providing a Mac~OS~X description (Section~\ref{sec:scm-macosx}).
 
 \bibliographystyle{plainnat}
 \bibliography{R-Forge_Manual}
