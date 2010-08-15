@@ -38,6 +38,14 @@ rf_read_configuration <- function( file, fields = NULL, ... ){
                      )
 }
 
+.rf_get_tmp <- function( rfc ){
+    rfc$tmp_dir
+}
+
+.rf_get_svn_root <- function( rfc ){
+    rfc$svn_root
+}
+
 ##############################
 ## Connect/disconnect to rf DB
 ##############################
@@ -80,43 +88,51 @@ rf_get_db_con <- function( rfc ){
 
 .check_available_entries <- function( rfc )
   all( rf_standard_fields() %in% names(rfc) )
-  
+
+
+.get_active_reps_from_root <- function( rfc, verbose = FALSE ){
+    svn_reps <- dir( .rf_get_svn_root(rfc) )
+    ## take only those which are indeed repositories and are not hidden
+    included <- sapply( svn_reps, function(x) file.exists(file.path( .rf_get_svn_root(rfc), x, "format")) )
+    if( verbose )
+        writeLines( sprintf("- Directory not a repository:\n-- %s.",
+                            paste(svn_reps[!included], collapse = ", ")) )
+    svn_reps <- svn_reps[ included ]
+    ## check if meta data can be retrieved from repositories
+    included <- sapply( svn_reps, function(x)
+                       !is.na(.svn_get_revsion_and_timestamp(file.path(.rf_get_svn_root(rfc), x))) )
+    if( verbose )
+        writeLines( sprintf("- Repository meta data cannot be retrieved:\n-- %s.",
+                            paste(svn_reps[!included], collapse = ", ")) )
+    ## return active repositories
+    svn_reps[ included ]
+}
+
 ##############################
 ## update rf db
 ##############################
+
 rf_update_db <- function( rfc, verbose = FALSE){
   ## we need a tempory directory here
-  if ( !file.exists(rfc$tmp_dir) )
-    dir.create(rfc$tmp_dir, recursive=TRUE)
-  if( length(dir(rfc$tmp_dir)) )
-    warning( sprintf("directory '%s' not empty", rfc$tmp_dir) )
-  stopifnot( file.exists(rfc$svn_root) )
-  if( length(dir(rfc$svn_root)) <= 0 )
-    stop( sprintf("svn root '%s' directory empty", rfc$svn_root) )
+  if ( !file.exists(.rf_get_tmp(rfc)) )
+    dir.create( .rf_get_tmp(rfc), recursive=TRUE )
+  if( length(dir( .rf_get_tmp(rfc))) )
+    warning( sprintf("directory '%s' not empty", .rf_get_tmp(rfc)) )
+  stopifnot( file.exists(.rf_get_svn_root(rfc)) )
+  if( length(dir(.rf_get_svn_root(rfc))) <= 0 )
+    stop( sprintf("svn root '%s' directory empty", .rf_get_svn_root(rfc)) )
 
   ## directories in svn_root are potential repositories
-  svn_reps <- dir(rfc$svn_root)
-
-  ## take only those which are indeed repositories and are not hidden
-  included <- sapply( svn_reps, function(x) file.exists(file.path(rfc$svn_root, x, "format")) )
-  if(verbose)
-    writeLines( sprintf("- Repositories not included:\n-- %s.",
-                        paste(svn_reps[!included], collapse = ", ")) )
-  svn_reps <- svn_reps[ included ]
-
-  ## check if meta data can be retrieved from repositories
-  included <- sapply( svn_reps, function(x)
-                     !is.na(.svn_get_revsion_and_timestamp(file.path(rfc$svn_root, x))) )
-  svn_reps <- svn_reps[ included ]
+  svn_reps <- .get_active_reps_from_root( rfc, verbose )
 
   ## retrieve all description files from the repositories
-  if(verbose)
-    writeLines( "- Retrieve DESCRIPTIONs ...")
+  if( verbose )
+      writeLines( "- Retrieve DESCRIPTIONs ...")
   descriptions <- lapply( svn_reps,
-                          function(x) .find_description_in_svn( file.path(rfc$svn_root, x)) )
-  names( descriptions ) <- svn_reps 
+                         function(x) .find_description_in_svn( file.path(.rf_get_svn_root(rfc), x)) )
+  names( descriptions ) <- svn_reps
   lapply( svn_reps, function(x) lapply(descriptions[[ x ]], function(desc, rep)
-                                       .svn_get_description(rfc$svn_root, desc, rep, rfc$tmp_dir), x) )
+                                       .svn_get_description(.rf_get_svn_root(rfc), desc, rep, .rf_get_tmp(rfc)), x) )
 
   ## verify integrity of descriptions
   ## HERE I AM! ##
@@ -129,8 +145,8 @@ rf_update_db <- function( rfc, verbose = FALSE){
       writeLines( sprintf("- Processing repository '%s':", rep) )
 
 
-                
-    
+
+
   }
   rfc <- rfTools:::rf_connect( rfc )
   pkgs_in_db <- .get_pkgs_from_table( rfc, rfc$rf_table )
@@ -138,7 +154,7 @@ rf_update_db <- function( rfc, verbose = FALSE){
   pkgs_in_db
 }
 
-## get head revison and its time stamp from svn 
+## get head revison and its time stamp from svn
 .svn_get_revsion_and_timestamp <- function( path ) {
   info <- tryCatch( .svn_info(path), error = identity)
   if( inherits(info, "error"))
@@ -158,14 +174,14 @@ rf_update_db <- function( rfc, verbose = FALSE){
   system( sprintf("svnlook tree --full-paths %s", path), intern = TRUE )
 
 .find_description_in_svn <- function( path ){
-   grep( "^pkg/([^/]+/)?DESCRIPTION$", 
-        .svn_tree( path ), 
+   grep( "^pkg/([^/]+/)?DESCRIPTION$",
+        .svn_tree( path ),
         value = TRUE, perl = TRUE )
 }
 
 .svn_get_description <- function( svn_root, desc, rep, tmp_dir){
   descname <- sprintf( "%s.%s", rep, gsub("/", ".", desc) )
-  system( sprintf("svn export file://%s %s", 
+  system( sprintf("svn export file://%s %s",
                   file.path(svn_root, rep, desc), file.path(tmp_dir, descname)) )
 }
 
@@ -283,7 +299,7 @@ rf_db_install <- function( con, config_file ){
     stopifnot( file.create(config_file) )
     rfc <- .create_new_rf_db( con )
   }
-  
+
   rf_write_configuration( rfc, file = config_file )
   invisible( TRUE )
 }
