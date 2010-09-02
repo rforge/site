@@ -17,13 +17,15 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## pkg list and dependency structure
   pkgs_dep <- resolve_dependency_structure(pkgs, repository_url, path_to_pkg_src)
 
-  ## install missing packages
+  ## install missing packages from standard repositories
   pkgs_installed <- installed.packages(lib = lib)
   ## Temporarily All packages are installed
   ## install those packages which are only available from R-Forge, the rest
   ## should be installed from CRAN or other repositories
   ## TODO: considering the install order
   pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], rownames(pkgs_installed))
+  avail_repos <- unique(available.packages(contriburl = contrib.url(repository_url))[,1])
+  pkgs_to_install <- pkgs_to_install[pkgs_to_install %in% avail_repos]
   pkgs_to_install_rforge <- setdiff(pkgs_dep[["R_FORGE"]], unique(c(pkgs_to_install, rownames(pkgs_installed))))
   writeLines("Done.")
   if(length(pkgs_to_install)){

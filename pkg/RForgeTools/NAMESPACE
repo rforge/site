@@ -5,9 +5,11 @@ import("tools")
 export("check_packages",
        "build_packages",
        "R_Forge_control",
-       "rforge_stats_read_logs"       
+       "rforge_stats_read_logs",
+       "rforge_server_info"
        )
 
+S3method("print", "rforge_server_info")
 S3method("print", "rforge_log")
 S3method("tail", "rforge_log")
 S3method("head", "rforge_log")
