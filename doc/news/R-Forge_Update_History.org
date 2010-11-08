@@ -1,4 +1,21 @@
-* News Items postet in R-Forge Site Admin
+* News (Front page)
+** Maintenance Work - Disk Space Expansion
+Dear R-Forge users,
+
+Please note the short (<30min.) R-Forge downtime today at 18:00 CET.
+
+Details:
+
+We need to extend disk space of the system hosting the core R-Forge
+components. This will lead to a short (<30min.) downtime of R-Forge
+today at 18:00 CET. This is necessary due to the unreliability of
+R-Forge especially on weekends, when log files have to be copied to a
+backup location. 
+
+We are sorry for the inconvenience caused.
+
+Best regards,
+The R-Forge Administration and Development Team
 
 ** R-Forge Update (2009-12-10)
 
@@ -20,7 +37,6 @@
 
    Best regards,
    The R-Forge Administration and Development Team
-
 
 ** First issue of The R Journal & R-Forge paper (2009-05-29)
    The first issue of The R Journal (successor of R News) has now been
