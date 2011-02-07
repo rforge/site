@@ -12,9 +12,9 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   setwd(build_dir)
 
   ## first delete old packages
-  system(paste("rm -f", file.path(contrib_dir, paste("*", file_type, sep = ""))))
+  system(sprintf("rm -f %s", file.path(contrib_dir, sprintf("*%s", file_type))))
   files <- dir()
-  files <- files[grep(file_type, files)]
+  files <- files[grep(sprintf("%s$", file_type), files)]
   for(i in files){
     ## copy package to contrib directory
     file.copy(i, contrib_dir, overwrite = TRUE)
@@ -33,12 +33,12 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   duplicated_pkgs <- duplicated(packages)
   if(any(duplicated_pkgs)){
   ## look for duplicated packages and remove older version
-    for(i in packages[duplicated_pkgs]){     
+    for(i in packages[duplicated_pkgs]){
       ind_package_to_remove <- ind[packages==i][version_order(versno[packages==i])[1]]
       system(paste("rm -f", tmp[ind_package_to_remove]))
     }
   }
-  
+
   ## Write a new PACKAGES and PACKAGES.gz file
   write_PACKAGES(dir = contrib_dir, fields = fields, type = pkg_type)
 
@@ -81,7 +81,7 @@ notify_admins <- function(packages, donotcompile, email, platform, control, path
   if(!is.null(path_to_check_dir))
     if(file.exists(file.path(path_to_check_dir, "check.csv.diff")))
       add_msg <- readLines(file.path(path_to_check_dir, "check.csv.diff"))
-  
+
   ## Text
   write(c(paste("R-Forge", platform, about, "log:"), " ",
           "Disk status:", " ",
@@ -102,7 +102,7 @@ notify_admins <- function(packages, donotcompile, email, platform, control, path
                  paste("-u \"R-Forge: Nightly", about,"\" -m Summary -a"), attachment,
                  "-s", relay_host))
   if(mail_prog == "mail")
-    system(paste("cat", attachment, "|", mail_prog, 
+    system(paste("cat", attachment, "|", mail_prog,
                  paste("-s \"R-Forge: Nightly", about, "\""), email))
   system(paste("rm -f", attachment))
   writeLines("Done.")

@@ -4,14 +4,14 @@
 ## install every package from source, we keep a complete local CRAN-
 ## install updated
 update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, platform, ...){
-  writeLines("Updating package library ...")
+  writeLines(sprintf("Updating package library %s ...", lib))
   if((platform == "Linux") | (platform == "MacOSX")){
     ## Start a virtual framebuffer X server and use this for DISPLAY so that
-    ## we can run package tcltk and friends.  
+    ## we can run package tcltk and friends.
     pid <- start_virtual_X11_fb()
   }
   ## first update all installed packages if necessary
-  update.packages(lib = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE)
+  update.packages(lib = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE, ...)
   writeLines("Done.")
   writeLines("Resolve dependency structure ...")
   ## pkg list and dependency structure
@@ -40,7 +40,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
     writeLines("Done.")
   }
   if((platform == "Linux") | (platform == "MacOSX")){
-    ## Close the virtual framebuffer X server 
+    ## Close the virtual framebuffer X server
     close_virtual_X11_fb(pid)
   }
   writeLines("Done.")

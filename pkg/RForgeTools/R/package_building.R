@@ -24,7 +24,8 @@ build_packages <- function(email,
                            bioc_data     =
                              "http://bioconductor.org/packages/release/data/annotation",
                            omega_hat_url = "http://www.omegahat.org/R",
-                           control       = list()){
+                           control       = list(),
+                           Ncpus = NULL){
 
   if(!inherits(control, "R-Forge_control"))
     stop("No R-Forge control object given")
@@ -32,13 +33,13 @@ build_packages <- function(email,
   writeLines("Start build process ...")
   ## match arguments
   ## FIXME: automatically use info from .Platform?
-  platform <- match.arg(platform) 
+  platform <- match.arg(platform)
   architecture <- match.arg(architecture)
   maj.version <- paste(R.Version()$maj,
                        unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
   ## x86_32 on x86_64 allowed but not the other way round
-  if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
-    stop("Building x86_64 binaries not possible on an x86_32 architecture") 
+  if((architecture=="x86_64") && (.Machine$sizeof.pointer == 4))
+    stop("Building x86_64 binaries not possible on an x86_32 architecture")
   ## check for necessary directories---create them if possible
   path_to_pkg_src <- control$path_to_pkg_src
   path_to_pkg_log <- control$path_to_pkg_log
@@ -47,7 +48,7 @@ build_packages <- function(email,
   stoplist <- control$stoplist
   ## local package library
   if(!check_directory(path_to_local_library, fix=TRUE))
-    stop(paste("There is no directory", dir,"!"))
+    stop(paste("There is no directory", path_to_local_library,"!"))
   ## R-Forge package sources
   if(!check_directory(path_to_pkg_src))
     stop("Directory", path_to_pkg_src, "missing!")
@@ -59,14 +60,14 @@ build_packages <- function(email,
     stop(paste("There is no directory", dir,"!"))
   ## get current working directory -> set back at FINALIZATION step
   old_wd <- getwd()
-  
+
   ## PACKAGE SIGHTING
-  
+
   ## STOP LIST: packages which should not be compiled
   ## BLACK_LIST: packages which cause severe problems (removed from R CMD build)
   ## TODO: blacklist hardcoded at the moment
   blacklist <- c("RepitoolsExamples")
-  
+
   ## FIXME: probably too strict at the moment. E.g., RWinEdt does not get build
   ## when checking packages the stoplist includes additional arguments to check
   ## process
@@ -75,7 +76,7 @@ build_packages <- function(email,
   }else check_args <- NULL
   ##if(length(no_install))
   ##  no_install <- check_args[no_install, 1]
-  
+
   ## for Linux builds we don't want to build vignettes when checkargs have:
   no_install   <- check_args[ grep("--install=no",
                                    check_args[["check_args"]]), "Package" ]
@@ -119,17 +120,17 @@ build_packages <- function(email,
     path_to_contrib_dir <- contrib.url(path_to_pkg_root, type = "source")
   }
   if(!check_directory(path_to_contrib_dir, fix=TRUE, recursive=TRUE))
-      stop(paste("There is no directory", dir,"!"))
+      stop(paste("There is no directory", path_to_contrib_dir,"!"))
 
   if(platform != "Linux"){
     ## sources to be considered in dependency check
     URL_pkg_sources <- contrib.url(sprintf("file:%s", path_to_pkg_root),
                                    type = "source")
-  
+
     ## where are the source tarballs already available from R-Forge?
     path_to_pkg_tarballs <- control$path_to_pkg_tarballs
     if( !check_directory(path_to_pkg_tarballs) )
-      stop( "Directory", path_to_pkg_tarballs, "missing!" ) 
+      stop( "Directory", path_to_pkg_tarballs, "missing!" )
 
     ## create package data base holding information about available repositories
     pkg_db_src <- create_package_db_src(svn = sprintf("file:%s",
@@ -138,7 +139,7 @@ build_packages <- function(email,
                                         src = sprintf("file:%s",
                                           path_to_contrib_dir))
     avail_src_pkgs <- pkg_db_src$svn[, 1]
-    
+
     pkgs <- remove_excluded_pkgs(avail_src_pkgs, donotcompile)
     ## we take only tarballs into account which are hosted in R-Forge SVN reps
     ##avail_src_pkgs <- avail_src_pkgs[avail_src_pkgs %in% pkgs]
@@ -151,14 +152,14 @@ build_packages <- function(email,
 
     ## sources to be considered in dependency check
     URL_pkg_sources <- sprintf("file://%s", path_to_pkg_src)
-  
+
     ## create package data base holding information about available repositories
     pkg_db_src <- create_package_db_src(svn = sprintf("file://%s",
                                           path_to_pkg_src),
                                         src = contrib.url(sprintf("file://%s", path_to_pkg_root),
                                           type = "source"))
   }
-  
+
   ## PACKAGE DB UPDATE
 
   ## FIXME: is it sufficient what we are doing here?
@@ -168,17 +169,17 @@ build_packages <- function(email,
     ## include Brian Ripley's Windows Repository
     other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
   }
-  
+
   update_package_library(c(pkgs), URL_pkg_sources, c(cran_url,
                                                      bioc_url,
                                                      omega_hat_url,
                                                      other_repositories),
-                         path_to_local_library, platform)
+                         path_to_local_library, platform, Ncpus = Ncpus)
 
   ##############################################################################
-  ## LAST PREPARATION STEPS BEFORE PACKAGE BUILD
+  ## LAST PREPARATION STEPS BEFORE PACKAGE BUILDING
   ##############################################################################
-  
+
   ## change to directory where the sources of R-Forge are in
   setwd(path_to_pkg_src)
 
@@ -204,14 +205,14 @@ build_packages <- function(email,
 
   ## LINUX BUILDS ##############################################################
   if(platform == "Linux"){
-  
+
     ## We need a virtual framebuffer
     pid <- start_virtual_X11_fb()
 
     ## Initialize timings
     timings <- numeric(length(pkgs))
     names(timings) <- pkgs
-    
+
     ## Building ...
     for(pkg in pkgs){
       ## Prolog
@@ -219,7 +220,7 @@ build_packages <- function(email,
                                    architecture = "all")
       write_prolog(pkg, pkg_buildlog, pkg_db_src, type = "build",
                    what = "tarball", std.out = TRUE)
-      
+
       ## timer start
       proc_start <- proc.time()
 
@@ -243,7 +244,7 @@ build_packages <- function(email,
             build <- !status
           }
       }
-      
+
       if(build){
         build_args <- if( pkg %in% c(no_vignettes, no_install, fake_install) )
           "--no-vignettes"
@@ -252,24 +253,24 @@ build_packages <- function(email,
         ## build tarball from sources
         .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
       }
-      
+
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-    
+
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
-    
+
     ## Cleanup
     close_virtual_X11_fb(pid)
 
   ## WINDOWS BUILDS ##########################################################
   }else if(platform == "Windows"){
-    
+
     ## Initialize timings
     timings <- numeric(length(avail_src_pkgs))
     names(timings) <- avail_src_pkgs
-    
+
     for( pkg in pkgs ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
@@ -282,11 +283,11 @@ build_packages <- function(email,
 
       ## get current package version (tarball, thus svn in pkg!)
       pkg_version_src   <- pkg_db_src$svn[pkg, "Version"]
-      
+
       ## FIXME: some packages do not get a Revision flag. Why?
       binary_revision <-
         tryCatch(as.integer(pkg_db_src$src[pkg, "Repository/R-Forge/Revision"]),
-                 error = identity)      
+                 error = identity)
       build <- TRUE
       ## for devel we build all packages
       if( !(R.version$status == "Under development (unstable)") ){
@@ -307,23 +308,23 @@ build_packages <- function(email,
             }
         }
       }
-      
+
       if(build){
         ## now build the package from package tarball
         .build_binary_from_tarball_win(pkg,
                                        pkg_version_src,
                                        path_to_pkg_tarballs,
                                        R,
-                                       pkg_buildlog)     
+                                       pkg_buildlog)
       }
-      
+
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-      
+
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
-    
+
     ## Cleanup
     ## delete 00LOCK, sometimes this interrupted the build process ...
     check_local_library(path_to_local_library)
@@ -347,15 +348,15 @@ build_packages <- function(email,
 
       ## timer start
       proc_start <- proc.time()
-      ## path to pkg buildlog 
+      ## path to pkg buildlog
 
        ## get current package version (tarball, thus svn in pkg!)
       pkg_version_src   <- pkg_db_src$svn[pkg, "Version"]
-      
+
       ## FIXME: some packages do not get a Revision flag. Why?
       binary_revision <-
         tryCatch(as.integer(pkg_db_src$src[pkg, "Repository/R-Forge/Revision"]),
-                 error = identity)      
+                 error = identity)
       build <- TRUE
       ## for devel we build all packages
       if( !(R.version$status == "Under development (unstable)") ){
@@ -376,23 +377,23 @@ build_packages <- function(email,
             }
         }
       }
-      
+
       if(build){
         ## now build the package from package tarball
         .build_binary_from_tarball_mac(pkg,
                                        pkg_version_src,
                                        path_to_pkg_tarballs,
                                        R,
-                                       pkg_buildlog)     
+                                       pkg_buildlog)
       }
-     
+
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     } #</FOR>
-    
+
     ## Cleanup: close framebuffer
     close_virtual_X11_fb(pid)
   } else stop(paste("Strange platform: ", platform, "! I'm confused ...",
@@ -404,7 +405,7 @@ build_packages <- function(email,
   pkgs_provided <- provide_packages_in_contrib(path_to_pkg_src,
                                                path_to_contrib_dir, platform)
   ## send email to R-Forge maintainer which packages successfully were built
-  notify_admins(pkgs_provided, donotcompile, email, platform, control, 
+  notify_admins(pkgs_provided, donotcompile, email, platform, control,
                 about = "build", timings = timings)
   ## go back to old working directory
   setwd(old_wd)
@@ -413,11 +414,11 @@ build_packages <- function(email,
 }
 
 ## OS: Linux (would also work on other POSIX systems?)
-## input: uncompressed package sources (the exported pkg directories) 
+## input: uncompressed package sources (the exported pkg directories)
 ## output: compressed package sources <package_name>_<version>.tar.gz
 ## FIXME: currently sources and resulting tarball are in the current working dir
 .build_tarball_from_sources_linux <- function(pkg, R, pkg_buildlog, build_args = ""){
-  system(paste(R, "CMD build", build_args, pkg, 
+  system(paste(R, "CMD build", build_args, pkg,
                ">>", pkg_buildlog, "2>&1"))
   pkg_version <- get_package_version_from_sources(pkg)
   invisible(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
@@ -442,16 +443,16 @@ build_packages <- function(email,
 }
 
 ## OS: Windows
-## input: uncompressed package sources (the exported pkg directories) 
+## input: uncompressed package sources (the exported pkg directories)
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
 .build_binary_from_sources_win <- function(pkg, pkg_version, R, pkg_buildlog, build_args = ""){
   ## first we have to build the tarball (important for vignettes)
-  system(paste(R, "CMD", "build", build_args, pkg, 
+  system(paste(R, "CMD", "build", build_args, pkg,
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
   ## then build the binary
-  system(paste(R, "CMD", "INSTALL --build", 
-                   paste(pkg, "_", pkg_version, ".tar.gz", sep = ""), 
+  system(paste(R, "CMD", "INSTALL --build --pkglock",
+                   paste(pkg, "_", pkg_version, ".tar.gz", sep = ""),
                    ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
   ## and finally delete the tarball
   file.remove(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
@@ -463,16 +464,16 @@ build_packages <- function(email,
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
 .build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
-  shell(paste(R, "CMD", "INSTALL --build", 
+  shell(paste(R, "CMD", "INSTALL --build",
                file.path(path_to_pkg_tarballs, "src", "contrib",
                          paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),
-                 ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+                 ">>", pkg_buildlog, "2>&1"), invisible = TRUE, shell = "cmd")
   ##               ">>", pkg_buildlog))#, invisible = TRUE)
   invisible(paste(pkg, "_", pkg_version, ".zip", sep = ""))
 }
 
 ## OS: Mac OS X
-## input: uncompressed package sources (the exported pkg directories) 
+## input: uncompressed package sources (the exported pkg directories)
 ## output: compressed package binary <package_name>_<version>.tgz
 ## FIXME: currently sources and resulting tarball are in the current working dir
 .build_binary_from_sources_mac <- function(pkg, pkg_version, R, pkg_buildlog, build_args = ""){
@@ -486,18 +487,18 @@ build_packages <- function(email,
   ## to compile something ...
   if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
     ## compile an x86_32 binary
-    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
+    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir,
 	             pkg_tarball, ">>", pkg_buildlog, "2>&1"))
     ## compile a PPC binary
-    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
+    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
 	      	     pkg_tarball, ">>", pkg_buildlog, "2>&1"))
 
   }else {
     ## R only packages can be installed in one rush
-    system(paste(R, "CMD INSTALL -l", tmpdir, 
+    system(paste(R, "CMD INSTALL -l", tmpdir,
                      pkg_tarball, ">>", pkg_buildlog, "2>&1"))
   }
-  
+
   ## combine everything to universal binary
   pkg_binary <- .make_universal_mac_binary(pkg, pkg_version,  pkg_buildlog, tmpdir)
 
@@ -506,7 +507,7 @@ build_packages <- function(email,
 
   ## and finally delete the tarball
   file.remove(pkg_tarball)
-  
+
   invisible(pkg_binary)
 }
 
@@ -522,24 +523,24 @@ build_packages <- function(email,
   ## to compile something ...
   if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
     ## compile an x86_32 binary
-    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir, 
+    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir,
                  file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
                  pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"))
     ## compile a PPC binary
-    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only", 
+    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
    	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                 pkg_version, ".tar.gz", sep = "")), 
+                 pkg_version, ".tar.gz", sep = "")),
                 ">>", pkg_buildlog, "2>&1"))
 
   }else {
     ## R only packages can be installed in one rush
-    system(paste(R, "CMD INSTALL -l", tmpdir, 
+    system(paste(R, "CMD INSTALL -l", tmpdir,
                  file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                 pkg_version, ".tar.gz", sep = "")), 
+                 pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"))
   }
-  
+
   pkg_binary <- .make_universal_mac_binary(pkg, pkg_version, pkg_buildlog, tmpdir)
 
   ## Cleanup
@@ -560,7 +561,7 @@ build_packages <- function(email,
     warning(paste("Package", pkg, "does not exist in", dir, "!"))
   file.exists(file.path(dir, pkg, "src"))
 }
-	
+
 ## check if package has a Makefile or a configure script,
 ## necessary for building mac packages -> Do we have to set 'arch=' variable?
 .check_whether_package_code_contains_makefile_or_configure <- function(pkg, dir = "."){
@@ -574,8 +575,8 @@ build_packages <- function(email,
 ## checks if there is an installed package in the given path and builds the .tgz
 .make_universal_mac_binary <- function(pkg, pkg_version,  pkg_buildlog, dir = "."){
   if(file.exists(file.path(dir, pkg, "DESCRIPTION"))){
-    system(paste("tar czvf", paste(pkg, "_", pkg_version, ".tgz", sep = ""), 
-                 "-C", dir, pkg, 
+    system(paste("tar czvf", paste(pkg, "_", pkg_version, ".tgz", sep = ""),
+                 "-C", dir, pkg,
                  ">>", pkg_buildlog, "2>&1"))
     return(paste(pkg, "_", pkg_version, ".tgz", sep = ""))
   }
@@ -587,7 +588,7 @@ build_packages <- function(email,
     system( paste("rm -rf", file.path(".", dir)) )
 }
 
-get_package_version_from_sources <- function(pkg, library = ".") 
+get_package_version_from_sources <- function(pkg, library = ".")
   sapply(pkg, .get_package_version_from_sources, library)
 
 .get_package_version_from_sources <- function(pkg, library){
