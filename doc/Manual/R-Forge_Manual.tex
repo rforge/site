@@ -42,7 +42,7 @@
 %%  \vspace*{0.5cm}
   \rule{\linewidth}{1.5mm}
   \begin{flushright}
-  \textbf{SVN Revision: 102, \today}\\
+  \textbf{SVN Revision: 210, \today}\\
   \end{flushright}
 
   \vspace*{\fill}
@@ -121,10 +121,10 @@ provide infrastructure in order to facilitate such an open
 decentralized development process for the entire \proglang{R}
 community.
 
-\proglang{R}-Forge~(\url{http://R-Forge.R-project.org}) provides a set
-of tools for source code management and various web-based features. It
-aims to provide a platform for collaborative development of
-\proglang{R}~packages, \proglang{R}-related software or further
+\proglang{R}-Forge~\citep[][]{RJournal:Theussl+Zeileis:2009} provides
+a set of tools for source code management and various web-based
+features. It aims to provide a platform for collaborative development
+of \proglang{R}~packages, \proglang{R}-related software or further
 projects. It is closely related to the most famous of such
 platforms---the world's largest open source software (OSS) development
 website---namely \url{http://SourceForge.net}. What is different is
@@ -138,23 +138,21 @@ Basically, \proglang{R}-Forge is based on FusionForge
 (\url{http://fusionforge.org/})---the open source successor of
 GForge~\citep{forge:copeland_et_al:2006}---which is a framework
 integrating various tools like SVN for collaborative work on source
-code, mailing lists, bug tracking etc. into one platform. On
-\proglang{R}-Forge all work is organized in the same entity namely a
+code, mailing lists, bug tracking etc.\ into one platform. On
+\proglang{R}-Forge all work is organized in the same entity, namely a
 ``Project''. In these projects it is possible to host one or more
 packages and other \proglang{R}-related material. The main advantage
 is, that uploaded code is going to be packaged (i.e., built) and
-checked every day not only with the latest patched version of
-\proglang{R}~\citep[see \textit{What is the current version of
-  \proglang{R}?} in][]{forge:hornik:2010} but also with the release
-candidate just before a new version of \proglang{R} is to be
-released. Thus, developers do not necessarily have to set up a local
-platform-independent build and check environment for their packages
-anymore. Furthermore, packages passing the quality management system
-can be released from \proglang{R}-Forge to CRAN in a standardized way. 
+checked every day for various platforms not only with the latest
+patched version of \proglang{R}~\citep[see \textit{What is the current
+  version of \proglang{R}?} in][]{forge:hornik:2010} but also with the
+release candidate just before a new version of \proglang{R} is to be
+released. Furthermore, packages passing the quality management system
+can be released from \proglang{R}-Forge to CRAN in a standardized way.
 
-Additionally, \proglang{R}-Forge provides other tools especially for
-larger projects to coordinate the work between project members and to
-communicate with their user base.
+Additionally, \proglang{R}-Forge provides other tools to coordinate
+the work between project members and to communicate with their user
+base.
 
 \begin{itemize}
 \item Project websites are a way for developers to present their work
@@ -187,8 +185,8 @@ communicate with their user base.
 %%\end{itemize}
 
 In this manual we present all relevant steps to get started with
-\proglang{R}-Forge. If you need further help or have comments
-regarding \proglang{R}-Forge please send an email to
+\proglang{R}-Forge. If you need further help or like to submit
+comments regarding \proglang{R}-Forge please send an email to
 \email{R-Forge@R-project.org}. For a more detailed documentation
 regarding the underlying FusionForge system we refer to
 \url{https://fusionforge.org/docman/view.php/6/1/gforge_manual.plain.html}.
@@ -460,16 +458,15 @@ platforms, including Linux, Windows (32 bit) and Mac~OS.
 
 \subsection{Building and Checking}
 To build your packages, simply place your package or, alternatively,
-multiple packages in the
-\textbf{\texttt{pkg/}} directory in your SVN repository (see 
-Section~\ref{sec:scmhowto} on how to achieve this) and check it
-in. Typically this directory contains either the \proglang{R} package with the usual
-\texttt{DESCRIPTION} file and \texttt{R/}, \texttt{man/},
-\texttt{data/} directories (see \cite{Rcore:writing_R_extensions} for more
-details) or contains two or more directories containing the actual
-package sources, i.e., you can build \textbf{more than one package} by
-putting the packages in subdirectories, e.g. \texttt{pkg/foo/}, 
-\texttt{pkg/bar/}, etc.
+multiple packages in the \textbf{\texttt{pkg/}} directory in your SVN
+repository (see Section~\ref{sec:scmhowto} on how to achieve this) and
+check it in. Typically this directory contains either the \proglang{R}
+package with the usual \texttt{DESCRIPTION} file and \texttt{R/},
+\texttt{man/}, \texttt{data/} directories~\citep[see][for more
+details]{Rcore:writing_R_extensions} or contains two or more
+directories containing the actual package sources, i.e., you can build
+\textbf{more than one package} by putting the packages in
+subdirectories, e.g. \texttt{pkg/foo/}, \texttt{pkg/bar/}, etc.
 
 Packages are automatically checked out every night (Central European
 Time), built and checked on several platforms (make sure that the

@@ -6,7 +6,11 @@ destination = /srv/gforge/download/
 all: manual IA
 
 manual: 
-	texi2pdf ${manual}.tex
+	pdflatex ${manual}
+	bibtex ${manual}
+	bibtex ${manual}
+	pdflatex ${manual}
+	pdflatex ${manual}
 
 IA: 
 	texi2pdf ${IA}.tex	
