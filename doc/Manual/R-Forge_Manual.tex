@@ -17,7 +17,7 @@
 %% new command for R-Forge tabs
 \newcommand{\tab}[1]{{\normalfont\textit{#1}}}
 
-\title{\proglang{R}-Forge User's Manual, BETA}
+\title{\proglang{R}-Forge User's Manual}
 \author{\RFORGE}
 %\email{R-Forge@R-project.org}
 %\institute{Department of Statistics and Mathematics\newline
@@ -38,7 +38,7 @@
 
 \begin{titlepage}
 
-  {\LARGE \raggedleft \textbf{\proglang{R}-Forge User's Manual, {\large BETA}}}\\
+  {\LARGE \raggedleft \textbf{\proglang{R}-Forge User's Manual}}\\
 %%  \vspace*{0.5cm}
   \rule{\linewidth}{1.5mm}
   \begin{flushright}
@@ -61,7 +61,7 @@
 
 %% Copyright notices
 %%\noindent Copyright 2006--2007 Stefan Theussl\\
-\noindent Copyright 2006--2008 \RFORGE{}\\
+\noindent Copyright 2006--2011 \RFORGE{}\\
 
 \vspace{0.5cm}
 \includegraphics{CCAL.png} 
@@ -87,8 +87,9 @@ this work freely and openly available (see
 \url{http://creativecommons.org/licenses/by-sa/2.0/} for details). 
 
 \vspace{0.5cm}
-The current members of the \RFORGE{} are Kurt Hornik, Martin Kober,
-David Meyer, Stefan Theu\ss{}l and Achim Zeileis. To contact the
+The current members of the \RFORGE{} are Kurt Hornik, David Meyer,
+Stefan Theu\ss{}l and Achim Zeileis. Former members include: Martin
+Kober. To contact the 
 authors please write an email to \email{R-Forge@R-project.org}.
 
 \newpage
@@ -105,49 +106,54 @@ authors please write an email to \email{R-Forge@R-project.org}.
 \section{Introduction}
 \label{sec:intro}
 
-For a decade the \proglang{R} Development Core Team is using collaborative
-development tools like Subversion~\citep[SVN,
+Software developers typically use collaborative development tools like
+Subversion~\citep[SVN,
 see][]{forge:Pilato+Collins-Sussman+Fitzpatrick:2004} or Concurrent
-Versions System~\citep[CVS, see][]{forge:Cederqvist:2006} provided by
-ETH Z\"urich.   
-Many \proglang{R} package
-developers around the world use similar infrastructure built upon their own
-solutions as collaborative development is a key factor for a lot of
-successful open source projects. Therefore the \textbf{R-project}
-wants to provide infrastructure not only
-for the \proglang{R} Development Core Team but also for the entire
-\proglang{R} community. 
+Versions System~\citep[CVS, see][]{forge:Cederqvist:2006} in order to
+manage their code base efficiently. E.g., the \proglang{R} Development
+Core Team is using a central SVN repository provided by ETH Z\"urich
+(\url{http://svn.R-project.org}) for the base \proglang{R}
+distribution. What is more, many \proglang{R} package developers
+around the world use similar infrastructure built upon their own
+solutions since collaborative development is a key factor for open
+source projects being successful. Thus, the \textbf{R-project} aims to
+provide infrastructure in order to facilitate such an open
+decentralized development process for the entire \proglang{R}
+community.
 
-\proglang{R}-Forge~(\url{http://R-Forge.R-project.org}) provides a set of tools
-for source code management and various web-based
-features. It aims to provide a platform for collaborative development of
-\proglang{R}~packages, \proglang{R}-related software or further projects. It is
-closely related to the most famous of such platforms---the 
-world's largest open source software (OSS) development website---namely
-\url{http://SourceForge.net}. What is different is the provided set of
-tools with a strong focus on the need of the \proglang{R}
-community. All in all, \proglang{R}-Forge is a place where all \proglang{R}
-developers and users can come together and exchange 
-their knowledge. Joining this community service gives you access to
-all we have to offer. 
+\proglang{R}-Forge~(\url{http://R-Forge.R-project.org}) provides a set
+of tools for source code management and various web-based features. It
+aims to provide a platform for collaborative development of
+\proglang{R}~packages, \proglang{R}-related software or further
+projects. It is closely related to the most famous of such
+platforms---the world's largest open source software (OSS) development
+website---namely \url{http://SourceForge.net}. What is different is
+the provided set of tools with a strong focus on the need of the
+\proglang{R} community. All in all, \proglang{R}-Forge is a place
+where all \proglang{R} developers and users can come together and
+exchange their knowledge. Joining this community service gives you
+access to all we have to offer.
 
-Basically, \proglang{R}-Forge is based on 
-GForge~\citep{forge:copeland_et_al:2006} which is a framework
-integrating various tools like 
-SVN for collaborative work on source code, mailing lists, bug tracking
-etc. into one platform. On \proglang{R}-Forge all work is organized in
-the same entity namely a ``Project''. In these projects it is possible
-to host one or more packages. The main advantage is, that your package
-is going to be built and checked every day 
-not only with the latest patched version of \proglang{R} but also with
-the release candidate just before a new version of \proglang{R} is to be
-released. It is not necessary anymore, that developers have to set up
-a local platform-independent build and check environment. Furthermore,
-packages passing the quality management system on \proglang{R}-Forge can be
-released to CRAN in a standardized way.
+Basically, \proglang{R}-Forge is based on FusionForge
+(\url{http://fusionforge.org/})---the open source successor of
+GForge~\citep{forge:copeland_et_al:2006}---which is a framework
+integrating various tools like SVN for collaborative work on source
+code, mailing lists, bug tracking etc. into one platform. On
+\proglang{R}-Forge all work is organized in the same entity namely a
+``Project''. In these projects it is possible to host one or more
+packages and other \proglang{R}-related material. The main advantage
+is, that uploaded code is going to be packaged (i.e., built) and
+checked every day not only with the latest patched version of
+\proglang{R}~\citep[see \textit{What is the current version of
+  \proglang{R}?} in][]{forge:hornik:2010} but also with the release
+candidate just before a new version of \proglang{R} is to be
+released. Thus, developers do not necessarily have to set up a local
+platform-independent build and check environment for their packages
+anymore. Furthermore, packages passing the quality management system
+can be released from \proglang{R}-Forge to CRAN in a standardized way. 
 
-Additionally, \proglang{R}-Forge provides other tools especially for larger
-projects to coordinate the work between project members and to
+Additionally, \proglang{R}-Forge provides other tools especially for
+larger projects to coordinate the work between project members and to
 communicate with their user base.
 
 \begin{itemize}
@@ -180,12 +186,12 @@ communicate with their user base.
 %%\item project help board.
 %%\end{itemize}
 
-In this manual we present all relevant steps to get
-started with \proglang{R}-Forge. If you need further help or have
-comments regarding \proglang{R}-Forge please send an email to
-\email{R-Forge@R-project.org}. For a more detailed
-documentation regarding the underlying GForge system
-see~\cite{forge:copeland_et_al:2006}. 
+In this manual we present all relevant steps to get started with
+\proglang{R}-Forge. If you need further help or have comments
+regarding \proglang{R}-Forge please send an email to
+\email{R-Forge@R-project.org}. For a more detailed documentation
+regarding the underlying FusionForge system we refer to
+\url{https://fusionforge.org/docman/view.php/6/1/gforge_manual.plain.html}.
 
 \section{Registration}
 \label{sec:registration}
@@ -410,53 +416,38 @@ ssh-dsa AAAA... foo@bar
 
 
 
-\subsubsection{Mac OS}
+\subsubsection{Mac OS X}
 \label{sec:scm-macosx}
 %% Thanks to Philippe Grosjean for providing us with this description
-Mac~OS users should refer to Unix section~\ref{sec:scm-unix}. They
-can alternatively use GUI~applications to manage their SVN
-repositories and SSH~keychains.
+Mac~OS~X users should consult Section~\ref{sec:scm-unix} (Linux/Unix)
+for generating and uploading keypairs. However, alternativ
+GUI~applications may be used to manage SVN repositories which is
+described here.
 
 \begin{enumerate}
-\item To manage the ssh keypair you can use SSHKeychain
-(\url{http://www.sshkeychain.org/}). You can generate your keychains
-in the 'Preferences...' dialog box of SSHKeychain, but you have to provide a
-passphrase of 5 characters minimum. If you do not want a passphrase,
-use 'ssh-keygen' at the terminal (a keychain without passphrase is
-required to use SCPlugin, see step~4. In SSHKeychain, select 'Agent'
-- 'Add single key...' and select the key you just generated. 
-
-\item Upload the public key to \proglang{R}-Forge as explained in
-  section~\ref{sec:scm-unix}
-  Unix. The public key is in a file name [keyfile].pub in the same
-  directory as your private key. If you used default directory and
-  name to generate your key, the files are in a hidden directory named
-  '.ssh' in your home path, and is thus not visible in the Finder. To
-  make a copy of the public key on your desktop type the following
-  commands in the terminal (replace the name of the file with yours): 
-
-  \code{cp ~/.ssh/id\_rsa.pub ~/Desktop/id\_rsa.pub}
-  
-  Then, upload this file to \proglang{R}-Forge.
+\item Create a keypair and upload the public key to \proglang{R}-Forge
+  as explained in Section~\ref{sec:scm-unix}.
 
 \item Wait until the next full hour so that the key gets activated.
 
-\item If you want a convenient management of your SVN~repository in the
-  Finder, install SCPlugin. To install it, follow instructions at
+\item In order to manage your SVN~repository in the \textit{Finder},
+  install \textbf{SCPlugin}. Note that a keypair without passphrase is
+  required to use SCPlugin which is considered insecure. To install it
+  anyways, follow instructions at
   \url{http://scplugin.tigris.org/installation.html}. Once SCPlugin is
   installed, navigate in the Finder to the directory where you want to
-  place the local copy of your SVN~repository. Create a folder with the name
-  of your project, right click on this folder and select \textit{Subversion}
-  -> \textit{Checkout}. Indicate the URL given on the project website (tab
-  "SCM") under "developer account". (Note: if this last step fails,
-  wait an hour and try again. The logins are created once an hour
-  only). 
+  place the local copy of your SVN~repository. Create a folder with
+  the name of your project, right click on this folder and select
+  \textit{Subversion} -> \textit{Checkout}. Indicate the URL given on
+  the project website (tab "SCM") under \textit{Developer Subversion
+    Access via SSH}.
 
 \end{enumerate}
 
-Another page to consult for SVN installation on Mac OSX is
+Another page to consult for SVN installation on Mac~OS~X is
 \url{http://www.wikihow.com/Install-Subversion-on-Mac-OS-X}. Alternate SVN
 software are proposed there. 
+
 
 \section{\proglang{R} Package Development}
 
@@ -472,7 +463,7 @@ To build your packages, simply place your package or, alternatively,
 multiple packages in the
 \textbf{\texttt{pkg/}} directory in your SVN repository (see 
 Section~\ref{sec:scmhowto} on how to achieve this) and check it
-in. Typically this directory contains either the R package with the usual
+in. Typically this directory contains either the \proglang{R} package with the usual
 \texttt{DESCRIPTION} file and \texttt{R/}, \texttt{man/},
 \texttt{data/} directories (see \cite{Rcore:writing_R_extensions} for more
 details) or contains two or more directories containing the actual
@@ -500,13 +491,13 @@ To install dependencies from other repositories as well use e.g.,
 
 \subsection{External SVNs}
 Developers who wish to use their own external package repository can
-use the \textbf{external SVN} feature in the\proglang{R}~packages Admin~tab
-(follow the instructions on the site). Please note that only
-repositories with anonymous access and using the \proglang{R}-Forge repository
-structure (i.e., \texttt{pkg} is available in the repositories) are
-supported. It is possible to use 
-external and internal SVN repositories side-by-side. Regardless of
-origin, all packages will show up on the R packages tab.
+use the \textbf{external SVN} feature in the \proglang{R}~packages
+Admin~tab (follow the instructions on the site). Please note that only
+repositories with anonymous access and using the \proglang{R}-Forge
+repository structure (i.e., \texttt{pkg} is available in the
+repositories) are supported. It is possible to use external and
+internal SVN repositories side-by-side. Regardless of origin, all
+packages will show up on the \proglang{R} packages tab.
 
 If you decided to migrate your repository to \proglang{R}-Forge please go to
 Section~\ref{sec:svnmigration}.
@@ -560,7 +551,7 @@ lists for their project.
 
 Furthermore, \textbf{searching the lists} is provided by the Swish-e engine
 and can be accessed via the List tab. Please note that private lists
-are not included in the search index.  
+are not included in the search index. 
 % TODO: Reference for swish
 
 
@@ -622,13 +613,11 @@ your \proglang{R}-Forge project:
 
 Setting up this project would not have been possible without Douglas
 Bates and the University of Wisconsin as they provided us with a
-server for hosting this platform. Furthermore, 
-the authors would like to thank the Zentrum f\"ur Informatikdienste  
-of the Wirtschaftsuniversit\"at Wien for
-their support and for providing us with additional hardware as well as a
-professional server infrastructure. 
-Thanks to Philippe Grosjean for
-providing a Mac~OS description (Section~\ref{sec:scm-macosx}).
+server for hosting this platform. Furthermore, the authors would like
+to thank IT Services of the WU Wirtschaftsuniversit\"at Wien for their
+support and for providing us with additional hardware as well as a
+professional server infrastructure.  Thanks to Philippe Grosjean for
+comments on using SVN on Mac~OS~X (Section~\ref{sec:scm-macosx}).
 
 
 \bibliographystyle{plainnat}
