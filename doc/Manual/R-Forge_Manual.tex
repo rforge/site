@@ -429,23 +429,23 @@ described here.
 \item Wait until the next full hour so that the key gets activated.
 
 \item In order to manage your SVN~repository in the \textit{Finder},
-  install \textbf{SCPlugin}. Note that a keypair without passphrase is
-  required to use SCPlugin which is considered insecure. To install it
-  anyways, follow instructions at
-  \url{http://scplugin.tigris.org/installation.html}. Once SCPlugin is
-  installed, navigate in the Finder to the directory where you want to
-  place the local copy of your SVN~repository. Create a folder with
-  the name of your project, right click on this folder and select
+  install \textbf{SCPlugin}. To install it follow the instructions at
+  \url{http://scplugin.tigris.org}. Once SCPlugin is installed,
+  navigate in the Finder to the directory where you want to place the
+  local copy of your SVN~repository. Create a folder with the name of
+  your project, right click on this folder and select
   \textit{Subversion} -> \textit{Checkout}. Indicate the URL given on
   the project website (tab "SCM") under \textit{Developer Subversion
     Access via SSH}.
-
+\item Alternatively, download and install the \textbf{svnX} client
+  from
+  \url{http://www.apple.com/downloads/macosx/development_tools/svnx.html}.
+  It has a reasonable GUI, provides parallel views into Subversion
+  repositories and working directories, supports all SVN-like
+  operations, and can also handle keypairs with password. More
+  information for svnX installation on Mac~OS~X is given on the page
+  \url{http://www.wikihow.com/Install-Subversion-on-Mac-OS-X}.
 \end{enumerate}
-
-Another page to consult for SVN installation on Mac~OS~X is
-\url{http://www.wikihow.com/Install-Subversion-on-Mac-OS-X}. Alternate SVN
-software are proposed there. 
-
 
 \section{\proglang{R} Package Development}
 
@@ -613,8 +613,9 @@ Bates and the University of Wisconsin as they provided us with a
 server for hosting this platform. Furthermore, the authors would like
 to thank IT Services of the WU Wirtschaftsuniversit\"at Wien for their
 support and for providing us with additional hardware as well as a
-professional server infrastructure.  Thanks to Philippe Grosjean for
-comments on using SVN on Mac~OS~X (Section~\ref{sec:scm-macosx}).
+professional server infrastructure.  Thanks to Philippe Grosjean and
+Hans Werner Borchers for comments on using SVN on Mac~OS~X
+(Section~\ref{sec:scm-macosx}).
 
 
 \bibliographystyle{plainnat}
