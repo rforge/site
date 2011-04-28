@@ -1,4 +1,16 @@
 * News (Front page)
+** R-Forge Update (2011-04-28)
+
+   - RForgeTools updated to 0.4-9: This update includes a lot of minor
+     improvements regarding the building of source packages. In order
+     to save disk space packages are now built using the flags
+     "--compact-vignettes" and "--resave-data=best". Furthermore, all
+     Bioconductor source repositories are now included for resolving
+     package dependencies.
+
+   Best regards,
+   The R-Forge Administration and Development Team
+
 ** Maintenance Work - Disk Space Expansion
 Dear R-Forge users,
 
