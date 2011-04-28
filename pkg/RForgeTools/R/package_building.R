@@ -15,17 +15,19 @@
 ## takes a control object containing control parameters, the platform,
 ## architecture, ... as arguments
 build_packages <- function(email,
-                           platform      = c("Linux", "Windows", "MacOSX"),
-                           architecture  = c("x86_32", "x86_64"),
-                           rforge_url    = "http://R-Forge.R-project.org",
-                           cran_url      = "http://CRAN.R-project.org",
-                           bioc_url      =
+                           platform       = c("Linux", "Windows", "MacOSX"),
+                           architecture   = c("x86_32", "x86_64"),
+                           rforge_url     = "http://R-Forge.R-project.org",
+                           cran_url       = "http://CRAN.R-project.org",
+                           bioc_url       =
                              "http://bioconductor.org/packages/release/bioc",
-                           bioc_data     =
+                           bioc_data      =
                              "http://bioconductor.org/packages/release/data/annotation",
-                           omega_hat_url = "http://www.omegahat.org/R",
-                           control       = list(),
-                           Ncpus = NULL){
+                           bioc_experiment=
+                             "http://bioconductor.org/packages/release/data/experiment",
+                           omega_hat_url  = "http://www.omegahat.org/R",
+                           control        = list(),
+                           Ncpus = 1L){
 
   if(!inherits(control, "R-Forge_control"))
     stop("No R-Forge control object given")
@@ -171,7 +173,7 @@ build_packages <- function(email,
   }
 
   update_package_library(c(pkgs), URL_pkg_sources, c(cran_url,
-                                                     bioc_url,
+                                                     c(bioc_url, bioc_data, bioc_experiment),
                                                      omega_hat_url,
                                                      other_repositories),
                          path_to_local_library, platform, Ncpus = Ncpus)
@@ -417,8 +419,9 @@ build_packages <- function(email,
 ## input: uncompressed package sources (the exported pkg directories)
 ## output: compressed package sources <package_name>_<version>.tar.gz
 ## FIXME: currently sources and resulting tarball are in the current working dir
+## Changelog 2011-04-28: --compact-vignettes --resave-data=best added to save disk space
 .build_tarball_from_sources_linux <- function(pkg, R, pkg_buildlog, build_args = ""){
-  system(paste(R, "CMD build", build_args, pkg,
+  system(paste(R, "CMD build --compact-vignettes --resave-data=best", build_args, pkg,
                ">>", pkg_buildlog, "2>&1"))
   pkg_version <- get_package_version_from_sources(pkg)
   invisible(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
