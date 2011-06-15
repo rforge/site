@@ -40,7 +40,9 @@
 "mysql","GPL",5.0.67,NA,"http://dev.mysql.com/downloads/mysql/#downloads","MySQL "
 "mysql64","GPL",NA,NA,"",""
 "netcdf","http://www.unidata.ucar.edu/software/netcdf/copyright.html",4.0.1,NA,"http://www.stats.ox.ac.uk/pub/RWin/","NetCDF, prepared by Brian Ripley"
-"netcdf64","http://www.unidata.ucar.edu/software/netcdf/copyright.html",4.0.1,NA,"http://www.stats.ox.ac.uk/pub/RWin/Win64No_/","NetCDF, prepared by Brian Ripley"
+"netcdf64","http://www.unidata.ucar.edu/software/netcdf/copyright.html",4.0.1,NA,"http://www.stats.ox.ac.uk/pub/RWin/Win64No_/","NetCDF,
+prepared by Brian Ripley"
+"NLopt","LGPL",2.2.3,2.2.3,NA,"Prepared by Jelmer Ypma"
 "PostgreSQL","BSD",8.3.4-1,8.4.0-1,"http://www.postgresql.org/download/windows","PostgreSQL binaries"
 "PostgreSQL","BSD",NA,NA,NA,"PostgreSQL binaries"
 "QuantLib","QuantLib License",0.9.9,0.9.7,"http://dirk.eddelbuettel.com/tmpql/QuantLibBuild.tar.gz","comprehensive software framework for quantitative finance, provided by Dirk Eddelbuettel"
