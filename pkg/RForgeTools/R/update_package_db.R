@@ -37,7 +37,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## FIXME: hard coded R-Forge tar.gz source dir
   if(length(pkgs_to_install_rforge)){
     writeLines("Install missing packages from R-Forge ...")
-    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = contrib.url("http://R-Forge.R-project.org"), ...)
+    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = contrib.url("http://R-Forge.R-project.org", type = "source"), type = "source")
     writeLines("Done.")
   }
   if((platform == "Linux") | (platform == "MacOSX")){
@@ -66,6 +66,7 @@ resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
   pkgs_all <- resolve_dependencies(pkgs_to_resolve_deps, avail)
   pkgs_repos <- setdiff(pkgs_all, pkgs)
   pkgs_rforge <- setdiff(pkgs_all, rownames(avail_repos))
+  ## FIXME: what to do with packages hosted on both R-Forge and other repos ...
   DL <- utils:::.make_dependency_list(pkgs_all, avail)
   pkgs_install_order <- utils:::.find_install_order(pkgs_all, DL)
 
