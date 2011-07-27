@@ -1,11 +1,3 @@
-importFrom("utils", "head")
-importFrom("utils", "tail")
 importFrom("chron", "as.chron")
 
-export("rforge_stats_read_logs")
-
-S3method("print", "rforge_log")
-S3method("tail", "rforge_log")
-S3method("head", "rforge_log")
-S3method("[", "rforge_log")
-S3method("as.data.frame", "rforge_log")
+export("read_access_log")

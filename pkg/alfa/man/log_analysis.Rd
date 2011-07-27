@@ -17,7 +17,8 @@ read_access_log( file, format = c("common", "combined"), ... )
     on the local file system.}
   \item{format}{a character string specifying the log file
   format. Currently only \code{"common"} and \code{"combined"} are
-  supported. See Details for more information.
+  supported. See Details for more information.}
+  \item{...}{further arguments passed to function \code{read.table()}.}
 }
 \details{The function \code{read_access_log()} reads all entries from
   log files  produced by Apache web servers in one of two formats. The
