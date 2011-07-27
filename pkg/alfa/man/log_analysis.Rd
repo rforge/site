@@ -1,70 +1,55 @@
-\name{RForgeLog}
-\alias{rforge_stats_read_logs}
-\alias{print.rforge_log}
-\alias{[.rforge_log}
-\alias{head.rforge_log}
-\alias{tail.rforge_log}
-\alias{as.data.frame.rforge_log}
+\name{reader}
+\alias{read_access_log}
 
-\title{R-Forge Tools for Log Analysis}
+\title{Reader for Apache Log Files}
 
 \description{
-  A set of tools for handling R-Forge log files.
+  This function reads a log file produced by an Apache web server from
+  disk and returns a \code{'data.frame'}.
 }
 \usage{
 ## reader
-rforge_stats_read_logs (log_rep, from = NA, to = NA, subset = "package download",
-                        file_name = "gforge.log")
-
-## methods
-\method{print}{rforge_log}(x, \ldots)
-\method{head}{rforge_log}(x, \ldots)
-\method{tail}{rforge_log}(x, \ldots)
-\method{[}{rforge_log}(x, \ldots)
-\method{as.data.frame}{rforge_log}(x, \ldots)
+read_access_log( file, format = c("common", "combined"), ... )
 }
 
 \arguments{
-  \item{log_rep}{the location of the log files on the local file system.}
-  \item{from}{the first date to be considered for reading. Default: \code{NA}.}
-  \item{to}{the last date to be considered for reading. Default: \code{NA}.}
-  \item{subset}{specifies the subset, i.e., which entries are to be
-extracted from the logs. Currently only \code{"package download"} is available.}
-  \item{file_name}{specifies the name of the log file. Default: \code{"gforge.log"}.}
-  \item{x}{an object of class \code{rforge_log}.}
-  \item{...}{further arguments are passed on.}
+  \item{file}{a character string specifying the location of the log file
+    on the local file system.}
+  \item{format}{a character string specifying the log file
+  format. Currently only \code{"common"} and \code{"combined"} are
+  supported. See Details for more information.
 }
-\details{The function \code{rforge_stats_read_logs()} reads particular
-entries from log files made by the R-Forge system or any GForge
-compatible log file repository typically produced by the
-Apache web server. It returns an object of class \code{rforge_log} for
-which we provide infrastructure like extractor functions or print
-method.
+\details{The function \code{read_access_log()} reads all entries from
+  log files  produced by Apache web servers in one of two formats. The
+  format \code{"common"} contains information about the client IP
+  address, the RFC1413 identity, the userid determined by HTTP
+  authentication, the timestamp of the request, the HTTP request, the
+  HTTP status code, and the size of the object returned to the client
+  (in bytes). Format \code{"combined"} additional includes information
+  about the referer and the user agent.
 
-A method to the generic function \code{as.data.frame} can be used to
-coerce an \code{rforge_log} object to a data.frame. 
+  Each column in the resulting \code{'data.frame'} is of class
+  \code{'character'} except \code{"Timestamp"} which inherits from class
+  \code{'chron'} and columns \code{"HTTP_status"} and \code{"User_agent"}
+  which are represented by a factor.
 }
 \value{
-  An object of class \code{rforge_log} containing a particular subset of
-entries in the given log files.
+  A \code{'data.frame'}.
 }
 
 \references{
-  R-Forge (\url{http://R-Forge.R-project.org}).
+  \url{http://httpd.apache.org/docs/2.2/logs.html}.
 }
 \author{Stefan Theussl}
 
 \examples{
-## read log entries (not run):
-## log_entries_2008 <- rforge_stats_read_logs("path/to/logs", from = "2008/01/01",
-##                       to = "2008/12/31", subset = "package download")
-
-## coerce to data.frame (not run):
-## log_data_2008 <- as.data.frame(log_entries_2008)
-
-## the package includes a data set containing log entries for 2008
-data(log_data_2008)
-dim(log_data_2008)
-summary(log_data_2008)
+## read log entries in format "common":
+common <- read_access_log( system.file("logs/common.log", package =
+"alfa") )
+common
+## read log entries in format "combined":
+combined <- read_access_log( system.file("logs/combined.log", package =
+"alfa"), format = "combined" )
+combined
 }
 \keyword{utilities}

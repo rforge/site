@@ -1,5 +1,6 @@
 importFrom("utils", "head")
 importFrom("utils", "tail")
+importFrom("chron", "as.chron")
 
 export("rforge_stats_read_logs")
 

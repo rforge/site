@@ -3,6 +3,7 @@ Version: 0.0-0
 Date: 2011-07-27
 Title: Apache Log File Analysis
 Description: This package provides a set of tools for analyzing the log files produced by Apache web servers.
+Imports: chron
 Author: Stefan Theussl
 Maintainer: Stefan Theussl <stefan.theussl@wu.ac.at>
 License: GPL-2
