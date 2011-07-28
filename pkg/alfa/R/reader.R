@@ -1,8 +1,7 @@
 read_access_log <- function( file, format = c("common", "combined"), ... ){
   format <- match.arg(format)
-  check <- read.table( file = file, na.strings = "-", nrows = 1, ... )
-  stopifnot( ncol(check) == (apache_log_cols( format)+1) )
   x <- read.table( file = file, na.strings = "-", stringsAsFactors = FALSE, ... )
+  stopifnot( ncol(x) == (apache_log_cols( format)+1) )
   ## read time stamp appropriately
   dates <- make_chron_object( x )
   x <- x[,-5]

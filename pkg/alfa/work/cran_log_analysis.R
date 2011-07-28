@@ -13,6 +13,10 @@ mclapply( files, function(x) {cranlog <- read_access_log( file.path(log_dir, x),
                               save(cranlog, file = file.path(log_dir, paste(x, "rda", sep =".")))}, mc.cores = ncores)
 q( save = "no" )
 
+## if something files see which one 
+files <- dir(log_dir)
+sub2 <- sub(".rda", "", files)
+files <- setdiff(sub2, sub2[duplicated(sub2)])
 
 ##########################################################################
 ## ANALYSIS
