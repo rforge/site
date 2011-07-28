@@ -8,6 +8,10 @@ read_access_log <- function( file, format = c("common", "combined"), ... ){
   x <- x[,-5]
   x[,4] <- dates
   colnames(x) <- apache_log_entries(format)
+  if( format == "combined"){
+    x[["User_agent"]] <- as.factor(x[["User_agent"]])
+  }
+  x[["HTTP_status"]] <- as.factor(x[["HTTP_status"]])
   x
 }
 
