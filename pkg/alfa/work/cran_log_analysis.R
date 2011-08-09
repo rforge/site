@@ -1,22 +1,61 @@
 ## simple R script to analyze log files
 library("alfa")
-library("multicore")
 
-ncores <- 4
+## this is where the read log files are stored
+rda_dir <- "/mnt/data/cranrda"
 
-## Uncompressed CRAN log files are stored in:
-log_dir <- "/mnt/data/cran"
+##########################################################################
+## DATA PREPARATION
+##########################################################################
 
-outfile <- "/mnt/data/cranlogs.rda"
-files <- dir(log_dir)
-mclapply( files, function(x) {cranlog <- read_access_log( file.path(log_dir, x), format = "combined" )
-                              save(cranlog, file = file.path(log_dir, paste(x, "rda", sep =".")))}, mc.cores = ncores)
-q( save = "no" )
+## library("multicore")
+## ncores <- 4
 
-## if something files see which one 
-files <- dir(log_dir)
-sub2 <- sub(".rda", "", files)
-files <- setdiff(sub2, sub2[duplicated(sub2)])
+## ## Uncompressed CRAN log files are stored in:
+## log_dir <- "/mnt/data/cran"
+
+## outfile <- "/mnt/data/cranlogs.rda"
+## files <- dir(log_dir)
+## mclapply( files, function(x) {cranlog <- read_access_log( file.path(log_dir, x), format = "combined" )
+##                               save(cranlog, file = file.path(log_dir, paste(x, "rda", sep =".")))}, mc.cores = ncores)
+## q( save = "no" )
+
+## ## if something files see which one 
+## files <- dir(log_dir)
+## sub2 <- sub(".rda", "", files)
+## files <- setdiff(sub2, sub2[duplicated(sub2)])
+
+## ## then combine:
+## ## rename files
+## file.rename(file.path(rda_dir, "full.access.log.rda"), file.path(rda_dir, "full.access.log.00.rda"))
+## for(i in 1:9)
+##   file.rename( file.path(rda_dir, sprintf("full.access.log.%d.rda", i)), file.path(rda_dir, sprintf("full.access.log.0%d.rda", i)) )
+
+## files <- dir(rda_dir)
+
+## cranlogs <- NULL
+## for( file in rev(files[1:30]) ){
+##   writeLines(sprintf("file: %s", file))
+##   load( file.path(rda_dir, file) )
+##   cranlogs <- rbind(cranlog, cranlogs)
+## }
+## save(cranlogs, file = file.path(rda_dir, "cranlogs_2011-1.rda"))
+
+## cranlogs <- NULL
+## for( file in rev(files[31:60]) ){
+##   writeLines(sprintf("file: %s", file))
+##   load( file.path(rda_dir, file) )
+##   cranlogs <- rbind(cranlog, cranlogs)
+## }
+## save(cranlogs, file = file.path(rda_dir, "cranlogs_2010-2.rda"))
+
+## cranlogs <- NULL
+## for( file in rev(files[61:length(files)]) ){
+##   writeLines(sprintf("file: %s", file))
+##   load( file.path(rda_dir, file) )
+##   cranlogs <- rbind(cranlog, cranlogs)
+## }
+## save(cranlogs, file = file.path(rda_dir, "cranlogs_2010-1.rda"))
 
 ##########################################################################
 ## ANALYSIS
@@ -46,7 +85,7 @@ match_win_packages <- function( x ){
 
 ##########################################################################
 ## SRC/LINUX/MAC/WINDOWS
-load("/mnt/data/cran/full.access.log.10.rda")
+#load("/mnt/data/cran/full.access.log.10.rda")
 
 R_client_download_stats <- function( log ){
   GET <- log[grep("^GET", log[["Request"]]), ]
@@ -77,6 +116,24 @@ R_client_download_stats <- function( log ){
                         WIN = tra_win)
           )
 }
+
+## first half of 2011
+load( file.path(rda_dir, "cranlogs_2011-1.rda") )
+
+## subset according to date and remove unneccesary information
+
+months <- sapply(1:7L, function(x) sprintf("%02d/01/11", x))
+
+results <- list()
+for( i in seq_along(months) ){
+  startdate <- months[i]
+  stopdate <- ifelse( length(months) >= i, max(cranlogs$Timestamp), months[i + 1] )
+  results[[ months[i] ]] <- R_client_download_stats( cranlogs[ (cranlogs$Timestamp >= startdate) & (cranlogs$Timestamp < stopdate), c(4:7, 9)] )
+}
+
+save( results, file = file.path(rda_dir, "results_2011-1.rda") )
+
+
 
 ## Linux clients extra
 GET <- cranlog[grep("^GET", cranlog[["Request"]]), ]
