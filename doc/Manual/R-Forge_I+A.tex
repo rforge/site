@@ -60,7 +60,7 @@
 
 %% Copyright notices
 %%\noindent Copyright 2006--2007 Stefan Theussl\\
-\noindent Copyright 2006--2010 \RFORGE{}\\
+\noindent Copyright 2006--2011 \RFORGE{}\\
 
 \vspace{0.5cm}
 %\includegraphics{CCAL.png} 
@@ -145,6 +145,43 @@ in table~\ref{tab:server_overview}.
 We should use a running Rserve daemon on each server to indicate the
 servers purpose and what kind of application or operating system runs
 on it.
+
+\subsection{Current Workflow}
+
+\subsubsection{Backups}
+
+SVN repos located in \file{/srv/svn}, as of 2011-07-04 there are 1074
+%% ls -l /srv/svn/ | wc -l
+projects using 25 GB of disk space.
+
+\textbf{Local backup} (i.e., backup to same machine) in
+\file{/srv/backup}. This includes daily generated (compressed?) dump
+files of the whole database of size 21MB
+(\file{/usr/local/sbin/psqlbackup.sh}), weekly full backups (dump
+files) of all SVN repos with daily (revision-based) as well as
+incremental backups (both via \file{/usr/local/sbin/svnbackup.sh}) and
+weekly backups of mailinglists: \code{tar czf
+  /srv/backup/mailman/mailman.`/bin/date +\%F`.tar.gz
+  /var/lib/mailman}. The size of a full weekly mailing list backup is
+240MB.
+
+Backup cron jobs: \file{/etc/cron.d/rforge_cron_backup}
+
+\textbf{Remote backup}: The backup directory is transferred to a
+different server xmnumenorbackup.ai.wu.ac.at. A full backup is done
+weekly (the last 2 full backups are always available ~ 330GB) and
+daily incremental backups (6 incremental  in sum 160GB).
+
+setup via installed binary  (or ssh public-key) on R-Forge which is called from the backup
+server at specific dates.
+
+\subsubsection{Package export}
+
+svn export of all packages hosted on R-Forge from their corresponding
+repos to \file{/srv/rsync/pkgs/} (local package cache): 3.7GB. 1243
+packages get exported. 
+
+
 
 \subsection{Serverfarm---map}
 
