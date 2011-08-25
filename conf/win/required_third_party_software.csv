@@ -1,5 +1,6 @@
 "Software","License","Version CRAN","Version R-Forge","URL","Comment"
 "boost","Boost Software Licence",1.43.0,1.39,"http://www.boost.org","Boost C++ library (mainly header files)"
+"clp","EPL",1.14.0,NA,"","Coin-or linear programming; made available by clpAPI maintainer via http://www.cs.uni-duesseldorf.de/AG/BI/Software/SyBiL/clpAPI/clp_1.14.0.zip"
 "fftw","GPL-2",3.2.2,3.2.2,"http://www.fftw.org/install/windows.html","C subroutine library for computing the discrete Fourier transform"
 "fftw64","GPL-2",3.2.2,NA,"http://www.stats.ox.ac.uk/pub/Rtools/goodies/Win64No_/local64No_.zip","64bit prepared by Brian Ripley"
 "gd",NA,2.0.33,2.0.33,"http://www.libgd.org/Downloads","gd"
