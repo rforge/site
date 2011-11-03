@@ -5,7 +5,7 @@
 \usepackage{graphicx,keyval,thumbpdf,url}
 \usepackage{amsmath}
 \usepackage{amsfonts}
-
+\usepackage{a4wide}
 %% math commannd
 \newcommand\argmin{\mathop{\mathrm{arg min}}}
 \newcommand\trace{\mathop{\mathrm{tr}}}
@@ -24,11 +24,15 @@
 
 \AtBeginDocument{\setkeys{Gin}{width=0.6\textwidth}}
 
-\date{2010-07-08}
-\title{R-Forge Open Issues and Roadmap}
+\date{\today}
+\title{R-Forge Open Issues and Community Service Roadmap}
 \author{Stefan Theu\ss{}l}
 
 \sloppy{}
+
+\begin{document}
+
+\maketitle
 
 \section{Summary}
 
@@ -37,35 +41,60 @@ General:
 \begin{itemize}
 \item First of all, Kurt needs to decide what should happen with
   R-Forge in the future.
-\item In any case, we plan to establish sort of an \textit{incoming
-    platform} (InP) where packages will be checked on all three major
-  platforms: Linux, Mac OS X, Windows. Furthermore, binaries will be
-  built and made available for download.
+\item In any case, we (Brian, Simon, Stefan, Uwe) all agreed to
+  establish sort of an \textit{incoming platform} (InP) where packages
+  will be checked on all three major platforms: Linux, Mac OS X,
+  Windows. Furthermore, binaries for the latter two will be built and
+  made available for download.
 \item R-Forge (or any other community services [possibly established
-  instead]) will use this InP as a backend.
-\item Maintenance of the components of this build system will stay
-  with the corresponding experts. For Linux this is Kurt (WU Vienna);
-  for Mac OS X Simon (AT\&T); for Windows: Uwe (TU Dortmund?).
-\item Nevertheless, if R-Forge will be supported by the R Foundation
-  in the future, someone has to do all the sysadmin stuff like
-  applying patches/security updates, maintain the FusionForge/R-Forge
-patch set, etc.
-\item The R Foundation has no steady income so that funding a part
-  time or even full time position is possible for a longer term. 
+  instead]) will use this InP as a back end.
+\item Maintenance of the components of this common build and check
+  system will stay with the corresponding experts. For Linux this is
+  Kurt (WU Vienna); for Mac OS X Simon (AT\&T); for Windows: Uwe (TU
+  Dortmund?).
+\item Full check service (including recursive reverse dependencies)
+  implemented mainly on the Linux system for coverage/speed reasons.
+\item Nevertheless, if the \proglang{R} Foundation and/or Kurt decides that
+  R-Forge will be supported in the future, someone has to
+  do all the sysadmin stuff like:
+  \begin{enumerate}
+  \item applying patches/security
+    updates,
+  \item maintaining the FusionForge/R-Forge patch set 
+  \item maintaining the SVN-to-compressed-package-sources (aka Linux
+    builds)
+  \item answering user inquiries, going through support and feature
+    request tracker (approx. 1--5 requests per day).
+  \end{enumerate}
+\item Simon offered to investigate AT\&T hosting/providing sysadmin
+  support for part of this, e.g., the FusionForge service.
+\item Although the \proglang{R} Foundation has a steady income, employing people,
+  i.e., funding a part time or even full time position, is not
+  possible for a longer period of time.
+\item Subscription fees for such a community service have been
+  discussed with no clear results; Advertisements (e.g., banners) for
+  sponsoring such a platform does not generate enough money and leads
+  to diverse problems (see Revolution donation).
+\item Again, David Smith (Revolution) asked what they could do to help
+  (generally, not specific to R-Forge).
 \item However, there is money for carrying out a short term project to
   establish a professional community service.
 \end{itemize}
 
-Computational Resources needed in Vienna (WU)
+\medskip
+
+Computational resources needed in Vienna (WU)
 
 \begin{itemize}
 \item Currently, R-Forge is run on the Bates donation, a six core, 12
-  GB memory AMD Athlon system with a RAID 5 1TB net harddisk
+  GB memory AMD Athlon system with a RAID 5 1TB net hard disk
   storage. This system is now more than 5 years old. It hosts three
-  virtual (Xen) machines: the webservice, the source package builder,
-  and a development instance of the webservice.
+  virtual (Xen) machines: the web service, the source package builder,
+  and a development instance of the web service.
+\item Linux package checks run on the same system. Currently, only a
+  few (2--4) checks per week due to limited resources.
 \item Checks and builds for the Windows platform are carried out on a
-  6 core virtual machine (xen), with 8GB memory (resources will be
+  6 core virtual machine (Xen), with 8GB memory (resources will be
   freed when there is the incoming platform set up)
 \item Checks and builds for the Mac OS X platform are carried out on a
   2 core mac mini with 4GB of memory (resources will be
@@ -73,56 +102,313 @@ Computational Resources needed in Vienna (WU)
   hopelessly overloaded and will be trashed.
 \item Backup is an issue. A professional backup system needs to take
   care of all relevant data hosted on R-Forge (or any community
-  platform). Currently, we simply mirror svn repositories, mailing
+  platform). Currently, we simply mirror SVN repositories, mailing
   lists and database dump files to a second server physically located
-  in a different area (but within the WU network).
-\item 
-  
+  in a different area (but within the WU network). Is this sufficient?
+  Or do we need a more sophisticated (presumably proprietary = costly)
+  backup mechanism?
 \end{itemize}
 
-Further Ressources needed (AT\&T, TU Dortmund)
+\medskip
+Human resources needed:
+\begin{itemize}
+\item Designing a common model for package checks and setting up such
+  a new community service also involves lots of programming work.
+\item Given a common model for check servers Brian believes that he
+  could get his sysadmins to implement it on Solaris too.
+\end{itemize}
+
+
+\medskip
+Further resources needed (AT\&T, TU Dortmund)
 
 \begin{itemize}
 \item For the incoming platform we need a 12+ core Mac server which is
   planned to be hosted with Simon at AT\&T. Stefan will get access to
   this machine to install his current R-Forge tool-chain for the time
   being.
-\item Windows builder has sufficient resources?
+\item At the moment Winbuilder resources are capable to run regular
+  checks of CRAN packages with various flavors of \proglang{R}
+  including recursive reverse checks. However, checking an additional
+  1000+ (devel/R-Forge) packages will definitely bring this system to
+  its limits.
 \end{itemize}
 
 Short term TODO:
 
-
 \begin{itemize}
-\item Buying a good equipped mac server (5000--6000 Euro should be sufficient)
 \item Centralize build check system by introducing a general incoming
   platform. It will rather be a push than a pull service (in contrast
   to the current implementation on R-Forge).
-\item Current Apple USA offers for this money (~8250\$) a 12 core
-  Intel Westmere at 2.93 GHz, 24 GB of RAM (=2GB per core), RAID (5?)
-  with 3 1TB disks.
-  
+\item For the InP we need first of all a well equipped x86 server
+  hosting the Linux build platform (R-Forge) and regular (daily?) CRAN
+  as well as on demand InP package checks. Given parallelization of
+  CRAN Linux check processes a 20+ core server (1.5 GB to 2GB RAM per
+  core) should be capable of handling both, CRAN and InP checks
+  (including recursive reverse checks?). Fast disk storage is almost
+  as important as the number/clock frequency of cores, thus a RAID
+  system is required. Note also that power consumption is high and
+  24/7 operation has to be confirmed by hosting institution (should be
+  no problem at WU, but who knows \ldots{}).
+\item It has to be decided if this system also serves as the upload
+  host. For R-Forge, packages will be directly pushed to this server
+  for processing.
+\item Next, we need a well equipped Mac pro server (5000--6000 Euro
+  should be sufficient). Currently, Apple USA offers for this amount of
+  money (ca.~8250\$) a 12 core Intel Westmere at 2.93 GHz, 24 GB of RAM
+  (=2GB per core), RAID (5?) with three 1TB disks.
 \end{itemize}
 
 \section{R-Forge Statistics}
 
+TODO. 
+
+Some figures generated for the useR! meeting: 
+1107 (active) Projects = \#SVN repositories; Repo size (open projects)
+sum: 14GB; 1236 packages, 614 of them are in CRAN, 11 on bioc;
+
+Package sizes (kB):
+\begin{verbatim}
+> summary(as.integer(sizes))
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      9     147     426    3098    1422  641400 
+\end{verbatim}
+
+number of packages changed in last 2 weeks/month/2 months/6 months:
+\begin{verbatim}
+> sum( head_rev > "08/01/11", na.rm = TRUE)
+[1] 171
+> sum( head_rev > "07/01/11", na.rm = TRUE)
+[1] 279
+> sum( head_rev > "06/01/11", na.rm = TRUE)
+[1] 342
+> sum( head_rev > "02/01/11", na.rm = TRUE)
+[1] 519
+\end{verbatim}
+
+number of packages changed per day in Juli 2011
+\begin{verbatim}
+> summary( out )
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+  22.00   47.25   70.00   66.53   77.00  122.00
+\end{verbatim}
 
 \section{Further Notes}
 
 CRAN package download traffic and other resource-demanding components
 are investigated separately. However, the current system is far away
 from serving all the load generated by the web server and download
-requests in the future. Currently, an Intel P4 system at 3GHz, 2 GB
-RAM with 200GB RAID 1 (2 disks) is hosting CRAN. This is \proglang{R}
-Foundation equipment.
+requests in the future. It does OK at the moment though. Currently, an
+Intel P4 system at 3GHz, 2 GB RAM with 200GB RAID 1 (2 disks) is
+hosting CRAN. This is \proglang{R} Foundation equipment.
 
-\begin{document}
-\maketitle
+\section{Details}
 
+TODO.
 
+\subsection{Notes by Brian 2011-08-23}
 
+\begin{verbatim}
+o I am not convinced that we need a full recursive rebuild service on
+Windows (and we don't have one on Macs).  If it were done on just one
+platform (preferably Linux for speed/coverage reasons), we would all
+find out what needs to be rebuilt, and that isn't very much even for
+e.g. Matrix updates.  Also, running three flavours on winbuilder is
+perhaps too much: we could simply build new packages on R-oldrelease
+when they build. 
 
+o I don't think we have really spec-ed the systems needed.  We just
+know that 12-core servers are good value and the sort of level
+needed. A full Linux check is currently taking my server ca 70 CPU
+hours: on an 8-core system that is getting a bit slow for comfort (the
+machine has to do real work too).  Uwe is quoting 80 hours on
+Winbuilder (with a few more exclusions). (A quick look suggests that
+2x10cores is pretty expensive as yet compared to 2x6 or 2x8, and
+16-core Opterons are still futureware.)  We would need some headroom,
+but a 2x increase is the sort of thing plausible over the life of such
+hardware.
+\end{verbatim}
 
+\subsection{Notes by Uwe 2011-08-22}
+
+\begin{verbatim}
+We talked about freeing resources on winbuilder, I was a bit too fast
+here:  This is not that easily possible: If we want to have regular full
+checks for R-devel and the check summaries on CRAN up to date,
+winbuilder has to run regular checks for R-devel and at least recusive
+reverse checks for R-pacthed and R-oldrelease (if I do not regenerate 
+all check results daily). Otherwise, check summaries on CRAN won't be
+up to date re. Windows.
+
+That means, if we want to provide check results on differences for
+R-patched and R-oldrelease and all changes in R-devel, winbuilder is
+currently almost running at its limits (at least given the update
+orgies around useR! this year).  Checking 100 packages from R-forge
+won't be a problem, but rechecking all 1000's for recent R-devel
+results will not be that straightforward without adequate additional
+or replaced hardware. 
+Anyway, we should get started with winbuilder and if that is not
+sufficient, there will always be a way to get some more hardware.  
+\end{verbatim}
+
+\subsection{Notes by Kurt 2011-08-16}
+
+\begin{verbatim}
+I see R-Forge providing 3 kinds of services:
+
+A. A source code repository
+
+B. General purpose development/community services (mailing lists, bug
+   report systems, project web pages, ...)
+
+C. R-specific development/community services:
+
+   1. Build service for source and binary packages
+   2. Check service
+   3. Source and binary repositories of the hosted packages
+   4. Automatic CRAN submissions
+
+For A, there are obvious alternatives (sourceforge, googlecode, these
+days if one is really cool and/or a rock star I guess one needs to be
+hosted at github, ...).  Personally, I would not want to put my R-based
+projects there---I don't trust the providers, neither as concerns the
+persistence of their service, nor whether they respect privacy in as
+much as they should.  So trust is an issue---which I guess implies that
+we cannot have REvolution run the R-Forge source code repository.  But
+then of course cost is an issue as well.  In particular, it seems
+unclear whether the R Foundation members and donors should provide or
+support this service.  On the one hand, it clearly aids the
+proliferation of R, which is one of the main goals of the R Foundation.
+On the other hand, at full cost the bill is quite considerable.
+
+My conclusion would be that if we (the R Foundation) think that we
+should provide a source code repository as a commmunity service (and
+personally I think we should), then we should try to find out the real
+cost, and see how we can get the funding.  I don't think we can start
+charging subscription fees, so ideally we would get sponsoring in
+exchange for web page presence of the sponsors, which implies that we
+need to host the service at a place where this is no problem [and in
+principle, this is a problem for WU, although I think I can officially
+work around this if this is possible (WU used to get sponsoring by
+exclusively selling ad presense in its web pages, but this may have
+changed by now).
+
+For B, this is all "nice to have" (provided one has no alternatives,
+e.g., one's own web pages).  From what I understand, it basically comes
+for free when using gforge.
+
+For C, it clearly would make sense to (as discussed, and also as I think
+was agreed between Stefan and Uwe some time ago) join efforts towards
+providing a "community" build/check service, and also to make it easier
+to run repositories.
+
+The R-Forge build/check service has not really worked out well, part due
+to the growth experienced [Stefan tells me that he's out of CPU time for
+even the minimal build/check once a day cycle], but I think mostly due
+to the conceptual vagueness of the approach.  The COST paper I co-wrote
+with Stefan and Uwe tried to formalize the issues a bit.  In particular:
+if R-F package A depends on R-F package B, which version of B should be
+used for building/checking A?  The current SVN version?  The current
+build (however obtained)?  The current CRAN version (which may not
+exist)?
+
+So, there are fundamental conceptual issues/challenges which are in
+integral part of a common build service design.  (As mentioned in the
+COST paper, the typical Linux distribution build/check services work
+differently, as does the BioC service.)
+
+I think that there are probably no good defaults for a general purpose
+build/check service, and that the specs should be part of the submission
+process.  For checking, this is somewhat easier:
+
+* I think we should allow for submitting a group of source packages (or
+  maybe specify the locations where these can be obtained)
+
+* One should be able to specify which flavors to use for checking
+
+* We might also want to allow the submission of "images" to be used for
+  checking.  E.g., JMC feels that he cannot easily make changes and test
+  their effects on (a subset of) CRAN.  One idea could be having him
+  create a suitable "image" [not a full disk image I think] and submit
+  this to the check service together with a list of CRAN packages to be
+  checked (and we could provide tools to specify certain groups of
+  packages, e.g. "all S4 using ones").
+
+* We might also want to allow for recursive checks, although I think
+  this will have to be restricted to a suitable subset of *registered*
+  users.
+
+As I only ever use source packages, I don't know all that much about
+issues when building binary packages.  For source packages which require
+loading other packages as part of the build process (in particular to
+rebuild the vignettes), we clearly need a way to specify the versions of
+these packages to be employed, and there is a bit of a chicken and egg
+problem there.  (In the above example, if A suggests B and B suggests A
+because both use the other in their vignettes, where do we start?)
+
+For C3, I see making it easier to run repositories as depending on first
+having good solutions for build/check services, so this will be a
+longer-term goal.
+
+For C4: I don't think this has worked out well.  People keep submitting
+packages which clearly can never have cleanly passed the checks,
+sometimes because they submit too soon (before the daily rebuild).  One
+could consider a pipeline where someone first submits to the check
+service and then if everything worked fine is given the opportunity to
+forward the submission to CRAN.  There is an issue, though, because the
+CRAN incoming checking runs additional CRAN incoming specific test
+code.  So one would need to specify a check "profile" and tell people to
+use the CRAN profile in case they were planning to upload to CRAN [and
+provide me with a list of possible "approvals" only containing checked
+packages which used the CRAN profile.
+
+[I haven't thought about the details of organizing pulling "submissions"
+from the check queue into CRAN, but I think this can wait until we get
+something going ...] 
+\end{verbatim}
+
+\subsection{Notes by Brian 2011-06-29}
+
+\begin{verbatim}
+Everyone agrees that the most important service is the build/check
+service:
+
+Binary builds on Windows and Mac
+
+Checks on some Linux variants and those two.
+
+All for some flavours of R, most importantly R-patched and R-devel.
+If we had a common submission platform, we could probably add the
+Solaris servers.
+
+The svn and mailing lists are most appropriate to collaborative
+projects (and maybe most projects are really single-developer).
+There are some projects with disprortionately large packages (and
+hence stress on backups).
+
+Current hardware is the Bates donation, a Windows VM on an IBM server
+in the dept, and a Mac mini.
+
+Some concern over data transfer rates for daily builds/checks (but we
+need figures).
+
+Seems better to have a single Windows and a single Mac build/check
+service, managed by the experts (e.g. Uwe and Simon), with some backup
+management available from R-core or the host institutions.  Whether
+these are best hosted at WU or with their primary maintainers depends
+on data transfer rates.
+
+The scale of R-forge is now such that there probably needs to be a
+server dedicated to backups.  (Anecdote: R-forge takes 40\% of WU's
+daily backup traffic.)
+
+It would be useful to have at least one of the check servers running
+checks of reverse dependencies (as Uwe does now, but it would better
+be done on Linux for speed and coverage reasons): this would be
+especially useful if CRAN submissions were to be automated so that
+submissions could be sent to a portal that would automagically run
+checks and assemble the logs for Kurt's use.
+\end{verbatim}
 
 \end{document}
 
