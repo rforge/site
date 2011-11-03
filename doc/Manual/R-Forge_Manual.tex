@@ -466,7 +466,9 @@ package with the usual \texttt{DESCRIPTION} file and \texttt{R/},
 details]{Rcore:writing_R_extensions} or contains two or more
 directories containing the actual package sources, i.e., you can build
 \textbf{more than one package} by putting the packages in
-subdirectories, e.g. \texttt{pkg/foo/}, \texttt{pkg/bar/}, etc.
+subdirectories, e.g. \texttt{pkg/foo/}, \texttt{pkg/bar/}, etc. Note
+however, that anonymous access to the source code repository has to
+be enabled for the above to work (see Section~\ref{sec:scmoptions}).
 
 Packages are automatically checked out every night (Central European
 Time), built and checked on several platforms (make sure that the
