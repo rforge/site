@@ -31,7 +31,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   writeLines("Done.")
   if(length(pkgs_to_install)){
     writeLines("Install missing packages from third party repositories ...")
-    install.packages(pkgs_to_install, lib = lib, contriburl = contrib.url(repository_url), ...)
+    install.packages(pkgs = as.character(na.omit(pkgs_to_install)), lib = lib, contriburl = contrib.url(repository_url), ...)
     writeLines("Done.")
   }
   ## FIXME: hard coded R-Forge tar.gz source dir
