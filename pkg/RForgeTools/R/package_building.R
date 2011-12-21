@@ -522,7 +522,7 @@ build_packages <- function(email,
   ## make temporary directory
   tmpdir <- .make_tmp_directory()
 
-  ## first look if there is a src directory because then we know that we have
+ dirname <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")  ## first look if there is a src directory because then we know that we have
   ## to compile something ...
   if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
     ## compile an x86_32 binary
@@ -535,7 +535,6 @@ build_packages <- function(email,
    	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
                  pkg_version, ".tar.gz", sep = "")),
                 ">>", pkg_buildlog, "2>&1"))
-
   }else {
     ## R only packages can be installed in one rush
     system(paste(R, "CMD INSTALL -l", tmpdir,
@@ -543,6 +542,13 @@ build_packages <- function(email,
                  pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"))
   }
+
+  ## re-link dynlibs (see http://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Building-universal-package)
+  minor_version <-  paste( R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep="." )
+  ## gfortran
+  system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgfortran.2.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgfortran.2.dylib $lib ; done", tmpdir, pkg, minor_version) )
+  ## gcc
+  system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgcc_s.1.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgcc_s.1.dylib $lib ; done", tmpdir, pkg, minor_version) )
 
   pkg_binary <- .make_universal_mac_binary(pkg, pkg_version, pkg_buildlog, tmpdir)
 
