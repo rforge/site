@@ -421,7 +421,11 @@ build_packages <- function(email,
 ## FIXME: currently sources and resulting tarball are in the current working dir
 ## Changelog 2011-04-28: --compact-vignettes --resave-data=best added to save disk space
 .build_tarball_from_sources_linux <- function(pkg, R, pkg_buildlog, build_args = ""){
-  system(paste(R, "CMD build --compact-vignettes --resave-data=best", build_args, pkg,
+  files <- Sys.glob(c(file.path(pkg, "data", "*.rda"), file.path(pkg, "data", "*.RData"), file.path(pkg, "R", "sysdata.rda")))
+  rdas <- tools::checkRdaFiles(files)
+  if(!all(rdas$compress %in% c("bzip2", "xz")))
+     build_args <- sprintf("--resave-data=best %s", build_args)
+  system(paste(R, "CMD build --compact-vignettes", build_args, pkg,
                ">>", pkg_buildlog, "2>&1"))
   pkg_version <- get_package_version_from_sources(pkg)
   invisible(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
