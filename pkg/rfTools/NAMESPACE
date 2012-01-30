@@ -2,6 +2,7 @@ import( "tools" )
 
 export( "rf_db_install",
         "rf_db_remove",
+        "rf_get_svn_repos",
         "rf_read_configuration",
         "rf_write_configuration")
 

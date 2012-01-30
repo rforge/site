@@ -3,13 +3,18 @@
 ## rf constructor/methods
 ##############################
 
-.create_rf_config <- function( db_name, db_user, db_password, svn_root, tmp_dir, db_con = NULL ){
-  structure( list(db_name     = db_name,
-                  db_user     = db_user,
-                  db_password = db_password,
-                  svn_root    = svn_root,
-                  tmp_dir     = tmp_dir,
-                  db_con      = db_con), class = "rf" )
+.create_rf_config <- function( db_name, db_user, db_password, svn_root, tmp_dir,
+                               db_con = NULL, db_table_base = "rf_package_db",
+                               db_table_repository = "rf_repository_db" ){
+  structure( list(db_name             = db_name,
+                  db_user             = db_user,
+                  db_password         = db_password,
+                  svn_root            = svn_root,
+                  tmp_dir             = tmp_dir,
+                  db_con              = db_con,
+                  db_table_base       = db_table_base,
+                  db_table_repository = db_table_repository),
+             class = "rf" )
 }
 
 print.rf <- function( x, ... ){
@@ -17,7 +22,8 @@ print.rf <- function( x, ... ){
 }
 
 rf_standard_fields <- function()
-  c("db_name", "db_user", "db_password", "svn_root", "tmp_dir")
+  c( "db_name", "db_user", "db_password", "db_table_base", "db_table_repository",
+     "svn_root", "tmp_dir" )
 
 rf_write_configuration <- function( rfc, file, fields = NULL, ... ){
   fields <- unique(rf_standard_fields(), fields)
@@ -30,11 +36,13 @@ rf_write_configuration <- function( rfc, file, fields = NULL, ... ){
 rf_read_configuration <- function( file, fields = NULL, ... ){
   conf <- read.dcf( file   = file,
                     fields = unique(rf_standard_fields(), fields), ... )
-  .create_rf_config( db_name     = conf[, "db_name"],
-                     db_user     = conf[, "db_user"],
-                     db_password = conf[, "db_password"],
-                     svn_root    = conf[, "svn_root"],
-                     tmp_dir     = conf[, "tmp_dir"]
+  .create_rf_config( db_name     = as.character(conf[, "db_name"]),
+                     db_user     = as.character(conf[, "db_user"]),
+                     db_password = as.character(conf[, "db_password"]),
+                     svn_root    = as.character(conf[, "svn_root"]),
+                     tmp_dir     = as.character(conf[, "tmp_dir"]),
+                     db_table_base = as.character(conf[, "db_table_base"]),
+                     db_table_repository = as.character(conf[, "db_table_repository"]),
                      )
 }
 
@@ -44,6 +52,10 @@ rf_read_configuration <- function( file, fields = NULL, ... ){
 
 .rf_get_svn_root <- function( rfc ){
     rfc$svn_root
+}
+
+.rf_get_base_table <- function( rfc ){
+    rfc$db_table_base
 }
 
 ##############################
@@ -90,113 +102,6 @@ rf_get_db_con <- function( rfc ){
   all( rf_standard_fields() %in% names(rfc) )
 
 
-.get_active_reps_from_root <- function( rfc, verbose = FALSE ){
-    svn_reps <- dir( .rf_get_svn_root(rfc) )
-    ## take only those which are indeed repositories and are not hidden
-    included <- sapply( svn_reps, function(x) file.exists(file.path( .rf_get_svn_root(rfc), x, "format")) )
-    if( verbose )
-        writeLines( sprintf("- Directory not a repository:\n-- %s.",
-                            paste(svn_reps[!included], collapse = ", ")) )
-    svn_reps <- svn_reps[ included ]
-    ## check if meta data can be retrieved from repositories
-    included <- sapply( svn_reps, function(x)
-                       !is.na(.svn_get_revsion_and_timestamp(file.path(.rf_get_svn_root(rfc), x))) )
-    if( verbose )
-        writeLines( sprintf("- Repository meta data cannot be retrieved:\n-- %s.",
-                            paste(svn_reps[!included], collapse = ", ")) )
-    ## return active repositories
-    svn_reps[ included ]
-}
-
-##############################
-## update rf db
-##############################
-
-rf_update_db <- function( rfc, verbose = FALSE){
-  ## we need a tempory directory here
-  if ( !file.exists(.rf_get_tmp(rfc)) )
-    dir.create( .rf_get_tmp(rfc), recursive=TRUE )
-  if( length(dir( .rf_get_tmp(rfc))) )
-    warning( sprintf("directory '%s' not empty", .rf_get_tmp(rfc)) )
-  stopifnot( file.exists(.rf_get_svn_root(rfc)) )
-  if( length(dir(.rf_get_svn_root(rfc))) <= 0 )
-    stop( sprintf("svn root '%s' directory empty", .rf_get_svn_root(rfc)) )
-
-  ## directories in svn_root are potential repositories
-  svn_reps <- .get_active_reps_from_root( rfc, verbose )
-
-  ## retrieve all description files from the repositories
-  if( verbose )
-      writeLines( "- Retrieve DESCRIPTIONs ...")
-  descriptions <- lapply( svn_reps,
-                         function(x) .find_description_in_svn( file.path(.rf_get_svn_root(rfc), x)) )
-  names( descriptions ) <- svn_reps
-  lapply( svn_reps, function(x) lapply(descriptions[[ x ]], function(desc, rep)
-                                       .svn_get_description(.rf_get_svn_root(rfc), desc, rep, .rf_get_tmp(rfc)), x) )
-
-  ## verify integrity of descriptions
-  ## HERE I AM! ##
-
-
-  package_dirs <- lapply( descriptions, dirname )
-
-  for (rep in svnreps) {
-    if(verbose)
-      writeLines( sprintf("- Processing repository '%s':", rep) )
-
-
-
-
-  }
-  rfc <- rfTools:::rf_connect( rfc )
-  pkgs_in_db <- .get_pkgs_from_table( rfc, rfc$rf_table )
-  rfc <- rfTools:::rf_disconnect( rfc )
-  pkgs_in_db
-}
-
-## get head revison and its time stamp from svn
-.svn_get_revsion_and_timestamp <- function( path ) {
-  info <- tryCatch( .svn_info(path), error = identity)
-  if( inherits(info, "error"))
-    return( NA )
-  list( rev  = as.integer(info[ 1,'Revision' ]),
-        time = as.POSIXct(info[ 1,'Last Changed Date' ]) )
-}
-
-.svn_info <- function( path ){
-  con  <- pipe( open = "r", sprintf("svn info \"file://%s\"", path) )
-  x    <- read.dcf( con )
-  close(con)
-  x
-}
-
-.svn_tree <- function( path )
-  system( sprintf("svnlook tree --full-paths %s", path), intern = TRUE )
-
-.find_description_in_svn <- function( path ){
-   grep( "^pkg/([^/]+/)?DESCRIPTION$",
-        .svn_tree( path ),
-        value = TRUE, perl = TRUE )
-}
-
-.svn_get_description <- function( svn_root, desc, rep, tmp_dir){
-  descname <- sprintf( "%s.%s", rep, gsub("/", ".", desc) )
-  system( sprintf("svn export file://%s %s",
-                  file.path(svn_root, rep, desc), file.path(tmp_dir, descname)) )
-}
-
-
-rf_show_pkgs <- function( rfc ){
-  rfc <- rfTools:::rf_connect( rfc )
-  pkgs_in_db <- .get_pkgs_from_table( rfc, rfc$rf_table )
-  rfc <- rfTools:::rf_disconnect( rfc )
-  pkgs_in_db
-}
-
-.get_pkgs_from_table <- function( rfc, table )
-  dbGetQuery( rf_get_db_con(rfc),
-              sprintf("SELECT pkg_name,version,revision FROM %s", table) )
-
 
 ##############################
 ## rf DB insert schema
@@ -231,7 +136,7 @@ rf_db_insert_schema <- function( rfc, config_file ){
   .db_add_repository_table( rfc )
 }
 
-.db_add_base_table <- function( rfc, table = "rf_package_db" ){
+.db_add_base_table <- function( rfc ){
   rfc <- rf_connect( rfc )
   sql <- sprintf('
   CREATE TABLE %s (
@@ -256,7 +161,7 @@ rf_db_insert_schema <- function( rfc, config_file ){
 }
 
 ## information about packages also hosted on other repositories (CRAN, bioc, etc.)
-.db_add_repository_table <- function( rfc, table = "rf_repository_db" ){
+.db_add_repository_table <- function( rfc ){
   rfc <- rf_connect( rfc )
   sql <- sprintf('
   CREATE TABLE %s (
@@ -273,7 +178,8 @@ rf_db_insert_schema <- function( rfc, config_file ){
 .db_drop_table <- function( rfc, table ){
   stopifnot( !is.null(table) )
   rfc <- rf_connect( rfc )
-  dbSendQuery( rf_get_db_con(rfc), sprintf("DROP TABLE %s", as.character(table)) )
+  dbSendQuery( rf_get_db_con(rfc),
+               sprintf("DROP TABLE %s", as.character(table)) )
   rf_disconnect( rfc )
 }
 
