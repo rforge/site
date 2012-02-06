@@ -1,0 +1,32 @@
+#!/usr/bin/env Rscript
+## R-Forge build system tool chain
+## update and print package status
+
+require("rfTools")
+
+## read connection information
+conf_file <- "/home/rforge/conf/rf.conf"
+rfc <- rf_read_configuration( file = conf_file )
+
+## we use some caching here
+cached <- TRUE
+pkg_status_cache <- file.path( rfTools:::.rf_get_tmp(rfc), "pkg_status_cache.rda" )
+if( !file.exists(pkg_status_cache) ){
+  pkg_status <- rf_pkg_status(rfc)
+  save(pkg_status, file = pkg_status_cache)
+  cached <- FALSE
+}
+## only refresh cache every 5 min
+refresh_time <- Sys.time() - 300
+if( file.info(pkg_status_cache)[["ctime"]] < refresh_time ){
+  pkg_status <- rf_pkg_status(rfc)
+  save(pkg_status, file = pkg_status_cache )
+  cached <- FALSE
+}
+load( pkg_status_cache )
+
+pkg_status
+
+if(cached){
+  warning("Cached results. Refresh time: 5 min.")
+}

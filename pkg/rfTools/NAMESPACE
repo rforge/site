@@ -4,6 +4,10 @@ export( "rf_db_install",
         "rf_db_remove",
         "rf_get_svn_repos",
         "rf_read_configuration",
-        "rf_write_configuration")
+        "rf_pkg_status",
+        "rf_prepare_build",
+        "rf_set_build_offline",
+        "rf_write_configuration" )
 
 S3method( "print", "rf" )
+S3method( "print", "rf_pkg_status" )

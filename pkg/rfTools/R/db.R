@@ -64,7 +64,7 @@ rf_read_configuration <- function( file, fields = NULL, ... ){
 
 rf_connect <- function( rfc ){
   stopifnot( inherits(rfc, "rf") )
-  rfc$db_con <- dbConnect( PgSQL(),
+  rfc$db_con <- dbConnect( PostgreSQL(),
                            dbname   = rfc$db_name,
                            user     = rfc$db_user,
                            password = rfc$db_password )
