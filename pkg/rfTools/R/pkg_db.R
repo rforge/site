@@ -1,7 +1,12 @@
-## update rf package db
+## Prepare package sources for build
 ##############################
 
-## updates the pkg db shown in the R packages tab
+## Three steps are needed for preparing package sources hosted in SVN for build
+## (1) search SVN repositories for new or updated packages and retrieve some meta info
+## (2) update package db with retrieved info and flag as 'scheduled for build'
+## (3) export uncompressed sources from SVN and flag packages as 'building' in SVN
+
+## (1) make pkg status info based on SVN; retrieves further info from pkg db and CRAN
 rf_pkg_status <- function( rfc, verbose = FALSE ){
   stopifnot( file.exists(.rf_get_svn_root(rfc)) )
   if( length(dir(.rf_get_svn_root(rfc))) <= 0 )
@@ -110,9 +115,9 @@ print.rf_pkg_status <- function( x, ... ){
   }
 }
 
-
+## (2) update pkg db with new info and flag as 'scheduled for build'
 rf_prepare_build <- function(rfc, rf_pkg_status, rebuild = FALSE){
-    ## packages which are not yet listed in DB
+  ## packages which are not yet listed in DB
   brand_new <- names(rf_pkg_status$outdated)[!names(rf_pkg_status$outdated) %in% rownames(rf_pkg_status$db)]
   ## packages listed but not current
   outdated <- setdiff(names(pkg_status$outdated), brand_new)
@@ -134,13 +139,40 @@ rf_prepare_build <- function(rfc, rf_pkg_status, rebuild = FALSE){
   tobuild
 }
 
-rf_export_pkgs <- function(rfc, rf_pkg_status, pkgs){
+## (3) exports package sources and make them available for build
+rf_export_and_build_pkgs <- function(rfc, rf_pkg_status, pkgs){
   stmp <- .make_new_staging_area( rfc )
-  
+  status <- lapply( pkgs, function(pkg){
+    desc <- rf_pkg_status$outdated[[pkg]]$description
+    dest <- file.path( stmp, desc["Package"] )
+    out <- .svn_export(attr(desc, "meta")["URL"], dest)
+    desc["Repository"] <- "R-Forge"
+    desc["Repository/R-Forge/Project"] <- rf_pkg_status$outdated[[pkg]]$repo
+    desc["Repository/R-Forge/Revision"] <- attr(desc, "meta")["Last Changed Rev"]
+    tools:::.write_description( desc, file.path(dest, "DESCRIPTION") )
+  } )
+  tools::write_PACKAGES( stmp, type = "source", unpacked = TRUE )
+  ## as additional debug info save pkg status object
+  save( rf_pkg_status, file = file.path(stmp, "PKG_STAT.rda") )
+  TAR <- Sys.getenv("TAR")
+  if (!nzchar(TAR)) {
+    TAR <- if (WINDOWS) 
+      "tar --force-local"
+    else "internal"
+  }
+  res <- utils::tar( file.path(.rf_get_tmp(rfc), paste(basename(stmp), "tar.gz", sep = ".")),
+                     basename(stmp), compression = "gzip", compression_level = 9, tar = TAR,
+                     extra_flags = sprintf("-C %s", dirname(stmp)) )
+  if (res) {
+    stop("packaging staging area into .tar.gz failed.")
+  }
+  lapply( pkgs, function(pkg) rf_set_pkg_status(rfc, pkg, status = 2L) )
+  unlink( stmp, recursive = TRUE )
+  invisible( unlist(status) )
 }
-  
+
 rf_update_outdated_pkg <- function( rfc, rf_pkg_status, pkgs){
-  tab <- rfTools:::.rf_get_base_table(rfc)
+  tab <- .rf_get_base_table(rfc)
   ## status set to 1L: scheduled for build
   status <- 1L
   
@@ -155,9 +187,9 @@ rf_update_outdated_pkg <- function( rfc, rf_pkg_status, pkgs){
     # FIXME: quotes.
     .make_SQL_update_outdated(tab, repo, desc["Package"], desc["Version"], desc["Title"], desc["Description"], desc["Author"], desc["License"], desc["Date"], substr(attr(desc, "meta")["Last Changed Date"], 1, 25), as.integer(attr(desc, "meta")["Last Changed Rev"]), desc["Maintainer"], cran, status)
   } )
-  rfc <- rfTools:::rf_connect( rfc )
-  lapply(sql, function(x) dbSendQuery(rfTools:::rf_get_db_con(rfc), x) )
-  rfc <- rfTools:::rf_disconnect( rfc )
+  rfc <- rf_connect( rfc )
+  lapply(sql, function(x) dbSendQuery(rf_get_db_con(rfc), x) )
+  rfc <- rf_disconnect( rfc )
 }
 
 rf_insert_new_pkg <- function( rfc, rf_pkg_status, pkgs){
@@ -231,7 +263,7 @@ rf_delete_pkg <- function(rfc, pkg){
   ## we need a tempory directory here
   if ( !file.exists(.rf_get_tmp(rfc)) )
     dir.create( .rf_get_tmp(rfc), recursive=TRUE )
-  stage_tmp <- file.path( .rf_get_tmp(rfc), sprintf("rf_build_%s", format(Sys.time(), format = "%Y-%m-%d-%H-%M")) )
+  stage_tmp <- file.path( .rf_get_tmp(rfc), sprintf("build_%s", format(Sys.time(), format = "%Y-%m-%d-%H-%M")) )
   if ( !file.exists(stage_tmp) )
     dir.create( stage_tmp )
   if( length(dir(stage_tmp)) )
@@ -239,15 +271,7 @@ rf_delete_pkg <- function(rfc, pkg){
   stage_tmp
 }
 
-rf_upate_db <- function(rfc, rf_pkg_status){
-  stopifnot( inherits(rf_pkg_status, "rf_pkg_status") )
-  
-  
-
-  
-}
-
-
+## Package DB helper functions
 
 rf_set_build_offline <- function(rfc){
   rfc <- rf_connect( rfc )

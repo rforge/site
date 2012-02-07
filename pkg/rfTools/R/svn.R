@@ -1,6 +1,9 @@
 ## this file includes code for handling svn repositories
 ## 
 
+## SVN repository interactions
+################################################################################
+
 rf_get_svn_repos <- function( rfc, all = FALSE, verbose = FALSE )
   .get_active_reps_from_root( rfc, verbose = verbose, all = all )
 
@@ -28,8 +31,8 @@ rf_get_descriptions_from_svn <- function( rfc, svn_reps ){
 ## lower level SVN functions
 ################################################################################
 
-.svn_export <- function( repo, path ){
-  system( sprintf("svn export %s %s", repo, path) )
+.svn_export <- function( url, path ){
+  system( sprintf("svn export %s %s", url, path), ignore.stdout = TRUE )
 }
 
 .svn_info <- function( path ){

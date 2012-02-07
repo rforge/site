@@ -27,6 +27,8 @@ if( !file.exists(pkg_status_cache) ){
 
 ## update package db: outdated and brandnew packages => status 1 (scheduled for build)
 tobuild <- rf_prepare_build(rf, pkg_status)
+## export sources and make them available for build
+rf_export_and_build_pkgs( rf, pkg_status, tobuild )
 
 ## or rebuild everything
 #tobuild <- rf_prepare_build(rf, pkg_status, rebuild = TRUE)
