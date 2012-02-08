@@ -36,7 +36,13 @@ rf_export_and_build_pkgs( rf, pkg_status, tobuild )
 ## set build offline
 #rf_set_build_offline(rf)
 
+################################################################################
 ## ON BUILD MACHINE
+################################################################################
+
+################################################################################
+## SRC
+
 ## some parts taken from script rforge_build_packages
 
 require( "rfTools", lib = "/home/rforge/lib/R/" )
@@ -112,3 +118,60 @@ unlink(file.path(build_root, src_dir), recursive = TRUE)
 file.remove( file.path(stmp, paste(src_dir, ".tar.gz.processing", sep = "")) )
 
 TRUE
+
+
+################################################################################
+## MAC builder:
+
+require( "rfTools", lib = "/Users/rforge/lib/R/" )
+## local library path (this is where the packages get installed to)
+maj.version <- paste(R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
+local_lib <- file.path(Sys.getenv("R_LIBS"), maj.version)
+
+## we have to set 'R_LIBS' again otherwise package dependencies are not found
+Sys.setenv("R_LIBS" = local_lib)
+
+stmp <- "/srv/rf/staging"
+## build root, where the builds/checks are done
+build_root <- "/srv/rf/building"
+if(!file.exists(build_root))
+  dir.create(build_root)
+
+src_dir <- rf_takeover_prepared_build(stmp, build_root, type = "mac")
+
+if( is.null(src_dir) )
+  q( save = "no" )
+
+## load pkg meta info
+load( file.path(build_root, src_dir, "PKG_STAT.rda") )
+
+## setup control file
+control <- rf_build_control(path_to_pkg_src  = file.path(build_root, src_dir),            ## R-Forge uncompressed pkg source
+                            path_to_pkg_log  = file.path(build_root, src_dir, "RF_LOGS"), ## Log directory
+                            path_to_pkg_root = file.path(build_root, src_dir, "RF_PKG_ROOT"), ## R-Forge root (contains /src ,/bin)
+                            path_to_local_texmf = "/usr/local/share/texmf",## path to local texmf
+                            path_to_local_library = local_lib,             ## path to local pkg library
+                            path_to_check_dir = file.path(build_root, src_dir, "RF_PKG_CHECK"), ## path to check dir
+                            stoplist = "/srv/R/lib/check_R_stoplist",      ## path to stoplist
+                            cpu_time_limit = 600,                          ## CPU time limit
+                            mail_domain_name_of_sender = system("hostname", intern = TRUE), ## "xmorthanc.wu.ac.at" 
+                            mail_relay_server = "",                        ## only necessary with sendEmail
+                            mail_programme = "mail")                       ## on Windows: sendEmail
+
+## start building ...
+rf_build_packages( rf_pkg_status,
+                   platform        = "MacOSX",
+                   architecture    = "x86_64",
+                   bioc_url        = "http://bioconductor.statistik.tu-dortmund.de/packages/2.9/bioc",
+                   bioc_data       = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/annotation",
+                   bioc_experiment = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/experiment",
+                   control         = control )
+
+rf_check_packages( rf_pkg_status,
+                   platform        = "MacOSX",
+                   architecture    = "x86_64",
+                   bioc_url        = "http://bioconductor.statistik.tu-dortmund.de/packages/2.9/bioc",
+                   bioc_data       = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/annotation",
+                   bioc_experiment = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/experiment",
+                   control         = control )
+

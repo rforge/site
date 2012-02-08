@@ -26,15 +26,30 @@ rf_build_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
 is.rf_build_control <- function(x)
   inherits(x, "rf_build_control")
 
-rf_takeover_prepared_build <- function(stmp, build_root){
+rf_takeover_prepared_build <- function(stmp, build_root, type = "src"){
+  stopifnot( type %in% c("src", "mac", "win") )
   ## take the oldest available for build
-  btgz <- grep("^build_.*?.tar.gz$", dir(stmp), value = TRUE)[1]
+  if(type == "src"){
+    btgz <- grep("^build_.*?.tar.gz$", dir(stmp), value = TRUE)[1]
+  } else {
+    btgz <- grep("^SRC.build_.*?.tar.gz$", dir(stmp), value = TRUE)[1]
+  }
   ## if no build to take up -> exit
   if( is.na(btgz) )
     return(NULL)
-  ## rename it ot *.processing
-  ptgz <- paste(btgz, "processing", sep = ".")
-  file.rename( file.path(stmp, btgz), file.path(stmp, ptgz) )
+  ## rename it to *.processing or create lock file .processing.<OStype>
+  ptgz <- switch(type, 
+   "src" =  paste(btgz, "processing", sep = "."),
+   "mac" =  paste(btgz, "processing", "MAC", sep = "."),
+   "win" =  paste(btgz, "processing", "WIN", sep = ".") )
+  ## if given submission is already being processed exit and return NULL
+  if( file.exists(file.path(stmp, ptgz)) )
+    return( NULL )
+  if(type == "src"){
+    file.rename( file.path(stmp, btgz), file.path(stmp, ptgz) )
+  } else {
+    file.create( file.path(stmp, ptgz) )
+  }
   ## uncompress staging area
   TAR <- Sys.getenv("TAR")
   WINDOWS <- .Platform$OS.type == "windows"
@@ -43,12 +58,21 @@ rf_takeover_prepared_build <- function(stmp, build_root){
       "tar --force-local"
     else "internal"
   }
-  res <- utils::untar( file.path(stmp, ptgz), compressed = "gzip", tar = TAR, exdir = build_root)
+  if( type == "src" ){
+    res <- utils::untar( file.path(stmp, ptgz), compressed = "gzip", tar = TAR, exdir = build_root)
+  } else {
+    res <- utils::untar( file.path(stmp, btgz), compressed = "gzip", tar = TAR, exdir = build_root)
+  }
   if (res) {
     stop("unpackaging staging area failed.")
   }
   ## src_dir
-  src_dir <- gsub(".tar.gz.processing", "", ptgz)
+  if( type == "src" ){
+    src_dir <- gsub( ".tar.gz.processing", "", ptgz )
+  } else {
+    src_dir <- gsub( "SRC.", "", gsub(".tar.gz", "", btgz) )
+  }
+  src_dir
 }
 
 ## TODO LIST (there are more points in Uwe's functions):
@@ -176,17 +200,9 @@ rf_build_packages <- function(pkg_status,
     URL_pkg_sources <- contrib.url(sprintf("file:%s", path_to_pkg_root),
                                    type = "source")
 
-    ## where are the source tarballs already available from R-Forge?
-    path_to_pkg_tarballs <- control$path_to_pkg_tarballs
-    if( !check_directory(path_to_pkg_tarballs) )
-      stop( "Directory", path_to_pkg_tarballs, "missing!" )
+    avail_src_pkgs <- available.packages(URL_pkg_sources)
 
-##############FIXME
-    avail_src_pkgs <- pkg_db_src$svn[, 1]
-
-    pkgs <- remove_excluded_pkgs(avail_src_pkgs, donotcompile)
-    ## we take only tarballs into account which are hosted in R-Forge SVN reps
-    ##avail_src_pkgs <- avail_src_pkgs[avail_src_pkgs %in% pkgs]
+    pkgs <- remove_excluded_pkgs(rownames(avail_src_pkgs), donotcompile)
   } else {
     ## Packages exported from R-Forge's SVN repositories
     pkgs_all <- utils::available.packages(contriburl =
@@ -280,13 +296,13 @@ rf_build_packages <- function(pkg_status,
   }else if(platform == "Windows"){
 
     ## Initialize timings
-    timings <- numeric(length(avail_src_pkgs))
-    names(timings) <- avail_src_pkgs
+    timings <- numeric(length(pkgs))
+    names(timings) <- pkgs
     
     for( pkg in pkgs ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      write_prolog(pkg, pkg_buildlog, pkg_db_src,
+      write_prolog(pkg, pkg_buildlog, pkg_status,
                    type = "build", what = "binary", std.out = TRUE)
 
       ## BUILD
@@ -294,41 +310,14 @@ rf_build_packages <- function(pkg_status,
       proc_start <- proc.time()
 
       ## get current package version (tarball, thus svn in pkg!)
-      pkg_version_src   <- pkg_db_src$svn[pkg, "Version"]
-
-      ## FIXME: some packages do not get a Revision flag. Why?
-      binary_revision <-
-        tryCatch(as.integer(pkg_db_src$src[pkg, "Repository/R-Forge/Revision"]),
-                 error = identity)
-      build <- TRUE
-      ## for devel we build all packages
-      if( !(R.version$status == "Under development (unstable)") ){
-        ## otherwise we build only new revisions
-        ## FIXME: reverse depend tests et al have to be considered
-        if( !inherits(binary_revision, "error") ){
-          tarball_revision <-
-            as.integer( pkg_db_src$svn[pkg, "Repository/R-Forge/Revision"] )
-          if( !any(is.na(c(tarball_revision, binary_revision))) )
-            if( tarball_revision <= binary_revision ){
-              status <-
-                .copy_binary_from_repository( pkg,
-                                             path_to_contrib_dir,
-                                             path_to_pkg_src,
-                                             pkg_db_src$src[pkg, "Version"],
-                                             pkg_buildlog)
-              build <- !status
-            }
-        }
-      }
-
-      if(build){
-        ## now build the package from package tarball
-        .build_binary_from_tarball_win(pkg,
-                                       pkg_version_src,
-                                       path_to_pkg_tarballs,
-                                       R,
-                                       pkg_buildlog)
-      }
+      pkg_version_src   <- avail_src_pkgs[pkg, "Version"]
+      
+      ## now build the package from package tarball
+      .build_binary_from_tarball_win(pkg,
+                                     pkg_version_src,
+                                     path_to_pkg_root,
+                                     R,
+                                     pkg_buildlog)
 
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
@@ -348,56 +337,29 @@ rf_build_packages <- function(pkg_status,
     pid <- start_virtual_X11_fb()
 
     ## Initialize timings
-    timings <- numeric(length(avail_src_pkgs))
-    names(timings) <- avail_src_pkgs
+    timings <- numeric(length(pkgs))
+    names(timings) <- pkgs
 
     ## BUILDING FROM PKG TARBALLS
     for(pkg in pkgs){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      write_prolog(pkg, pkg_buildlog, pkg_db_src,
+      write_prolog(pkg, pkg_buildlog, pkg_status,
                    type = "build", what = "binary", std.out = TRUE)
 
       ## timer start
       proc_start <- proc.time()
       ## path to pkg buildlog
 
-       ## get current package version (tarball, thus svn in pkg!)
-      pkg_version_src   <- pkg_db_src$svn[pkg, "Version"]
+      ## get current package version (tarball, thus svn in pkg!)
+      pkg_version_src   <- avail_src_pkgs[pkg, "Version"]
 
-      ## FIXME: some packages do not get a Revision flag. Why?
-      binary_revision <-
-        tryCatch(as.integer(pkg_db_src$src[pkg, "Repository/R-Forge/Revision"]),
-                 error = identity)
-      build <- TRUE
-      ## for devel we build all packages
-      if( !(R.version$status == "Under development (unstable)") ){
-        ## otherwise we build only new revisions
-        ## FIXME: reverse depend tests et al have to be considered
-        if( !inherits(binary_revision, "error") ){
-          tarball_revision <-
-            as.integer( pkg_db_src$svn[pkg, "Repository/R-Forge/Revision"] )
-          if( !any(is.na(c(tarball_revision, binary_revision))) )
-            if( tarball_revision <= binary_revision ){
-              status <-
-                .copy_binary_from_repository( pkg,
-                                              path_to_contrib_dir,
-                                              path_to_pkg_src,
-                                              pkg_db_src$src[pkg, "Version"],
-                                              pkg_buildlog)
-              build <- !status
-            }
-        }
-      }
-
-      if(build){
-        ## now build the package from package tarball
-        .build_binary_from_tarball_mac(pkg,
-                                       pkg_version_src,
-                                       path_to_pkg_tarballs,
-                                       R,
-                                       pkg_buildlog)
-      }
+      ## now build the package from package tarball
+      .build_binary_from_tarball_mac( pkg,
+                                      pkg_version_src,
+                                      path_to_pkg_root,
+                                      R,
+                                      pkg_buildlog )
 
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
