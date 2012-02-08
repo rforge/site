@@ -105,7 +105,7 @@ print.rf_pkg_status <- function( x, ... ){
     writeLines("- Repositories with packages containing malformed DESCRIPTION files:")
     print(unique(unlist(lapply(x$malformed_description, function(pkg) pkg$repo))))
   }
-  if(length(pkg_status$conflicts)){
+  if(length(x$conflicts)){
     writeLines("- Package name conflicts:")
     print(unlist(lapply(x$conflicts, function(pkg) sprintf("%s: %s", pkg$repo, pkg$description["Package"]))))
   }
@@ -120,13 +120,13 @@ rf_prepare_build <- function(rfc, rf_pkg_status, rebuild = FALSE){
   ## packages which are not yet listed in DB
   brand_new <- names(rf_pkg_status$outdated)[!names(rf_pkg_status$outdated) %in% rownames(rf_pkg_status$db)]
   ## packages listed but not current
-  outdated <- setdiff(names(pkg_status$outdated), brand_new)
+  outdated <- setdiff(names(rf_pkg_status$outdated), brand_new)
   ## if rebuild then include current status otherwise only take
   ## outdated pkgs which are not scheduled for build or building
   build_states <- c(3, 4, 5)
   if( rebuild )
     build_states <- c(0, 3, 4, 5)
-  status <- pkg_status$db[outdated, "status"]
+  status <- rf_pkg_status$db[outdated, "status"]
   outdated <- outdated[status %in% build_states]
   ## character vector of package names to be built
   tobuild <- c(outdated, brand_new)
@@ -155,6 +155,7 @@ rf_export_and_build_pkgs <- function(rfc, rf_pkg_status, pkgs){
   ## as additional debug info save pkg status object
   save( rf_pkg_status, file = file.path(stmp, "PKG_STAT.rda") )
   TAR <- Sys.getenv("TAR")
+  WINDOWS <- .Platform$OS.type == "windows"
   if (!nzchar(TAR)) {
     TAR <- if (WINDOWS) 
       "tar --force-local"

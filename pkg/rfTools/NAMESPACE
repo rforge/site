@@ -1,12 +1,16 @@
 import( "tools" )
 
-export( "rf_db_install",
+export( "rf_build_control",
+        "rf_build_packages",
+        "rf_check_packages",
+        "rf_db_install",
         "rf_db_remove",
         "rf_export_and_build_pkgs",
         "rf_get_svn_repos",
         "rf_read_configuration",
         "rf_pkg_status",
         "rf_prepare_build",
+        "rf_takeover_prepared_build",
         "rf_set_build_offline",
         "rf_write_configuration" )
 

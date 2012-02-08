@@ -1,0 +1,885 @@
+## Package Build Infrastructure for R-Forge
+## Author: Stefan Theussl
+
+## Constructor for R-Forge control files
+rf_build_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
+                              path_to_local_texmf, path_to_local_library,
+                              stoplist, 
+                              mail_domain_name_of_sender, mail_relay_server,
+                              mail_programme = "mail",
+                              path_to_check_dir = "",
+                              cpu_time_limit = 600){
+  structure(list(cpu_time_limit = cpu_time_limit,
+                 mail_domain_name_of_sender = mail_domain_name_of_sender,
+                 mail_programme = mail_programme,
+                 mail_relay_server = mail_relay_server,
+                 path_to_check_dir = path_to_check_dir,
+                 path_to_local_library = path_to_local_library,
+                 path_to_local_texmf = path_to_local_texmf,
+                 path_to_pkg_log  = path_to_pkg_log,
+                 path_to_pkg_root = path_to_pkg_root,
+                 path_to_pkg_src  = path_to_pkg_src,
+                 stoplist = stoplist),
+            class = "rf_build_control")
+}
+
+is.rf_build_control <- function(x)
+  inherits(x, "rf_build_control")
+
+rf_takeover_prepared_build <- function(stmp, build_root){
+  ## take the oldest available for build
+  btgz <- grep("^build_.*?.tar.gz$", dir(stmp), value = TRUE)[1]
+  ## if no build to take up -> exit
+  if( is.na(btgz) )
+    return(NULL)
+  ## rename it ot *.processing
+  ptgz <- paste(btgz, "processing", sep = ".")
+  file.rename( file.path(stmp, btgz), file.path(stmp, ptgz) )
+  ## uncompress staging area
+  TAR <- Sys.getenv("TAR")
+  WINDOWS <- .Platform$OS.type == "windows"
+  if (!nzchar(TAR)) {
+    TAR <- if (WINDOWS) 
+      "tar --force-local"
+    else "internal"
+  }
+  res <- utils::untar( file.path(stmp, ptgz), compressed = "gzip", tar = TAR, exdir = build_root)
+  if (res) {
+    stop("unpackaging staging area failed.")
+  }
+  ## src_dir
+  src_dir <- gsub(".tar.gz.processing", "", ptgz)
+}
+
+## TODO LIST (there are more points in Uwe's functions):
+
+## file URLs of local mirrors: contriburl = sprintf("file:///%s", dir)
+## do not download from cran.r-project.org
+## should we include a tmp directory
+## if so a cleanup is necessary
+## Clean /tmp dir
+##  system("rm -rf c:\\tmp\\*")
+
+## this is where the work is done
+## takes a control object containing control parameters, the platform,
+## architecture, ... as arguments
+rf_build_packages <- function(pkg_status,
+                              platform       = c("Linux", "Windows", "MacOSX"),
+                              architecture   = c("x86_32", "x86_64"),
+                              rforge_url     = "http://R-Forge.R-project.org",
+                              cran_url       = "http://CRAN.R-project.org",
+                              bioc_url       =
+                              "http://bioconductor.org/packages/release/bioc",
+                              bioc_data      =
+                              "http://bioconductor.org/packages/release/data/annotation",
+                              bioc_experiment=
+                              "http://bioconductor.org/packages/release/data/experiment",
+                              omega_hat_url  = "http://www.omegahat.org/R",
+                              control        = list(),
+                              Ncpus = 1L){
+  
+  if( !is.rf_build_control(control) )
+    stop("No R-Forge build control object given")
+  
+  ## INITIALIZATION
+  writeLines("Start build process ...")
+  ## match arguments
+  ## FIXME: automatically use info from .Platform?
+  platform <- match.arg(platform)
+  architecture <- match.arg(architecture)
+  maj.version <- paste(R.Version()$maj,
+                       unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
+  ## x86_32 on x86_64 allowed but not the other way round
+  if((architecture=="x86_64") && (.Machine$sizeof.pointer == 4))
+    stop("Building x86_64 binaries not possible on an x86_32 architecture")
+  ## check for necessary directories---create them if possible
+  path_to_pkg_src <- control$path_to_pkg_src
+  path_to_pkg_log <- control$path_to_pkg_log
+  path_to_pkg_root <- control$path_to_pkg_root
+  path_to_local_library <- control$path_to_local_library
+  stoplist <- control$stoplist
+  ## local package library
+  if(!check_directory(path_to_local_library, fix=TRUE))
+    stop(paste("There is no directory", path_to_local_library,"!"))
+  ## R-Forge package sources
+  if(!check_directory(path_to_pkg_src))
+    stop("Directory", path_to_pkg_src, "missing!")
+  ## test for build log dir and clean it
+  check_log_directory(path_to_pkg_log, type = "build")
+  ## check if package root directory (the directory containing
+  ## the src/contrib or bin/windows/contrib) exists.
+  if(!check_directory(path_to_pkg_root, fix=TRUE))
+    stop(paste("There is no directory", dir,"!"))
+  ## get current working directory -> set back at FINALIZATION step
+  old_wd <- getwd()
+  ## PACKAGE SIGHTING
+
+  ## STOP LIST: packages which should not be compiled
+  ## BLACK_LIST: packages which cause severe problems (removed from R CMD build)
+  ## TODO: blacklist hardcoded at the moment
+  blacklist <- c("RepitoolsExamples")
+
+  ## FIXME: probably too strict at the moment. E.g., RWinEdt does not get build
+  ## when checking packages the stoplist includes additional arguments to check
+  ## process
+  if(file.exists(stoplist)){
+    check_args <- read.csv(stoplist, stringsAsFactors = FALSE)
+  }else check_args <- NULL
+
+  ## for Linux builds we don't want to build vignettes when checkargs have:
+  no_install   <- check_args[ grep("--install=no",
+                                   check_args[["check_args"]]), "Package" ]
+  fake_install <- check_args[ grep("--install=fake",
+                                   check_args[["check_args"]]), "Package" ]
+  no_vignettes <- check_args[ grep("--no-vignettes",
+                                   check_args[["check_args"]]), "Package" ]
+
+  ## donotcompile <- no_install
+  donotcompile <- blacklist
+  if(platform %in% c("Windows", "MacOSX")){
+    donotcompile <- unique(c(donotcompile, no_install))
+  }
+
+  if( length(donotcompile) ){
+    for(pkg in donotcompile){
+      arch <- "all"
+      if(platform %in% c("Windows", "MacOSX")){
+        arch <- architecture
+      }
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg,
+                                   platform, architecture = arch)
+      write_stoplist_notification(pkg, pkg_buildlog, "build", std.out = TRUE)
+    }
+  }
+
+  ## set up CONTRIB directory
+  ## If we use a BINARY distribution like WINDOWS or MAC we have to append
+  ## the major version of R to the contrib directory otherwise use /src/contrib
+  if(platform == "Windows"){
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", .Platform$OS.type,
+                                 "contrib", maj.version)
+
+  }else if(platform == "MacOSX"){
+    macosx_branch <- c(x86_64="leopard", x86_32="universal")
+    path_to_contrib_dir <- file.path(path_to_pkg_root, "bin", "macosx",
+                                     macosx_branch[architecture],
+                                     "contrib", maj.version)
+  }else {
+    ## UNIX SOURCE directory (./src/contrib)
+    path_to_contrib_dir <- contrib.url(path_to_pkg_root, type = "source")
+  }
+  if(!check_directory(path_to_contrib_dir, fix=TRUE, recursive=TRUE))
+    stop(paste("There is no directory", path_to_contrib_dir,"!"))
+  
+  if(platform != "Linux"){
+    ## sources to be considered in dependency check
+    URL_pkg_sources <- contrib.url(sprintf("file:%s", path_to_pkg_root),
+                                   type = "source")
+
+    ## where are the source tarballs already available from R-Forge?
+    path_to_pkg_tarballs <- control$path_to_pkg_tarballs
+    if( !check_directory(path_to_pkg_tarballs) )
+      stop( "Directory", path_to_pkg_tarballs, "missing!" )
+
+##############FIXME
+    avail_src_pkgs <- pkg_db_src$svn[, 1]
+
+    pkgs <- remove_excluded_pkgs(avail_src_pkgs, donotcompile)
+    ## we take only tarballs into account which are hosted in R-Forge SVN reps
+    ##avail_src_pkgs <- avail_src_pkgs[avail_src_pkgs %in% pkgs]
+  } else {
+    ## Packages exported from R-Forge's SVN repositories
+    pkgs_all <- utils::available.packages(contriburl =
+                                          sprintf("file://%s", path_to_pkg_src), filters = "duplicates")[, 1]
+    ## Sort out packages that are on the exclude list
+    pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
+    
+    ## sources to be considered in dependency check
+    URL_pkg_sources <- sprintf("file://%s", path_to_pkg_src)
+  }
+
+  ## PACKAGE DB UPDATE
+
+  ## FIXME: is it sufficient what we are doing here?
+  other_repositories <- NULL
+
+  if(platform == "Windows"){
+    ## include Brian Ripley's Windows Repository
+    other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
+  }
+
+  update_package_library(c(pkgs), URL_pkg_sources, c(cran_url,
+                                                     c(bioc_url, bioc_data, bioc_experiment),
+                                                     omega_hat_url,
+                                                     other_repositories),
+                         path_to_local_library, platform, Ncpus = Ncpus)
+
+  ##############################################################################
+  ## LAST PREPARATION STEPS BEFORE PACKAGE BUILDING
+  ##############################################################################
+
+  ## change to directory where the sources of R-Forge are in
+  setwd(path_to_pkg_src)
+
+  ## delete 00LOCK, sometimes this interrupted the build process ...
+  check_local_library(path_to_local_library)
+  ## where is our R binary?
+  R <- file.path( R.home(), "bin", "R" )
+  ## Set environment variables which are necessary for building
+  ## (or creating vignettes)
+  Sys.setenv(R_LIBS = path_to_local_library)
+  ## Set TEXMFLOCAL environment variables in case we have
+  ## personalized style files (building vignettes)
+  path_to_local_texmf <- control$path_to_local_texmf
+  if(file.exists(path_to_local_texmf))
+    Sys.setenv(TEXMFLOCAL=path_to_local_texmf)
+
+  ##############################################################################
+  ## PACKAGE BUILDING
+  ##############################################################################
+
+  ## LINUX BUILDS ##############################################################
+  if(platform == "Linux"){
+
+    ## We need a virtual framebuffer
+    pid <- start_virtual_X11_fb()
+
+    ## Initialize timings
+    timings <- numeric(length(pkgs))
+    names(timings) <- pkgs
+
+    ## Building ...
+    for(pkg in pkgs){
+      ## Prolog
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform,
+                                   architecture = "all")
+      write_prolog(pkg, pkg_buildlog, pkg_status, type = "build",
+                   what = "tarball", std.out = TRUE)
+
+      ## timer start
+      proc_start <- proc.time()
+
+      build_args <- if( pkg %in% c(no_vignettes, no_install, fake_install) )
+        "--no-vignettes"
+      else
+        ""
+      ## build tarball from sources
+      .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)      
+      
+      ## save timing
+      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
+      
+      ## Epilog
+      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
+    }
+
+    ## Cleanup
+    close_virtual_X11_fb(pid)
+
+    ## WINDOWS BUILDS ##########################################################
+  }else if(platform == "Windows"){
+
+    ## Initialize timings
+    timings <- numeric(length(avail_src_pkgs))
+    names(timings) <- avail_src_pkgs
+    
+    for( pkg in pkgs ){
+      ## Prolog
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+      write_prolog(pkg, pkg_buildlog, pkg_db_src,
+                   type = "build", what = "binary", std.out = TRUE)
+
+      ## BUILD
+      ## timer start
+      proc_start <- proc.time()
+
+      ## get current package version (tarball, thus svn in pkg!)
+      pkg_version_src   <- pkg_db_src$svn[pkg, "Version"]
+
+      ## FIXME: some packages do not get a Revision flag. Why?
+      binary_revision <-
+        tryCatch(as.integer(pkg_db_src$src[pkg, "Repository/R-Forge/Revision"]),
+                 error = identity)
+      build <- TRUE
+      ## for devel we build all packages
+      if( !(R.version$status == "Under development (unstable)") ){
+        ## otherwise we build only new revisions
+        ## FIXME: reverse depend tests et al have to be considered
+        if( !inherits(binary_revision, "error") ){
+          tarball_revision <-
+            as.integer( pkg_db_src$svn[pkg, "Repository/R-Forge/Revision"] )
+          if( !any(is.na(c(tarball_revision, binary_revision))) )
+            if( tarball_revision <= binary_revision ){
+              status <-
+                .copy_binary_from_repository( pkg,
+                                             path_to_contrib_dir,
+                                             path_to_pkg_src,
+                                             pkg_db_src$src[pkg, "Version"],
+                                             pkg_buildlog)
+              build <- !status
+            }
+        }
+      }
+
+      if(build){
+        ## now build the package from package tarball
+        .build_binary_from_tarball_win(pkg,
+                                       pkg_version_src,
+                                       path_to_pkg_tarballs,
+                                       R,
+                                       pkg_buildlog)
+      }
+
+      ## save timing
+      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
+
+      ## Epilog
+      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
+    }
+
+    ## Cleanup
+    ## delete 00LOCK, sometimes this interrupted the build process ...
+    check_local_library(path_to_local_library)
+
+  ## MacOSX BUILDS ###########################################################
+  }else if(platform == "MacOSX"){
+
+    ## We need a virtual framebuffer
+    pid <- start_virtual_X11_fb()
+
+    ## Initialize timings
+    timings <- numeric(length(avail_src_pkgs))
+    names(timings) <- avail_src_pkgs
+
+    ## BUILDING FROM PKG TARBALLS
+    for(pkg in pkgs){
+      ## Prolog
+      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+      write_prolog(pkg, pkg_buildlog, pkg_db_src,
+                   type = "build", what = "binary", std.out = TRUE)
+
+      ## timer start
+      proc_start <- proc.time()
+      ## path to pkg buildlog
+
+       ## get current package version (tarball, thus svn in pkg!)
+      pkg_version_src   <- pkg_db_src$svn[pkg, "Version"]
+
+      ## FIXME: some packages do not get a Revision flag. Why?
+      binary_revision <-
+        tryCatch(as.integer(pkg_db_src$src[pkg, "Repository/R-Forge/Revision"]),
+                 error = identity)
+      build <- TRUE
+      ## for devel we build all packages
+      if( !(R.version$status == "Under development (unstable)") ){
+        ## otherwise we build only new revisions
+        ## FIXME: reverse depend tests et al have to be considered
+        if( !inherits(binary_revision, "error") ){
+          tarball_revision <-
+            as.integer( pkg_db_src$svn[pkg, "Repository/R-Forge/Revision"] )
+          if( !any(is.na(c(tarball_revision, binary_revision))) )
+            if( tarball_revision <= binary_revision ){
+              status <-
+                .copy_binary_from_repository( pkg,
+                                              path_to_contrib_dir,
+                                              path_to_pkg_src,
+                                              pkg_db_src$src[pkg, "Version"],
+                                              pkg_buildlog)
+              build <- !status
+            }
+        }
+      }
+
+      if(build){
+        ## now build the package from package tarball
+        .build_binary_from_tarball_mac(pkg,
+                                       pkg_version_src,
+                                       path_to_pkg_tarballs,
+                                       R,
+                                       pkg_buildlog)
+      }
+
+      ## save timing
+      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
+
+      ## Epilog
+      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
+    } #</FOR>
+
+    ## Cleanup: close framebuffer
+    close_virtual_X11_fb(pid)
+  } else stop(paste("Strange platform: ", platform, "! I'm confused ...",
+                    sep = ""))
+
+  ## FINAL STEPS
+  writeLines("Send email to R-Forge maintainer and cleanup ...")
+  ## provide built packages in corresponding contrib dir
+  pkgs_provided <- provide_packages_in_contrib(path_to_pkg_src,
+                                               path_to_contrib_dir, platform)
+  ## send email to R-Forge maintainer which packages successfully were built
+  ## FIXME: make a log file for later examination
+  #notify_admins(pkgs_provided, donotcompile, email, platform, control,
+  #              about = "build", timings = timings)
+  ## go back to old working directory
+  setwd(old_wd)
+  writeLines("Done.")
+  invisible(TRUE)
+}
+
+
+
+
+
+
+## OS: Linux (would also work on other POSIX systems?)
+## input: uncompressed package sources (the exported pkg directories)
+## output: compressed package sources <package_name>_<version>.tar.gz
+## FIXME: currently sources and resulting tarball are in the current working dir
+## Changelog 2011-04-28: --compact-vignettes --resave-data=best added to save disk space
+.build_tarball_from_sources_linux <- function(pkg, R, pkg_buildlog, build_args = ""){
+  files <- Sys.glob(c(file.path(pkg, "data", "*.rda"), file.path(pkg, "data", "*.RData"), file.path(pkg, "R", "sysdata.rda")))
+  rdas <- tools::checkRdaFiles(files)
+  if(!all(rdas$compress %in% c("bzip2", "xz")))
+     build_args <- sprintf("--resave-data=best %s", build_args)
+  system(paste(R, "CMD build --compact-vignettes", build_args, pkg,
+               ">>", pkg_buildlog, "2>&1"))
+  pkg_version <- get_package_version_from_sources(pkg)
+  invisible(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
+}
+
+.copy_tarball_from_repository <- function(pkg, pkg_root, pkg_src,
+                                          pkg_version, pkg_buildlog){
+  cat("Package up to date. Not building ...\n", file = pkg_buildlog,
+      append = TRUE)
+  file.copy(file.path(pkg_root, paste(pkg, "_", pkg_version, ".tar.gz",
+                                      sep = "")), pkg_src, overwrite = TRUE)
+}
+
+.copy_binary_from_repository <- function(pkg, pkg_root, pkg_src,
+                                          pkg_version, pkg_buildlog){
+  cat("Package up to date. Not building ...\n", file = pkg_buildlog,
+      append = TRUE)
+  ## FIXME: is there an easier way to retrieve the file suffix?
+  filesuffix <- ifelse( .Platform$OS.type == "unix", ".tgz", ".zip")
+  file.copy(file.path(pkg_root, paste(pkg, "_", pkg_version, filesuffix,
+                                      sep = "")), pkg_src, overwrite = TRUE)
+}
+
+## OS: Windows
+## input: uncompressed package sources (the exported pkg directories)
+## output: compressed package binary <package_name>_<version>.zip
+## FIXME: currently sources and resulting tarball are in the current working dir
+.build_binary_from_sources_win <- function(pkg, pkg_version, R, pkg_buildlog, build_args = ""){
+  ## first we have to build the tarball (important for vignettes)
+  system(paste(R, "CMD", "build", build_args, pkg,
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+  ## then build the binary
+  system(paste(R, "CMD", "INSTALL --build --pkglock",
+                   paste(pkg, "_", pkg_version, ".tar.gz", sep = ""),
+                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
+  ## and finally delete the tarball
+  file.remove(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
+  invisible(paste(pkg, "_", pkg_version, ".zip", sep = ""))
+}
+
+## OS: Windows
+## input: package tarball (<package_name>_<version>.tar.gz)
+## output: compressed package binary <package_name>_<version>.zip
+## FIXME: currently sources and resulting tarball are in the current working dir
+.build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
+  shell(paste(R, "CMD", "INSTALL --build",
+               file.path(path_to_pkg_tarballs, "src", "contrib",
+                         paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),
+                 ">>", pkg_buildlog, "2>&1"), invisible = TRUE, shell = "cmd")
+  ##               ">>", pkg_buildlog))#, invisible = TRUE)
+  invisible(paste(pkg, "_", pkg_version, ".zip", sep = ""))
+}
+
+## OS: Mac OS X
+## input: uncompressed package sources (the exported pkg directories)
+## output: compressed package binary <package_name>_<version>.tgz
+## FIXME: currently sources and resulting tarball are in the current working dir
+.build_binary_from_sources_mac <- function(pkg, pkg_version, R, pkg_buildlog, build_args = ""){
+  ## first we have to build the tarball (important for vignettes)
+  pkg_tarball <- .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
+
+  ## make temporary directory
+  tmpdir <- .make_tmp_directory()
+
+  ## first look if there is a src directory because then we know that we have
+  ## to compile something ...
+  if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
+    ## compile an x86_32 binary
+    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir,
+	             pkg_tarball, ">>", pkg_buildlog, "2>&1"))
+    ## compile a PPC binary
+    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
+	      	     pkg_tarball, ">>", pkg_buildlog, "2>&1"))
+
+  }else {
+    ## R only packages can be installed in one rush
+    system(paste(R, "CMD INSTALL -l", tmpdir,
+                     pkg_tarball, ">>", pkg_buildlog, "2>&1"))
+  }
+
+  ## combine everything to universal binary
+  pkg_binary <- .make_universal_mac_binary(pkg, pkg_version,  pkg_buildlog, tmpdir)
+
+  ## remove temporary directory
+  .cleanup_mac(tmpdir)
+
+  ## and finally delete the tarball
+  file.remove(pkg_tarball)
+
+  invisible(pkg_binary)
+}
+
+## OS: Mac OSX
+## input: package tarball (<package_name>_<version>.tar.gz)
+## output: compressed package binary <package_name>_<version>.tgz
+## FIXME: currently sources and resulting tarball are in the current working dir
+.build_binary_from_tarball_mac <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
+  ## make temporary directory
+  tmpdir <- .make_tmp_directory()
+
+ dirname <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")  ## first look if there is a src directory because then we know that we have
+  ## to compile something ...
+  if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
+    ## compile an x86_32 binary
+    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir,
+                 file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                 pkg_version, ".tar.gz", sep = "")),
+                 ">>", pkg_buildlog, "2>&1"))
+    ## compile a PPC binary
+    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
+   	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                 pkg_version, ".tar.gz", sep = "")),
+                ">>", pkg_buildlog, "2>&1"))
+  }else {
+    ## R only packages can be installed in one rush
+    system(paste(R, "CMD INSTALL -l", tmpdir,
+                 file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+                 pkg_version, ".tar.gz", sep = "")),
+                 ">>", pkg_buildlog, "2>&1"))
+  }
+
+  ## re-link dynlibs (see http://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Building-universal-package)
+  minor_version <-  paste( R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep="." )
+  ## gfortran
+  system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgfortran.2.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgfortran.2.dylib $lib ; done", tmpdir, pkg, minor_version) )
+  ## gcc
+  system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgcc_s.1.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgcc_s.1.dylib $lib ; done", tmpdir, pkg, minor_version) )
+
+  pkg_binary <- .make_universal_mac_binary(pkg, pkg_version, pkg_buildlog, tmpdir)
+
+  ## Cleanup
+  .cleanup_mac(tmpdir)
+
+  invisible(pkg_binary)
+}
+
+## update package repository
+## OLD way:
+## When using a binary distribution (Windows, Mac) we don't need to
+## install every package from source, we keep a complete local CRAN-
+## install updated
+update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, platform, ...){
+  writeLines(sprintf("Updating package library %s ...", lib))
+  if((platform == "Linux") | (platform == "MacOSX")){
+    ## Start a virtual framebuffer X server and use this for DISPLAY so that
+    ## we can run package tcltk and friends.
+    pid <- start_virtual_X11_fb()
+  }
+  ## first update all installed packages if necessary
+  ## debug  cat(sprintf("Arguments to update.packages(): lib = %s, repos = %s, ask = FALSE, checkBuilt = TRUE", lib, paste(repository_url, collapse = ", ")))
+  update.packages(lib = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE, ...)
+  writeLines("Done.")
+  writeLines("Resolve dependency structure ...")
+  ## pkg list and dependency structure
+  pkgs_dep <- resolve_dependency_structure(pkgs, repository_url, path_to_pkg_src)
+
+  ## install missing packages from standard repositories
+  pkgs_installed <- installed.packages(lib = lib)
+  ## Temporarily All packages are installed
+  ## install those packages which are only available from R-Forge, the rest
+  ## should be installed from CRAN or other repositories
+  ## TODO: considering the install order
+  pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], rownames(pkgs_installed))
+  avail_repos <- unique(available.packages(contriburl = contrib.url(repository_url))[,1])
+  pkgs_to_install <- pkgs_to_install[pkgs_to_install %in% avail_repos]
+  pkgs_to_install_rforge <- setdiff(pkgs_dep[["R_FORGE"]], unique(c(pkgs_to_install, rownames(pkgs_installed))))
+  writeLines("Done.")
+  if(length(pkgs_to_install)){
+    writeLines("Install missing packages from third party repositories ...")
+    install.packages(pkgs = as.character(na.omit(pkgs_to_install)), lib = lib, contriburl = contrib.url(repository_url), ...)
+    writeLines("Done.")
+  }
+  ## FIXME: hard coded R-Forge tar.gz source dir
+  if(length(pkgs_to_install_rforge)){
+    writeLines("Install missing packages from R-Forge ...")
+    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = contrib.url("http://R-Forge.R-project.org", type = "source"), type = "source")
+    writeLines("Done.")
+  }
+  if((platform == "Linux") | (platform == "MacOSX")){
+    ## Close the virtual framebuffer X server
+    close_virtual_X11_fb(pid)
+  }
+  writeLines("Done.")
+}
+
+## this function resolves the dependency structure of source pkgs and returns a list
+## containing ALL packages, packages hosted on other repositories and the install order
+## of ALL packages.
+## Additionally suggested packages are included, as they are probably needed when
+## building package vignettes
+resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
+  ## look out for available packages
+  avail_repos <- available.packages(contriburl =
+                                   contrib.url(repository_url))
+  avail_rforge <- available.packages(contriburl = path_to_pkg_src)
+  avail <- rbind(avail_rforge, avail_repos)
+  ## What packages do we need from external repository
+  pkgs <- pkgs[pkgs %in% rownames(avail_rforge)]
+  pkgs_suggested <- resolve_suggests(pkgs, avail)
+  pkgs_suggested <- pkgs_suggested[pkgs_suggested %in% rownames(avail)]
+  pkgs_to_resolve_deps <- unique(c(pkgs, pkgs_suggested))
+  pkgs_all <- resolve_dependencies(pkgs_to_resolve_deps, avail)
+  pkgs_repos <- setdiff(pkgs_all, pkgs)
+  pkgs_rforge <- setdiff(pkgs_all, rownames(avail_repos))
+  ## FIXME: what to do with packages hosted on both R-Forge and other repos ...
+  DL <- utils:::.make_dependency_list(pkgs_all, avail)
+  pkgs_install_order <- utils:::.find_install_order(pkgs_all, DL)
+
+  ## return a vector with packages and install order
+  list(ALL = pkgs_all, REPOS = pkgs_repos, R_FORGE = pkgs_rforge, INSTALL_ORDER = pkgs_install_order)
+}
+
+
+
+.make_tmp_directory <- function(where = "."){
+  dirname <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")
+  check_directory(file.path(where, dirname), fix = TRUE)
+  dirname
+}
+
+## simple check if there is an src directory
+.check_whether_package_contains_code_to_compile <- function(pkg, dir = "."){
+  if(!file.exists(file.path(dir, pkg)))
+    warning(paste("Package", pkg, "does not exist in", dir, "!"))
+  file.exists(file.path(dir, pkg, "src"))
+}
+
+## check if package has a Makefile or a configure script,
+## necessary for building mac packages -> Do we have to set 'arch=' variable?
+.check_whether_package_code_contains_makefile_or_configure <- function(pkg, dir = "."){
+  if(!file.exists(file.path(dir, pkg)))
+    warning(paste("Package", pkg, "does not exist in", dir, "!"))
+  files <- c("Makefile", "configure")
+  files_to_test <- c(file.path(dir, pkg, files), file.path(dir, pkg, "src", files))
+  any(file.exists(files_to_test))
+}
+
+## checks if there is an installed package in the given path and builds the .tgz
+.make_universal_mac_binary <- function(pkg, pkg_version,  pkg_buildlog, dir = "."){
+  if(file.exists(file.path(dir, pkg, "DESCRIPTION"))){
+    system(paste("tar czvf", paste(pkg, "_", pkg_version, ".tgz", sep = ""),
+                 "-C", dir, pkg,
+                 ">>", pkg_buildlog, "2>&1"))
+    return(paste(pkg, "_", pkg_version, ".tgz", sep = ""))
+  }
+  NA
+}
+
+.cleanup_mac <- function(dir){
+  if( file.exists( file.path(".", dir)) )
+    system( paste("rm -rf", file.path(".", dir)) )
+}
+
+get_package_version_from_sources <- function(pkg, library = ".")
+  sapply(pkg, .get_package_version_from_sources, library)
+
+.get_package_version_from_sources <- function(pkg, library){
+  suppressWarnings(pkg_version <- tryCatch(packageDescription(pkg, lib.loc = library)$Version, error = identity))
+  if(inherits(pkg_version, "error") | is.null(pkg_version)){
+    warning(paste("Could not retrieve version number from package", pkg, ". Setting to 0L!"))
+    pkg_version <- "0.0"
+  }
+  pkg_version
+}
+
+
+## Function definition of version ordering functions
+## given two version number, this function returns the order of them
+version_order <- function(x){
+  if(!is.character(x))
+    stop("A version number has to be of type character!")
+  if(! length(x) == 2)
+    warning("More than 2 version numbers detected: The order is calculated only from the first 2 elements in the vector!")
+  ## coerce to numeric version
+  y <- numeric_version(x[1])
+  z <- numeric_version(x[2])
+  
+  if(y <= z){
+    return(c(1,2))
+  } else
+    return(c(2,1))
+}
+
+## resolve dependencies helper 
+resolve_dependencies <- function(pkgs, available){
+  pkgs_all <- pkgs
+  pkgs_old <- NULL
+  while(!(length(pkgs_old)==length(pkgs_all))){
+    pkgs_old <- pkgs_all
+    DL <- unlist(utils:::.make_dependency_list(pkgs_all, available))
+    #browser()
+    pkgs_all <- unique(c(pkgs_all,DL))
+    pkgs_all <- pkgs_all[pkgs_all %in% available[,1]]
+  }
+  pkgs_all        
+}
+
+.make_suggests_list <- function(pkgs, available){
+  if (!length(pkgs))
+    return(NULL)
+  if (is.null(available))
+    stop(gettextf("'%s' must be supplied", available), domain = NA)
+  info <- available[pkgs, "Suggests", drop = FALSE]
+  x <- apply(info, 1, utils:::.clean_up_dependencies)
+  if (length(pkgs) == 1) {
+    x <- list(as.vector(x))
+    names(x) <- pkgs
+  }
+  ## bundles are defunct in 2.11 ...
+  bundles <- tryCatch(utils:::.find_bundles(available), error = identity)
+  if(! inherits(bundles, "error") ){
+    x <- lapply(x, function(x) if (length(x)) {
+      for (bundle in names(bundles)) x[x %in% bundles[[bundle]]] <- bundle
+      x <- x[!x %in% c("R", "NA")]
+      unique(x)
+    }
+    else x)
+  }
+  x
+}
+
+resolve_suggests <- function(pkgs, available){
+  pkgs_suggested <- unlist(.make_suggests_list(pkgs,available))
+  pkgs_suggested
+}
+
+## remove certain pkgs from a pkg list
+remove_excluded_pkgs <- function(pkgs, to_remove){
+  excluded <- sapply(pkgs, "[", 1) %in% to_remove
+  pkgs[!excluded]
+}
+
+## checks if directory exists---if not: creates it if  desired
+check_directory <- function(dir, fix = FALSE, ...){
+  out <- TRUE
+  if(!file.exists(dir)){
+    out <- FALSE
+    if(fix){
+      dir.create(dir, ...)
+      if(file.exists(dir))
+        return(TRUE)
+    }
+  }
+  out
+}
+
+## check, if packages can be installed to local library
+check_local_library <- function(lib){
+  ## look, if library is locked
+  lock <- file.path(lib, "00LOCK")
+  if(file.exists(lock))
+     system(paste("rm -rf", lock))
+}
+
+## check, if packages can be installed to local library
+## TODO: rotate (gzip and copy to backup location) old logs
+##       to keep track of history
+check_log_directory <- function(dir, type = c("build", "check")){
+  type <- match.arg(type)
+  if(!check_directory(dir, fix=TRUE))
+    stop(paste("There is no directory", dir, "!"))
+  old_wd <- getwd()
+  setwd(dir)
+  if(type == "build"){
+    suffix <- "buildlog.txt"
+  }else {
+    suffix <- "checklog.txt"
+  }
+  files <- list.files(dir, pattern = suffix)
+  file.remove(files)
+  setwd(old_wd)
+}
+
+## Start a virtual framebuffer X server and use this for DISPLAY so that
+## we can run package tcltk and friends.  We use a random PID
+## as the server number so that the checks for different flavors
+## get different servers.
+start_virtual_X11_fb <- function(){
+  ## FIXME: if /usr/bin/X11 exists -> then setting path not necessary
+  Sys.setenv(PATH=paste(Sys.getenv("PATH"), ":/usr/bin/X11", sep=""))
+  xvfb_screen <- floor(runif(1,1000,9999))
+  system(paste("Xvfb :", xvfb_screen, " -screen 0 1280x1024x24 &", sep=""))
+  pid <- as.integer(system(paste("ps auxw | grep \"Xvfb :", xvfb_screen,
+                      "\" | grep -v grep | awk '{ print $2 }'", sep=""), intern = TRUE))
+  Sys.setenv(DISPLAY=paste(":", xvfb_screen, sep = ""))
+  pid
+}
+
+close_virtual_X11_fb <- function(pid){
+  system(paste("kill -9", pid))
+  Sys.unsetenv("DISPLAY")
+}
+
+provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
+
+  file_types <- c(Linux = ".tar.gz", MacOSX = ".tgz", Windows = ".zip")
+  file_type <- file_types[platform]
+  pkg_types <- c(Linux = "source", MacOSX = "mac.binary", Windows = "win.binary")
+  pkg_type <- pkg_types[platform]
+  ## Hard coding fields (we are indexing by number, so hard-coding important here!)
+  ## R-Forge repository offers additional "Revision" field.
+  fields <- c(tools:::.get_standard_repository_db_fields(), "Repository", "Repository/Project", "Repository/R-Forge/Revision")
+  ## Remember old working directory
+  old_dir <- file_path_as_absolute(getwd())
+  setwd(build_dir)
+
+  ## first delete old packages
+  system(sprintf("rm -f %s", file.path(contrib_dir, sprintf("*%s", file_type))))
+  files <- dir()
+  files <- files[grep(sprintf("%s$", file_type), files)]
+  for(i in files){
+    ## copy package to contrib directory
+    file.copy(i, contrib_dir, overwrite = TRUE)
+    ## delete package from build directory
+    system(paste("rm -f", i))
+  }
+  ## remove old PACKAGES file
+  setwd(contrib_dir)
+  system(paste("rm -f PACKAGES*"))
+  ## now find out which packages have old versions DEPRECATED! -> to be removed
+  tmp <- dir()
+  splitted <- strsplit(tmp, "_")
+  packages <- sapply(splitted, "[", 1)
+  ind <- 1L:length(packages)
+  versno <- unlist(strsplit(sapply(splitted, "[", 2), file_type))
+  duplicated_pkgs <- duplicated(packages)
+  if(any(duplicated_pkgs)){
+  ## look for duplicated packages and remove older version
+    for(i in packages[duplicated_pkgs]){
+      ind_package_to_remove <- ind[packages==i][version_order(versno[packages==i])[1]]
+      system(paste("rm -f", tmp[ind_package_to_remove]))
+    }
+  }
+
+  ## Write a new PACKAGES and PACKAGES.gz file
+  write_PACKAGES(dir = contrib_dir, fields = fields, type = pkg_type)
+
+  ## back to old directory
+  setwd(old_dir)
+  unique(packages)
+}
