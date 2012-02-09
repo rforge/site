@@ -37,6 +37,8 @@ rf_takeover_prepared_build <- function(stmp, build_root, type = "src"){
   ## if no build to take up -> exit
   if( any(is.na(btgz)) )
     return(NULL)
+  if( !length(btgz) )
+      return(NULL)
 
   check_tgz <- function(btgz){
     ## rename it to *.processing or create lock file .processing.<OStype>

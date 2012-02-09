@@ -275,7 +275,7 @@ if (!nzchar(TAR)) {
 }
 
 files <- file.path(src_dir, c("RF_LOGS", "RF_PKG_CHECK", "RF_PKG_ROOT"))
-res <- utils::tar( file.path(stmp, paste("MAC", src_dir, "tar.gz", sep = ".")),
+res <- utils::tar( file.path(stmp, paste("WIN", src_dir, "tar.gz", sep = ".")),
                   files = files, compression = "gzip", compression_level = 9, tar = TAR,
                   extra_flags = sprintf("-C %s", build_root) )
 
