@@ -30,26 +30,37 @@ rf_takeover_prepared_build <- function(stmp, build_root, type = "src"){
   stopifnot( type %in% c("src", "mac", "win") )
   ## take the oldest available for build
   if(type == "src"){
-    btgz <- grep("^build_.*?.tar.gz$", dir(stmp), value = TRUE)[1]
+    btgz <- grep("^build_.*?.tar.gz$", dir(stmp), value = TRUE)
   } else {
-    btgz <- grep("^SRC.build_.*?.tar.gz$", dir(stmp), value = TRUE)[1]
+    btgz <- grep("^SRC.build_.*?.tar.gz$", dir(stmp), value = TRUE)
   }
   ## if no build to take up -> exit
-  if( is.na(btgz) )
+  if( any(is.na(btgz)) )
     return(NULL)
-  ## rename it to *.processing or create lock file .processing.<OStype>
-  ptgz <- switch(type, 
-   "src" =  paste(btgz, "processing", sep = "."),
-   "mac" =  paste(btgz, "processing", "MAC", sep = "."),
-   "win" =  paste(btgz, "processing", "WIN", sep = ".") )
-  ## if given submission is already being processed exit and return NULL
-  if( file.exists(file.path(stmp, ptgz)) )
-    return( NULL )
-  ## submission already processed
-  if( type == "mac" || file.exists(file.path(stmp, gsub("SRC.", "MAC.", btgz))) )
-    return( NULL )
-  if( type == "win" || file.exists(file.path(stmp, gsub("SRC.", "WIN.", btgz))) )
-    return( NULL )
+
+  check_tgz <- function(btgz){
+    ## rename it to *.processing or create lock file .processing.<OStype>
+    ptgz <- switch(type, 
+     "src" =  paste(btgz, "processing", sep = "."),
+     "mac" =  paste(btgz, "processing", "MAC", sep = "."),
+     "win" =  paste(btgz, "processing", "WIN", sep = ".") )
+    ## if given submission is already being processed exit and return NULL
+    if( file.exists(file.path(stmp, ptgz)) )
+      return( NULL )
+    ## submission already processed
+    if( type == "mac" && file.exists(file.path(stmp, gsub("SRC.", "MAC.", btgz))) )
+      return( NULL )
+    if( type == "win" && file.exists(file.path(stmp, gsub("SRC.", "WIN.", btgz))) )
+      return( NULL )
+    ptgz
+  }
+  ptgz <- lapply( btgz, check_tgz)
+  nn <- !unlist(lapply(ptgz, is.null))
+  if (!any(nn))
+    return(NULL)
+  btgz <- btgz[nn][1]
+  ptgz <- ptgz[[nn]][1]
+
   if(type == "src"){
     file.rename( file.path(stmp, btgz), file.path(stmp, ptgz) )
   } else {
