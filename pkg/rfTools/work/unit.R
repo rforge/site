@@ -281,3 +281,16 @@ res <- utils::tar( file.path(stmp, paste("MAC", src_dir, "tar.gz", sep = ".")),
 
 ## cleanup build dir
 unlink(file.path(build_root, src_dir), recursive = TRUE)
+
+################################################################################
+## R-FORGE: merge pkg src and binaries
+
+
+require(rfTools)
+
+rf <- rf_read_configuration( file = "/home/rforge/conf/rf.conf" )
+
+release_dir <- "/srv/rf/repo"
+log_dir <- "/srv/rf/logs"
+
+rf_release_packages( rf, release_dir, log_dir )

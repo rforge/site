@@ -89,7 +89,7 @@ rf_pkg_status <- function( rfc, verbose = FALSE ){
 
   ## outdated or new packages (packages for staging area)
   rf_pkg_status$outdated <- pkgs_svn[ names(pkgs_svn)[!names(pkgs_svn)%in% pkgs_current] ]
-
+  
   ## save rforge DB status
   rf_pkg_status$db <- pkg_rforge
   
@@ -116,16 +116,13 @@ print.rf_pkg_status <- function( x, ... ){
 }
 
 ## (2) update pkg db with new info and flag as 'scheduled for build'
-rf_prepare_build <- function(rfc, rf_pkg_status, rebuild = FALSE){
+rf_prepare_build <- function(rfc, rf_pkg_status){
   ## packages which are not yet listed in DB
   brand_new <- names(rf_pkg_status$outdated)[!names(rf_pkg_status$outdated) %in% rownames(rf_pkg_status$db)]
   ## packages listed but not current
   outdated <- setdiff(names(rf_pkg_status$outdated), brand_new)
-  ## if rebuild then include current status otherwise only take
   ## outdated pkgs which are not scheduled for build or building
-  build_states <- c(3, 4, 5)
-  if( rebuild )
-    build_states <- c(0, 3, 4, 5)
+  build_states <- c(0, 3, 4, 5)
   status <- rf_pkg_status$db[outdated, "status"]
   outdated <- outdated[status %in% build_states]
   ## character vector of package names to be built
