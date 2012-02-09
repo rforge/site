@@ -175,3 +175,18 @@ rf_check_packages( rf_pkg_status,
                    bioc_experiment = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/experiment",
                    control         = control )
 
+TAR <- Sys.getenv("TAR")
+WINDOWS <- .Platform$OS.type == "windows"
+if (!nzchar(TAR)) {
+  TAR <- if (WINDOWS) 
+    "tar --force-local"
+  else "internal"
+}
+
+files <- file.path(src_dir, c("RF_LOGS", "RF_PKG_CHECK", "RF_PKG_ROOT"))
+res <- utils::tar( file.path(stmp, paste("MAC", src_dir, "tar.gz", sep = ".")),
+                  files = files, compression = "gzip", compression_level = 9, tar = TAR,
+                  extra_flags = sprintf("-C %s", build_root) )
+
+## cleanup build dir
+unlink(file.path(build_root, src_dir), recursive = TRUE)

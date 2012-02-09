@@ -45,6 +45,11 @@ rf_takeover_prepared_build <- function(stmp, build_root, type = "src"){
   ## if given submission is already being processed exit and return NULL
   if( file.exists(file.path(stmp, ptgz)) )
     return( NULL )
+  ## submission already processed
+  if( type == "mac" || file.exists(file.path(stmp, gsub("SRC.", "MAC.", btgz))) )
+    return( NULL )
+  if( type == "win" || file.exists(file.path(stmp, gsub("SRC.", "WIN.", btgz))) )
+    return( NULL )
   if(type == "src"){
     file.rename( file.path(stmp, btgz), file.path(stmp, ptgz) )
   } else {
