@@ -22,8 +22,8 @@ rf_check_packages <- function( pkg_status,
   architecture <- match.arg( architecture )
   maj.version <- paste(R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
   ## x86_32 on x86_64 allowed but not the other way round
-  if((architecture=="x86_64") && (.Machine$sizeof.long == 4))
-    stop("Building x86_64 binaries not possible on an x86_32 architecture") 
+  if((architecture=="x86_64") && (.Machine$sizeof.pointer == 4))
+    stop("Building x86_64 binaries not possible on an x86_32 architecture")
   ## check for necessary directories---create them if possible
   path_to_pkg_src <- control$path_to_pkg_src
   print(path_to_pkg_src)
@@ -58,7 +58,7 @@ rf_check_packages <- function( pkg_status,
   old_wd <- getwd()
 
   ## PACKAGE SIGHTING
-  
+
   ## STOP LIST: packages which should not be compiled
   ## when checking packages the stoplist includes additional arguments to check process
   if(file.exists(stoplist)){
@@ -66,14 +66,14 @@ rf_check_packages <- function( pkg_status,
   }else check_args <- NULL
   ## Source packages from R-Forge to be checked: successfully build tarballs
   pkgs <- available.packages(contriburl = URL_pkg_sources)[, 1]
-  
+
   ## PACKAGE DB UPDATE ##
 
   ## FIXME: is it sufficient what we are doing here?
   update_package_library(pkgs, URL_pkg_sources,
                          c(cran_url, bioc_url, bioc_experiment, omega_hat_url),
                          path_to_local_library, platform)
-  
+
   ## LAST PREPARATION BEFORE CHECKING - DIRECTORIES
 
   ## prepare check results directories PKGS, save old check results in PKGS_pre
@@ -90,7 +90,7 @@ rf_check_packages <- function( pkg_status,
   setwd(file.path(path_to_check_dir, "PKGS"))
 
   ## LAST PREPARATION BEFORE CHECKING - MISCELLANEOUS
-  
+
   ## delete 00LOCK, sometimes this interrupted the build process ...
   check_local_library(path_to_local_library)
   ## where is our R binary?
@@ -104,12 +104,12 @@ rf_check_packages <- function( pkg_status,
     Sys.setenv(TEXMFLOCAL=path_to_local_texmf)
   if( platform %in% c("Linux", "MacOSX") ){
     ## Start a virtual framebuffer X server and use this for DISPLAY so that
-    ## we can run package tcltk and friends.  
+    ## we can run package tcltk and friends.
     pid <- start_virtual_X11_fb()
   }
-  
+
   ## PACKAGE CHECKING
-  
+
   ## note that we don't check packages fully again if they take too long
   old_timings_file <- file.path(path_to_check_dir, "time_c.out")
   check_too_long <- NULL
@@ -120,7 +120,7 @@ rf_check_packages <- function( pkg_status,
   ## obviously we want to collect new timings for each pkg checked
   timings <- numeric( length(pkgs) )
   names( timings ) <- pkgs
-  
+
   ## And now the testing ... (only R-Forge pkg tarballs!)
   for(pkg in pkgs){
     ## Prolog
@@ -128,7 +128,7 @@ rf_check_packages <- function( pkg_status,
                           architecture, "-checklog.txt", sep="")
     write_prolog(pkg, pkg_checklog, pkg_status, type = "check",
                  what = "tarball", std.out = TRUE)
-    
+
     ## additional arguments to R CMD check (--no-vignettes, --no-tests, etc.)
     check_arg <- get_check_args(pkg, check_args)
     ## FIXME: global check args
@@ -144,15 +144,14 @@ rf_check_packages <- function( pkg_status,
       check_arg <- "--no-examples --no-tests --no-vignettes"
       cat( sprintf("Additional arguments to R CMD check: %s (reason: run time too long)\n", check_arg), file = pkg_checklog, append = TRUE )
     }
-    
-    pkg_url <- file.path( gsub("file://", "", URL_pkg_sources),
+    toreplace <- ifelse( platform == "Windows", "file:///", "file://" )
+    pkg_url <- file.path( gsub(toreplace, "", URL_pkg_sources),
                          sprintf("%s_%s.tar.gz", pkg,
                                  pkg_status$outdated[[pkg]]$description["Version"]) )
     ## NOTE: On Windows we should use shell() instead of system()
     ##       otherwise pipes and redirections fail (see also ?system)
-    timings[pkg] <- ifelse( platform == "Windows",    
-      system.time(shell(paste(R, "CMD check", check_arg, pkg_url, ">>",
-                              pkg_checklog, "2>&1")))["elapsed"],
+    timings[pkg] <- ifelse( platform == "Windows",
+      system.time(system2(R, args = paste("CMD check", check_arg, pkg_url), stdout = pkg_checklog, stderr = pkg_checklog))["elapsed"],
                   system.time(system(paste(R, "CMD check", check_arg, pkg_url,
                                            ">>", pkg_checklog, "2>&1"))
                               )["elapsed"] )
@@ -161,18 +160,18 @@ rf_check_packages <- function( pkg_status,
   }
   ## better implementation necessary:
   pkgs_checked <- " "
-  
+
   ## FINALIZATION
 
   if( platform %in% c("Linux", "MacOSX") ){
-    ## Close the virtual framebuffer X server 
+    ## Close the virtual framebuffer X server
     close_virtual_X11_fb( pid )
   }
 
   ## provide check.csv et al.
   finalize_check_results( path_to_check_dir, path_to_pkg_src, check_args,
                          timings )
-  
+
   ## send email to R-Forge maintainer which packages successfully were built
   #notify_admins( pkgs_checked, donotcompile, email, platform, control,
   #               path_to_check_dir, timings = timings, about = "check" )
@@ -182,12 +181,12 @@ rf_check_packages <- function( pkg_status,
 }
 
 ## TODO: time_i.out
-finalize_check_results <- function(check_results_dir, 
-                                   path_to_pkg_src, 
-                                   check_args, 
+finalize_check_results <- function(check_results_dir,
+                                   path_to_pkg_src,
+                                   check_args,
                                    timings,
-                                   check_results_files = c("SUMMARY", 
-                                                           "check.csv", 
+                                   check_results_files = c("SUMMARY",
+                                                           "check.csv",
                                                            "time_c.out")){
   ## search check directory for check results
   ## check_results_dir <- "/srv/rsync/R-Forge.check/R-devel"
@@ -204,12 +203,12 @@ finalize_check_results <- function(check_results_dir,
   ## FIXME: only works on Linux as path_to_pkg_src is only there available
   for(dir in Rcheck){
     pkg <- gsub(".Rcheck$", "", dir)
-    file.copy(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), 
+    file.copy(file.path(path_to_pkg_src, pkg, "DESCRIPTION"),
               file.path(PKGS, dir, "00package.dcf"))
-    file.copy(file.path(PKGS, dir, "00install.out"), 
+    file.copy(file.path(PKGS, dir, "00install.out"),
               file.path(path_to_install_logs, sprintf("%s_install.out", pkg)), overwrite = TRUE)
   }
-  
+
   ## save old check results
   suffix <- ".prev"
   check_results_files <- file.path(check_results_dir, check_results_files)
@@ -224,7 +223,7 @@ finalize_check_results <- function(check_results_dir,
   if(!check_directory(file.path(check_results_dir, "Results"), fix=TRUE))
     stop(paste("There is no directory", file.path(check_results_dir, "Results"),
                "!"))
-  
+
   today <- format(Sys.time(), "%Y-%m-%d")
   results_archive <- file.path(check_results_dir, "Results", today)
 
@@ -243,22 +242,22 @@ finalize_check_results <- function(check_results_dir,
   ##mv Work/time_c.out time_c.out
   ##mv Work/time_i.out time_i.out
 
-  write_check_timings(file = file.path(check_results_dir, "time_c.out"), 
+  write_check_timings(file = file.path(check_results_dir, "time_c.out"),
                       Rcheck, timings)
-  
+
   ## Create check.csv.
-  write_check_csv(file = file.path(check_results_dir, "check.csv"), Rcheck, 
+  write_check_csv(file = file.path(check_results_dir, "check.csv"), Rcheck,
                   PKGS, path_to_pkg_src, check_args)
 
   ## Create SUMMARY.
-  write_check_SUMMARY(file = file.path(check_results_dir, "SUMMARY"), Rcheck, 
+  write_check_SUMMARY(file = file.path(check_results_dir, "SUMMARY"), Rcheck,
                       PKGS, path_to_pkg_src)
 
   for(file in check_results_files){
     file.copy(file, results_archive)
   }
 
-  write_check_diffs(check_results_dir)  
+  write_check_diffs(check_results_dir)
 }
 
 
@@ -279,14 +278,14 @@ write_check_csv <- function(Rcheck, check_dir, path_to_pkg_src, check_args, file
     suppressWarnings(priority <- tryCatch(read.dcf(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), "Priority")[1], error = identity))
     if(inherits(priority, "error"))
       priority <- NA
-    suppressWarnings(maintainer <- tryCatch(read.dcf(file.path(path_to_pkg_src, 
+    suppressWarnings(maintainer <- tryCatch(read.dcf(file.path(path_to_pkg_src,
       pkg, "DESCRIPTION"), "Maintainer")[1], error = identity))
     if(inherits(maintainer, "error"))
       maintainer <- NA
-    suppressWarnings(checklog <- tryCatch(readLines(file.path(check_dir, dir, 
+    suppressWarnings(checklog <- tryCatch(readLines(file.path(check_dir, dir,
       "00check.log")), error = identity))
     if(inherits(checklog, "error"))
-      checklog <- "ERROR: no check log found (RForgeTools)"      
+      checklog <- "ERROR: no check log found (RForgeTools)"
     warnings <- grep("WARNING$", checklog, fixed = TRUE, useBytes = TRUE)
     errors <- grep("ERROR", checklog, fixed = TRUE, useBytes = TRUE)
     if(length(errors))
@@ -296,7 +295,7 @@ write_check_csv <- function(Rcheck, check_dir, path_to_pkg_src, check_args, file
         status <- "WARN"
       else
         status <- "OK"
-    
+
     args <- get_check_args(pkg, check_args)
     if(length(args))
       args <- sprintf("[%s]", args)
@@ -315,7 +314,7 @@ write_check_SUMMARY <- function(Rcheck, check_dir, path_to_pkg_src, file = "SUMM
   for(i in 1:len){
     dir <- Rcheck[i]
     pkg <- gsub(".Rcheck$", "", dir)
-    suppressWarnings(checklog <- tryCatch(readLines(file.path(check_dir, dir, 
+    suppressWarnings(checklog <- tryCatch(readLines(file.path(check_dir, dir,
       "00check.log")), error = identity))
     if(inherits(checklog, "error"))
       checklog <- "ERROR: no check log found (RForgeTools)"
@@ -353,7 +352,7 @@ write_check_diffs <- function(check_dir, files = "check.csv"){
              shell(sprintf("test -s %s.diff || rm -f %s.diff", file, file)),
              system(sprintf("test -s %s.diff || rm -f %s.diff", file, file)) )
     }
-    
+
     if(file.exists(sprintf("%s.diff", file))){
       db <- check_results_diffs(file.path(check_dir))
       sink(sprintf("%s.diff", file))

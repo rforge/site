@@ -4,7 +4,7 @@
 ## Constructor for R-Forge control files
 rf_build_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
                               path_to_local_texmf, path_to_local_library,
-                              stoplist, 
+                              stoplist,
                               mail_domain_name_of_sender, mail_relay_server,
                               mail_programme = "mail",
                               path_to_check_dir = "",
@@ -40,7 +40,7 @@ rf_takeover_prepared_build <- function(stmp, build_root, type = "src"){
 
   check_tgz <- function(btgz){
     ## rename it to *.processing or create lock file .processing.<OStype>
-    ptgz <- switch(type, 
+    ptgz <- switch(type,
      "src" =  paste(btgz, "processing", sep = "."),
      "mac" =  paste(btgz, "processing", "MAC", sep = "."),
      "win" =  paste(btgz, "processing", "WIN", sep = ".") )
@@ -70,8 +70,8 @@ rf_takeover_prepared_build <- function(stmp, build_root, type = "src"){
   TAR <- Sys.getenv("TAR")
   WINDOWS <- .Platform$OS.type == "windows"
   if (!nzchar(TAR)) {
-    TAR <- if (WINDOWS) 
-      "tar --force-local"
+    TAR <- if (WINDOWS)
+      "tar --no-same-owner --force-local"
     else "internal"
   }
   if( type == "src" ){
@@ -117,10 +117,10 @@ rf_build_packages <- function(pkg_status,
                               omega_hat_url  = "http://www.omegahat.org/R",
                               control        = list(),
                               Ncpus = 1L){
-  
+
   if( !is.rf_build_control(control) )
     stop("No R-Forge build control object given")
-  
+
   ## INITIALIZATION
   writeLines("Start build process ...")
   ## match arguments
@@ -210,7 +210,7 @@ rf_build_packages <- function(pkg_status,
   }
   if(!check_directory(path_to_contrib_dir, fix=TRUE, recursive=TRUE))
     stop(paste("There is no directory", path_to_contrib_dir,"!"))
-  
+
   if(platform != "Linux"){
     ## sources to be considered in dependency check
     URL_pkg_sources <- contrib.url(sprintf("file:%s", path_to_pkg_root),
@@ -225,7 +225,7 @@ rf_build_packages <- function(pkg_status,
                                           sprintf("file://%s", path_to_pkg_src), filters = "duplicates")[, 1]
     ## Sort out packages that are on the exclude list
     pkgs <- remove_excluded_pkgs(pkgs_all, donotcompile)
-    
+
     ## sources to be considered in dependency check
     URL_pkg_sources <- sprintf("file://%s", path_to_pkg_src)
   }
@@ -296,11 +296,11 @@ rf_build_packages <- function(pkg_status,
       else
         ""
       ## build tarball from sources
-      .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)      
-      
+      .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
+
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-      
+
       ## Epilog
       write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
     }
@@ -314,7 +314,7 @@ rf_build_packages <- function(pkg_status,
     ## Initialize timings
     timings <- numeric(length(pkgs))
     names(timings) <- pkgs
-    
+
     for( pkg in pkgs ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
@@ -327,7 +327,7 @@ rf_build_packages <- function(pkg_status,
 
       ## get current package version (tarball, thus svn in pkg!)
       pkg_version_src   <- avail_src_pkgs[pkg, "Version"]
-      
+
       ## now build the package from package tarball
       .build_binary_from_tarball_win(pkg,
                                      pkg_version_src,
@@ -696,14 +696,14 @@ version_order <- function(x){
   ## coerce to numeric version
   y <- numeric_version(x[1])
   z <- numeric_version(x[2])
-  
+
   if(y <= z){
     return(c(1,2))
   } else
     return(c(2,1))
 }
 
-## resolve dependencies helper 
+## resolve dependencies helper
 resolve_dependencies <- function(pkgs, available){
   pkgs_all <- pkgs
   pkgs_old <- NULL
@@ -714,7 +714,7 @@ resolve_dependencies <- function(pkgs, available){
     pkgs_all <- unique(c(pkgs_all,DL))
     pkgs_all <- pkgs_all[pkgs_all %in% available[,1]]
   }
-  pkgs_all        
+  pkgs_all
 }
 
 .make_suggests_list <- function(pkgs, available){
