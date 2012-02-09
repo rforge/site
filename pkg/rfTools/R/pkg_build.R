@@ -59,7 +59,7 @@ rf_takeover_prepared_build <- function(stmp, build_root, type = "src"){
   if (!any(nn))
     return(NULL)
   btgz <- btgz[nn][1]
-  ptgz <- ptgz[[nn]][1]
+  ptgz <- unlist(ptgz[nn])[1]
 
   if(type == "src"){
     file.rename( file.path(stmp, btgz), file.path(stmp, ptgz) )
