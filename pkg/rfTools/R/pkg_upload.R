@@ -15,7 +15,9 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   btgz <- grep("^SRC.build_.*?.tar.gz$", dir(stmp), value = TRUE)
   if(any(is.na(btgz)))
     return( NULL )
-  
+  if( !length(btgz) )
+    return(NULL)
+
   check_tgz <- function(btgz){
     ## if given submission is already being processed exit and return NULL
     out <- c( mac = FALSE, win = FALSE )
@@ -41,7 +43,7 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
 
   ## create lock file
   file.create( file.path(stmp, ptgz) )
-  
+
   ## uncompress staging area
   TAR <- Sys.getenv("TAR")
   WINDOWS <- .Platform$OS.type == "windows"
@@ -64,6 +66,7 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
 
   build_states <- c(0, 3, 4, 5)
   status <- pkg_status$db[pkgs, "status"]
+  status[ is.na(status) ] <- 5
   pkgs <- pkgs[status %in% build_states]
   
   ## copy 00install.out, build, and check logs
@@ -134,7 +137,7 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   .rf_release_packages( pkgs_ok, file.path(stmp, src_dir, "RF_PKG_ROOT"), release_dir )
   
   lapply( pkgs_ok, function(pkg) rf_set_pkg_status( rfc, pkg, status = 0L) )
-
+  
   ## remove build tgz'
   file.remove(mac_build_file)
   file.remove(win_build_file)
@@ -182,7 +185,13 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
 }
     
 .rf_remove_package_from_release <- function(pkgs, release_dir){
-  
+
+  ## further configuration
+  file_types <- c(Linux = ".tar.gz", MacOSX = ".tgz", Windows = ".zip")
+  pkg_types <- c(Linux = "source", MacOSX = "mac.binary", Windows = "win.binary")
+  ## R-Forge repository offers additional "Revision" field.
+  fields <- c(tools:::.get_standard_repository_db_fields(), "Repository", "Repository/Project", "Repository/R-Forge/Revision")
+
   ## remove SRC packages
   pkgs_rforge_avail <- available.packages(contrib.url(sprintf("file://%s", release_dir)), filters = "duplicates")
   toremove <- which( rownames(pkgs_rforge_avail) %in% pkgs )
@@ -190,6 +199,12 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   lapply( files, function(file) {if(file.exists(file))
                                    file.remove(file)
                                } )
+  ## write PACKAGES file
+  platform <- "Linux"
+  file_type <- file_types[platform]
+  pkg_type <- pkg_types[platform]
+  write_PACKAGES(dir = contrib.url(release_dir), fields = fields, type = pkg_type)
+
   ## remove WIN packages
   pkgs_rforge_avail_win <- available.packages(contrib.url(sprintf("file://%s", release_dir), type = "win.binary"), filters = "duplicates")
   toremove <- which( rownames(pkgs_rforge_avail_win) %in% pkgs )
@@ -197,6 +212,11 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   lapply( files, function(file) {if(file.exists(file))
                                    file.remove(file)
                                } )
+  ## write PACKAGES file
+  platform <- "Windows"
+  file_type <- file_types[platform]
+  pkg_type <- pkg_types[platform]
+  write_PACKAGES(dir = contrib.url(release_dir, pkg_type), fields = fields, type = pkg_type)
   
   ## remove MAC packages
   pkgs_rforge_avail_mac <- available.packages(contrib.url(sprintf("file://%s", release_dir), type = "mac.binary.leopard"), filters = "duplicates")
@@ -205,29 +225,65 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   lapply( files, function(file) {if(file.exists(file))
                                    file.remove(file)
                                } )
+  ## write PACKAGES file
+  platform <- "MacOSX"
+  file_type <- file_types[platform]
+  pkg_type <- pkg_types[platform]
+  write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
+
   invisible(TRUE)
 }
 
 .rf_release_packages <- function(pkgs, path, release_dir){
+
+  ## further configuration
+  file_types <- c(Linux = ".tar.gz", MacOSX = ".tgz", Windows = ".zip")
+  pkg_types <- c(Linux = "source", MacOSX = "mac.binary", Windows = "win.binary")
+  ## R-Forge repository offers additional "Revision" field.
+  fields <- c(tools:::.get_standard_repository_db_fields(), "Repository", "Repository/Project", "Repository/R-Forge/Revision")
+
+  ## further configuration
+  file_types <- c(Linux = ".tar.gz", MacOSX = ".tgz", Windows = ".zip")
+  pkg_types <- c(Linux = "source", MacOSX = "mac.binary", Windows = "win.binary")
+
   ## SRC package must always be there
   pkgs_src_avail <- available.packages(contrib.url(sprintf("file://%s", path)), filters = "duplicates")
   files <- file.path(contrib.url(path), sprintf("%s_%s.tar.gz", pkgs_src_avail[pkgs, "Package"], pkgs_src_avail[pkgs, "Version"]))
   lapply( files, function(file) {if(file.exists(file))
                                    file.copy(file, contrib.url(release_dir))
                                } )
+  ## write PACKAGES file
+  platform <- "Linux"
+  file_type <- file_types[platform]
+  pkg_type <- pkg_types[platform]
+  write_PACKAGES(dir = contrib.url(release_dir), fields = fields, type = pkg_type)
+
+  ## WIN packages
   pkgs_win_avail <- available.packages(contrib.url(sprintf("file://%s", path), type = "win.binary"), filters = "duplicates")
   torelease <- which( rownames(pkgs_win_avail) %in% pkgs )
   files <- file.path(contrib.url(path, type = "win.binary"), sprintf("%s_%s.zip", pkgs_win_avail[torelease, "Package"], pkgs_win_avail[torelease, "Version"]))
   lapply( files, function(file) {if(file.exists(file))
                                    file.copy(file, contrib.url(release_dir, type = "win.binary"), copy.mode = FALSE)
                                } )
+  ## write PACKAGES file
+  platform <- "Windows"
+  file_type <- file_types[platform]
+  pkg_type <- pkg_types[platform]
+  write_PACKAGES(dir = contrib.url(release_dir, pkg_type), fields = fields, type = pkg_type)
 
-  ## remove MAC packages
+
+  ## MAC packages
   pkgs_mac_avail <- available.packages(contrib.url(sprintf("file://%s", path), type = "mac.binary.leopard"), filters = "duplicates")
   torelease <- which( rownames(pkgs_mac_avail) %in% pkgs )
   files <- file.path(contrib.url(path, type = "mac.binary.leopard"), sprintf("%s_%s.tgz", pkgs_mac_avail[torelease, "Package"], pkgs_mac_avail[torelease, "Version"]))
   lapply( files, function(file) {if(file.exists(file))
                                    file.copy(file, contrib.url(release_dir, type = "mac.binary.leopard"), copy.mode = FALSE)
                                } )
+  ## write PACKAGES file
+  platform <- "MacOSX"
+  file_type <- file_types[platform]
+  pkg_type <- pkg_types[platform]
+  write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
+
   invisible(TRUE)
 }

@@ -30,9 +30,11 @@ rf_pkg_status <- function( rfc, verbose = FALSE ){
       status <- .check_description_for_sanity(desc)
     ## Authors@R handling
     fields <- tools:::.expand_package_description_db_R_fields(desc)
-    if (length(fields))
+    if (length(fields) ){
+      meta <- attr(desc, "meta")
       desc <- c(desc, fields)
-    
+      attr(desc, "meta") <- meta
+    }
     list(description = desc,
          sanity_check = list(status = length(status) == 0,
            msg = status),
