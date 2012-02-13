@@ -845,17 +845,18 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   tmp <- dir()
   splitted <- strsplit(tmp, "_")
   packages <- sapply(splitted, "[", 1)
-  ind <- 1L:length(packages)
-  versno <- unlist(strsplit(sapply(splitted, "[", 2), file_type))
-  duplicated_pkgs <- duplicated(packages)
-  if(any(duplicated_pkgs)){
-  ## look for duplicated packages and remove older version
-    for(i in packages[duplicated_pkgs]){
-      ind_package_to_remove <- ind[packages==i][version_order(versno[packages==i])[1]]
-      system(paste("rm -f", tmp[ind_package_to_remove]))
+  if(length(packages)){
+    ind <- 1L:length(packages)
+    versno <- unlist(strsplit(sapply(splitted, "[", 2), file_type))
+    duplicated_pkgs <- duplicated(packages)
+    if(any(duplicated_pkgs)){
+      ## look for duplicated packages and remove older version
+      for(i in packages[duplicated_pkgs]){
+        ind_package_to_remove <- ind[packages==i][version_order(versno[packages==i])[1]]
+        system(paste("rm -f", tmp[ind_package_to_remove]))
+      }
     }
   }
-
   ## Write a new PACKAGES and PACKAGES.gz file
   write_PACKAGES(dir = contrib_dir, fields = fields, type = pkg_type)
 

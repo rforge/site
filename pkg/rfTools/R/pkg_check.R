@@ -266,44 +266,46 @@ finalize_check_results <- function(check_results_dir,
 write_check_csv <- function(Rcheck, check_dir, path_to_pkg_src, check_args, file = "check.csv"){
   fields <- c("Package", "Version", "Priority", "Maintainer", "Status", "Comment")
   len <- length(Rcheck)
-  csv <- matrix(rep(NA, len * length(fields)), nrow = len)
-  colnames(csv) <- fields
-  for(i in 1:len){
-    dir <- Rcheck[i]
-    pkg <- gsub(".Rcheck$", "", dir)
-    ## FIXME: When reading DCF files, we take the first result. E.g., BIOMOD returns the actual value plus NA. An encoding issue?
-    suppressWarnings(version <- tryCatch(read.dcf(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), "Version")[1], error = identity))
-    if(inherits(version, "error"))
-      version <- NA
-    suppressWarnings(priority <- tryCatch(read.dcf(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), "Priority")[1], error = identity))
-    if(inherits(priority, "error"))
-      priority <- NA
-    suppressWarnings(maintainer <- tryCatch(read.dcf(file.path(path_to_pkg_src,
-      pkg, "DESCRIPTION"), "Maintainer")[1], error = identity))
-    if(inherits(maintainer, "error"))
-      maintainer <- NA
-    suppressWarnings(checklog <- tryCatch(readLines(file.path(check_dir, dir,
-      "00check.log")), error = identity))
-    if(inherits(checklog, "error"))
-      checklog <- "ERROR: no check log found (RForgeTools)"
-    warnings <- grep("WARNING$", checklog, fixed = TRUE, useBytes = TRUE)
-    errors <- grep("ERROR", checklog, fixed = TRUE, useBytes = TRUE)
-    if(length(errors))
-      status <- "ERROR"
-    else
-      if(length(warnings))
-        status <- "WARN"
+  if(len){
+    csv <- matrix(rep(NA, len * length(fields)), nrow = len)
+    colnames(csv) <- fields
+    for(i in 1:len){
+      dir <- Rcheck[i]
+      pkg <- gsub(".Rcheck$", "", dir)
+      ## FIXME: When reading DCF files, we take the first result. E.g., BIOMOD returns the actual value plus NA. An encoding issue?
+      suppressWarnings(version <- tryCatch(read.dcf(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), "Version")[1], error = identity))
+      if(inherits(version, "error"))
+        version <- NA
+      suppressWarnings(priority <- tryCatch(read.dcf(file.path(path_to_pkg_src, pkg, "DESCRIPTION"), "Priority")[1], error = identity))
+      if(inherits(priority, "error"))
+        priority <- NA
+      suppressWarnings(maintainer <- tryCatch(read.dcf(file.path(path_to_pkg_src,
+                                                                 pkg, "DESCRIPTION"), "Maintainer")[1], error = identity))
+      if(inherits(maintainer, "error"))
+        maintainer <- NA
+      suppressWarnings(checklog <- tryCatch(readLines(file.path(check_dir, dir,
+                                                                "00check.log")), error = identity))
+      if(inherits(checklog, "error"))
+        checklog <- "ERROR: no check log found (RForgeTools)"
+      warnings <- grep("WARNING$", checklog, fixed = TRUE, useBytes = TRUE)
+      errors <- grep("ERROR", checklog, fixed = TRUE, useBytes = TRUE)
+      if(length(errors))
+        status <- "ERROR"
       else
-        status <- "OK"
-
-    args <- get_check_args(pkg, check_args)
-    if(length(args))
-      args <- sprintf("[%s]", args)
-    else
-      args <- ""
-    csv[i, ] <- c(pkg, version, priority, maintainer, status, args)
+        if(length(warnings))
+          status <- "WARN"
+        else
+          status <- "OK"
+      
+      args <- get_check_args(pkg, check_args)
+      if(length(args))
+        args <- sprintf("[%s]", args)
+      else
+        args <- ""
+      csv[i, ] <- c(pkg, version, priority, maintainer, status, args)
+    }
+    write.csv(csv, file, row.names = FALSE)
   }
-  write.csv(csv, file, row.names = FALSE)
   invisible(TRUE)
 }
 
