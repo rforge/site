@@ -7,7 +7,7 @@
 ## (3) export uncompressed sources from SVN and flag packages as 'building' in SVN
 
 ## (1) make pkg status info based on SVN; retrieves further info from pkg db and CRAN
-rf_pkg_status <- function( rfc, verbose = FALSE ){
+rf_pkg_status <- function( rfc, rebuild = FALSE, verbose = FALSE ){
   stopifnot( file.exists(.rf_get_svn_root(rfc)) )
   if( length(dir(.rf_get_svn_root(rfc))) <= 0 )
     stop( sprintf("svn root '%s' directory empty", .rf_get_svn_root(rfc)) )
@@ -82,7 +82,7 @@ rf_pkg_status <- function( rfc, verbose = FALSE ){
 
   ## obsolete packages which have to be removed from DB
   rf_pkg_status$obsolete <- rownames(pkg_rforge)[!rownames(pkg_rforge) %in% names(pkgs_svn)]
-
+    
   ## current packages (no action required later on)
   test2 <- unlist(lapply(rownames(pkg_rforge), function(pkg){
                   x <- pkg_rforge[pkg, "rev"] == as.integer(attr(pkgs_svn[[pkg]]$description, "meta")["Last Changed Rev"])
@@ -91,7 +91,14 @@ rf_pkg_status <- function( rfc, verbose = FALSE ){
                   NA
                 }))
   names(test2) <- rownames(pkg_rforge)
+
   pkgs_current <- na.omit(rownames(pkg_rforge)[ test2 ])
+
+  ## rebuild all packages marked as 5L: offline?
+  if( rebuild ){
+    pkgs_current <- pkgs_current[ pkg_rforge[pkgs_current, "status" ] != 5L ]
+  }
+  
   rf_pkg_status$current <- pkgs_svn[ pkgs_current ]
 
   ## outdated or new packages (packages for staging area)
@@ -255,7 +262,7 @@ rf_delete_pkg <- function(rfc, pkg){
   maintainer <- gsub("\'","", maintainer)
   title <- gsub("\'","", title)
   description <- gsub("\'","", description)
-  pkg_date <- tryCatch( as.Date(pkg_date), error = function(x) NA )
+  pkg_date <- tryCatch( as.Date(pkg_date, format = "%y-%m-%d"), error = function(x) NA )
   if( is.na(pkg_date) ){
     sql <- sprintf("UPDATE %s SET (unix_group_name, version, title, description, author, license, last_change, rev, maintainer, cran_release, status) = ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d') WHERE pkg_name = '%s'", table, unix_group_name, version, title, description, author, license, last_change, rev, maintainer, cran_release, status, pkg_name )
   } else {

@@ -121,7 +121,7 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   if(length(windows))
     all_results[windows, c("Linux", "MacOSX")] <- "OK"
     
-  pkgs_ok <- apply(all_results[, c("Linux", "Windows")], 1, function(x){y <- na.omit(x)
+  pkgs_ok <- apply(all_results[, c("Linux", "Windows"), drop = FALSE], 1, function(x){y <- na.omit(x)
                                                                         if(length(y))
                                                                           all(y %in% c("OK", "WARN"))
                                                                         else
