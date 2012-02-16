@@ -286,7 +286,7 @@ write_check_csv <- function(Rcheck, check_dir, path_to_pkg_src, check_args, file
       suppressWarnings(checklog <- tryCatch(readLines(file.path(check_dir, dir,
                                                                 "00check.log")), error = identity))
       if(inherits(checklog, "error"))
-        checklog <- "ERROR: no check log found (RForgeTools)"
+        checklog <- "ERROR: no check log found (rfTools)"
       warnings <- grep("WARNING$", checklog, fixed = TRUE, useBytes = TRUE)
       errors <- grep("ERROR", checklog, fixed = TRUE, useBytes = TRUE)
       if(length(errors))
@@ -302,6 +302,8 @@ write_check_csv <- function(Rcheck, check_dir, path_to_pkg_src, check_args, file
         args <- sprintf("[%s]", args)
       else
         args <- ""
+      if(length(args) > 1)
+        args <- args[1]
       csv[i, ] <- c(pkg, version, priority, maintainer, status, args)
     }
     write.csv(csv, file, row.names = FALSE)
