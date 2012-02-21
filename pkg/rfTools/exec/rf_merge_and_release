@@ -1,0 +1,16 @@
+#!/usr/bin/env Rscript
+## R-Forge build system tool chain
+## update and print package status
+
+require("rfTools")
+
+## read connection information
+conf_file <- "/home/rforge/conf/rf.conf"
+rfc <- rf_read_configuration( file = conf_file )
+
+## directory configuration
+## the R-Forge repository and the log file archive
+release_dir <- "/srv/rf/repo"
+log_dir <- "/srv/rf/logs"
+
+rf_release_packages( rfc, release_dir, log_dir )
