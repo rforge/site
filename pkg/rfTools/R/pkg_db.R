@@ -135,6 +135,16 @@ rf_prepare_build <- function(rfc, rf_pkg_status){
   brand_new <- names(rf_pkg_status$outdated)[!names(rf_pkg_status$outdated) %in% rownames(rf_pkg_status$db)]
   ## packages listed but not current
   outdated <- setdiff(names(rf_pkg_status$outdated), brand_new)
+  ## packages which are marked as 'Current'
+  current <- names(rf_pkg_status$current)
+  ## update the CRAN version for those only
+  if( length(current) ){
+    updated <- rf_update_cran_info( rfc, rf_pkg_status, current )
+    if(length(updated)){
+      writeLines("CRAN version info update for:")
+      writeLines(paste(updated, collapse = ", "))
+    }
+  }
   ## outdated pkgs which are not scheduled for build or building
   build_states <- c(0, 3, 4, 5)
   status <- rf_pkg_status$db[outdated, "status"]
@@ -142,11 +152,17 @@ rf_prepare_build <- function(rfc, rf_pkg_status){
   ## character vector of package names to be built
   tobuild <- c(outdated, brand_new)
   ## add brand new packages to DB
-  if( length(brand_new) )
+  if( length(brand_new) ){
     rf_insert_new_pkg( rfc, rf_pkg_status, brand_new )
+    writeLines("New packages on R-Forge:")
+    writeLines(paste(brand_new, collapse = ", "))
+  }
   ## update existing package rows and change build status in DB
-  if( length(outdated) )
+  if( length(outdated) ){
     rf_update_outdated_pkg( rfc, rf_pkg_status, outdated )
+    writeLines("Packages scheduled for build:")
+    writeLines(paste(outdated, collapse = ", "))
+  }
   tobuild
 }
 
@@ -180,7 +196,6 @@ rf_export_and_build_pkgs <- function(rfc, rf_pkg_status, pkgs){
   }
   lapply( pkgs, function(pkg) rf_set_pkg_status(rfc, pkg, status = 2L) )
   unlink( stmp, recursive = TRUE )
-  invisible( unlist(status) )
 }
 
 rf_update_outdated_pkg <- function( rfc, rf_pkg_status, pkgs){
@@ -202,6 +217,34 @@ rf_update_outdated_pkg <- function( rfc, rf_pkg_status, pkgs){
   rfc <- rf_connect( rfc )
   lapply(sql, function(x) dbSendQuery(rf_get_db_con(rfc), x) )
   rfc <- rf_disconnect( rfc )
+}
+
+rf_update_cran_info <- function( rfc, rf_pkg_status, pkgs){
+  tab <- .rf_get_base_table(rfc)
+  
+  sql <- unlist( lapply( rf_pkg_status$current[pkgs], function(pkg){
+    desc <- pkg$description
+    pkgname <- desc["Package"]
+    cran <- ""
+    if( !is.null(rf_pkg_status$cran) ){
+      if(pkgname %in% rownames(rf_pkg_status$cran)){
+        cran <- rf_pkg_status$cran[pkgname, "Version"]
+        cran_db <- rf_pkg_status$db[pkgname, "cran_release"]
+        if(cran <= cran_db)
+          cran <- ""
+      }
+    }
+    if(nzchar(cran))
+      .make_SQL_update_cran_info( tab, pkgname, cran )
+    else
+      NULL
+  } ) )
+  if(length(sql)){
+    rfc <- rf_connect( rfc )
+    lapply(sql, function(x) dbSendQuery(rf_get_db_con(rfc), x) )
+    rfc <- rf_disconnect( rfc )
+  }
+  names(sql)
 }
 
 rf_insert_new_pkg <- function( rfc, rf_pkg_status, pkgs){
@@ -271,6 +314,10 @@ rf_delete_pkg <- function(rfc, pkg){
   sql
 }
 
+.make_SQL_update_cran_info<- function( table, pkg_name, cran_release ){
+  sprintf("UPDATE %s SET (cran_release) = ('%s') WHERE pkg_name = '%s'", table, cran_release, pkg_name )
+}
+
 .make_new_staging_area <- function(rfc){
   ## we need a tempory directory here
   if ( !file.exists(.rf_get_tmp(rfc)) )
@@ -313,7 +360,7 @@ rf_show_pkgs <- function( rfc ){
 
 .get_pkgs_from_table <- function( rfc, table ){
   dbGetQuery( rf_get_db_con(rfc),
-              sprintf("SELECT pkg_name,version,rev,status FROM %s", table) )
+              sprintf("SELECT pkg_name,version,cran_release,rev,status FROM %s", table) )
 }
 
 ## Copied from package tools and modified to support vectorized descs:

@@ -73,8 +73,11 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   lapply(pkgs, rf_copy_logs, log_dir = log_dir, build_root = file.path(stmp, src_dir), type = "Linux" )          
   ## read check results
   file <- file.path(stmp, src_dir, "RF_PKG_CHECK", "check.csv")
-  results_lin <- read.csv(file)
-
+  results_lin <- if(file.exists(file))
+    read.csv(file)
+  else
+    NULL
+  
   ## MAC BINARIES
   mac_build_file <- file.path( stmp, gsub("SRC.", "MAC.", btgz) )
   res <- utils::untar( mac_build_file, compressed = "gzip", tar = TAR, exdir = stmp )
@@ -86,8 +89,11 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   lapply(pkgs, rf_copy_logs, log_dir = log_dir, build_root = file.path(stmp, src_dir), type = "MacOSX" )
   ## read check results
   file <- file.path(stmp, src_dir, "RF_PKG_CHECK", "check.csv")
-  results_mac <- read.csv(file)
-
+  results_mac <- if(file.exists(file))
+    read.csv(file)
+  else
+    NULL
+  
   win_build_file <- file.path( stmp, gsub("SRC.", "WIN.", btgz) )
   res <- utils::untar( win_build_file, compressed = "gzip", tar = TAR, exdir = stmp )
   if (res) {
@@ -98,28 +104,39 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   lapply(pkgs, rf_copy_logs, log_dir = log_dir, build_root = file.path(stmp, src_dir), type = "Windows" )
   ## read check results
   file <- file.path(stmp, src_dir, "RF_PKG_CHECK", "check.csv")
-  results_win <- read.csv(file)
-
+  results_win <- if(file.exists(file))
+    read.csv(file)
+  else
+    NULL
+  
   all_results <- matrix(NA, ncol = 3, nrow = length(pkgs), dimnames = list(pkgs, c("Linux", "MacOSX", "Windows")))
 
-  p <- as.character(results_lin[["Package"]])
-  all_results[p, "Linux"] <- as.character(results_lin[["Status"]])
-  p <- as.character(results_mac[["Package"]])
-  all_results[p, "MacOSX"] <- as.character(results_mac[["Status"]])
-  p <- as.character(results_win[["Package"]])
-  all_results[p, "Windows"] <- as.character(results_win[["Status"]])
-
+  if( !is.null(results_lin) ){
+    p <- as.character(results_lin[["Package"]])
+    all_results[p, "Linux"] <- as.character(results_lin[["Status"]])
+  }
+  if( !is.null(results_mac) ){
+    p <- as.character(results_mac[["Package"]])
+    all_results[p, "MacOSX"] <- as.character(results_mac[["Status"]])
+  }
+  if( !is.null(results_win) ){
+    p <- as.character(results_win[["Package"]])
+    all_results[p, "Windows"] <- as.character(results_win[["Status"]])
+  }
+  
   ## which pkgs pass R CMD check on major platforms
   ## leave out MacOSX for the moment
   ## check os type field
   os_type <- unlist(lapply(pkg_status$outdated, function(x) x$description["OS_Type"]))
-  names(os_type) <- pkgs
-  unix <- which(os_type == "unix")
-  if(length(unix))
-    all_results[unix, "Windows"] <- "OK"
-  windows <- which(os_type == "windows")
-  if(length(windows))
-    all_results[windows, c("Linux", "MacOSX")] <- "OK"
+  if( length(os_type) ){
+    names(os_type) <- pkgs
+    unix <- which(os_type == "unix")
+    if(length(unix))
+      all_results[unix, "Windows"] <- "OK"
+    windows <- which(os_type == "windows")
+    if(length(windows))
+      all_results[windows, c("Linux", "MacOSX")] <- "OK"
+  }
     
   pkgs_ok <- apply(all_results[, c("Linux", "Windows"), drop = FALSE], 1, function(x){y <- na.omit(x)
                                                                         if(length(y))
