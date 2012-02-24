@@ -292,7 +292,7 @@ rf_delete_pkg <- function(rfc, pkg){
   description <- gsub("\'","", description)
   pkg_date <- tryCatch( as.Date(pkg_date), error = function(x) NA )
   if( is.na(pkg_date) ){
-    sql <- sprintf("INSERT INTO %s (pkg_name, unix_group_name, version, title, description, author, license, pkg_date, last_change, rev, maintainer, cran_release, status) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", table, pkg_name, unix_group_name, version, gsub("\'","",title), gsub("\'","",description), author, license, last_change, rev, maintainer, cran_release, status )
+    sql <- sprintf("INSERT INTO %s (pkg_name, unix_group_name, version, title, description, author, license, last_change, rev, maintainer, cran_release, status) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", table, pkg_name, unix_group_name, version, gsub("\'","",title), gsub("\'","",description), author, license, last_change, rev, maintainer, cran_release, status )
   } else {
     sql <- sprintf("INSERT INTO %s (pkg_name, unix_group_name, version, title, description, author, license, pkg_date, last_change, rev, maintainer, cran_release, status) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", table, pkg_name, unix_group_name, version, gsub("\'","",title), gsub("\'","",description), author, license, pkg_date, last_change, rev, maintainer, cran_release, status )
   }
