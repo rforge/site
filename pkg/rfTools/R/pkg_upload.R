@@ -93,7 +93,8 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
     read.csv(file)
   else
     NULL
-  
+
+  ## WIN BINARIES
   win_build_file <- file.path( stmp, gsub("SRC.", "WIN.", btgz) )
   res <- utils::untar( win_build_file, compressed = "gzip", tar = TAR, exdir = stmp )
   if (res) {
@@ -127,7 +128,7 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   ## which pkgs pass R CMD check on major platforms
   ## leave out MacOSX for the moment
   ## check os type field
-  os_type <- unlist(lapply(pkg_status$outdated, function(x) x$description["OS_Type"]))
+  os_type <- unlist(lapply(pkg_status$outdated, function(x) x$description["OS_type"]))
   if( length(os_type) ){
     names(os_type) <- pkgs
     unix <- which(os_type == "unix")
