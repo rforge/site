@@ -151,8 +151,8 @@ rf_check_packages <- function( pkg_status,
     ## NOTE: On Windows we should use shell() instead of system()
     ##       otherwise pipes and redirections fail (see also ?system)
     timings[pkg] <- ifelse( platform == "Windows",
-      system.time(system2(R, args = paste("CMD check", check_arg, pkg_url), stdout = pkg_checklog, stderr = pkg_checklog))["elapsed"],
-                  system.time(system(paste(R, "CMD check", check_arg, pkg_url,
+      system.time(system2(R, args = paste("CMD check --as-cran", check_arg, pkg_url), stdout = pkg_checklog, stderr = pkg_checklog))["elapsed"],
+                  system.time(system(paste(R, "CMD check --as-cran", check_arg, pkg_url,
                                            ">>", pkg_checklog, "2>&1"))
                               )["elapsed"] )
     ## Epilog
@@ -296,7 +296,7 @@ write_check_csv <- function(Rcheck, check_dir, path_to_pkg_src, check_args, file
           status <- "WARN"
         else
           status <- "OK"
-      
+
       args <- get_check_args(pkg, check_args)
       if(length(args))
         args <- sprintf("[%s]", args)
