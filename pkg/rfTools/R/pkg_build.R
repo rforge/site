@@ -259,6 +259,8 @@ rf_build_packages <- function(pkg_status,
   check_local_library(path_to_local_library)
   ## where is our R binary?
   R <- file.path( R.home(), "bin", "R" )
+  if( platform == "Windows" )
+      R <- file.path(R.home(), "bin", "x64", "R")
   ## Set environment variables which are necessary for building
   ## (or creating vignettes)
   Sys.setenv(R_LIBS = path_to_local_library)
