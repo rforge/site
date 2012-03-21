@@ -64,7 +64,7 @@ rf_read_configuration <- function( file, fields = NULL, ... ){
 
 rf_connect <- function( rfc ){
   stopifnot( inherits(rfc, "rf") )
-  rfc$db_con <- dbConnect( PostgreSQL(),
+  rfc$db_con <- DBI::dbConnect( RPostgreSQL::PostgreSQL(),
                            dbname   = rfc$db_name,
                            user     = rfc$db_user,
                            password = rfc$db_password )
@@ -73,7 +73,7 @@ rf_connect <- function( rfc ){
 
 rf_disconnect <- function( rfc ){
   stopifnot( inherits(rfc, "rf") )
-  dbDisconnect( rf_get_db_con(rfc) )
+  DBI::dbDisconnect( rf_get_db_con(rfc) )
   rfc$db_con <- NULL
   rfc
 }
@@ -152,9 +152,9 @@ rf_db_insert_schema <- function( rfc, config_file ){
     license text,
     pkg_date date,
     external_url text )', table)
-  dbSendQuery( rf_get_db_con(rfc), sql )
+  DBI::dbSendQuery( rf_get_db_con(rfc), sql )
   sql <- sprintf( 'CREATE INDEX %s_unixgn ON %s (unix_group_name)', table, table )
-  dbSendQuery( rf_get_db_con(rfc), sql )
+  DBI::dbSendQuery( rf_get_db_con(rfc), sql )
   rfc <- rf_disconnect( rfc )
   rfc$rf_table <- table
   rfc
@@ -169,7 +169,7 @@ rf_db_insert_schema <- function( rfc, config_file ){
     repository integer,
     version character varying(30),
     last_change timestamp with time zone )', table)
-  dbSendQuery( rf_get_db_con(rfc), sql )
+  DBI::dbSendQuery( rf_get_db_con(rfc), sql )
   rfc <- rf_disconnect( rfc )
   rfc$rf_table_repository <- table
   rfc
@@ -178,7 +178,7 @@ rf_db_insert_schema <- function( rfc, config_file ){
 .db_drop_table <- function( rfc, table ){
   stopifnot( !is.null(table) )
   rfc <- rf_connect( rfc )
-  dbSendQuery( rf_get_db_con(rfc),
+  DBI::dbSendQuery( rf_get_db_con(rfc),
                sprintf("DROP TABLE %s", as.character(table)) )
   rf_disconnect( rfc )
 }
@@ -215,15 +215,15 @@ rf_db_install <- function( con, config_file ){
                                db_user = "rforge",
                                db_password = paste(sample(c(LETTERS, letters, 0:9), 10,
                                  replace = TRUE), collapse = "") ){
-  if( any(unlist(dbGetQuery(con, "SELECT datname FROM pg_database")) %in% db_name) )
+  if( any(unlist(DBI::dbGetQuery(con, "SELECT datname FROM pg_database")) %in% db_name) )
     warning( sprintf("database '%s' already exists. skipping creation...", db_name) )
   else
-    dbSendQuery(con, sprintf("CREATE DATABASE %s", db_name))
-  if( any(unlist(dbGetQuery(con, "SELECT usename FROM pg_user")) %in% db_user) )
+    DBI::dbSendQuery(con, sprintf("CREATE DATABASE %s", db_name))
+  if( any(unlist(DBI::dbGetQuery(con, "SELECT usename FROM pg_user")) %in% db_user) )
     warning( sprintf("user '%s' already exists. skipping creation...", db_user) )
   else {
-    dbSendQuery( con, sprintf("CREATE USER %s WITH PASSWORD '%s'", db_user, db_password) )
-    dbSendQuery( con, sprintf("GRANT ALL PRIVILEGES ON DATABASE %s TO %s", db_name, db_user) )
+    DBI::dbSendQuery( con, sprintf("CREATE USER %s WITH PASSWORD '%s'", db_user, db_password) )
+    DBI::dbSendQuery( con, sprintf("GRANT ALL PRIVILEGES ON DATABASE %s TO %s", db_name, db_user) )
     writeLines( sprintf("NOTE: database '%s' has been created and all privileges were granted to user '%s'.", db_name, db_user) )
   }
   writeLines( sprintf("NOTE: Database '%s' initialized.", db_name) )
@@ -241,11 +241,11 @@ rf_db_remove <- function( con, rfc, force = FALSE ){
 .delete_rf_db <- function( con, rfc, force = FALSE ){
   if( !force )
   stop( "disabled function. Too dangerous." )
-  dbSendQuery( con, sprintf("REVOKE ALL PRIVILEGES ON DATABASE %s FROM %s",
+  DBI::dbSendQuery( con, sprintf("REVOKE ALL PRIVILEGES ON DATABASE %s FROM %s",
                             rfc$db_name,
                             rfc$db_user) )
-  dbSendQuery( con, sprintf("DROP DATABASE %s", rfc$db_name) )
-  dbSendQuery( con, sprintf("DROP USER %s", rfc$db_user) )
+  DBI::dbSendQuery( con, sprintf("DROP DATABASE %s", rfc$db_name) )
+  DBI::dbSendQuery( con, sprintf("DROP USER %s", rfc$db_user) )
   TRUE
 }
 

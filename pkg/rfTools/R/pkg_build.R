@@ -574,14 +574,14 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   }
   ## first update all installed packages if necessary
   ## debug  cat(sprintf("Arguments to update.packages(): lib = %s, repos = %s, ask = FALSE, checkBuilt = TRUE", lib, paste(repository_url, collapse = ", ")))
-  update.packages(lib = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE, ...)
+  update.packages(lib.loc = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE, ...)
   writeLines("Done.")
   writeLines("Resolve dependency structure ...")
   ## pkg list and dependency structure
   pkgs_dep <- resolve_dependency_structure(pkgs, repository_url, path_to_pkg_src)
 
   ## install missing packages from standard repositories
-  pkgs_installed <- installed.packages(lib = lib)
+  pkgs_installed <- installed.packages(lib.loc = lib)
   ## Temporarily All packages are installed
   ## install those packages which are only available from R-Forge, the rest
   ## should be installed from CRAN or other repositories
