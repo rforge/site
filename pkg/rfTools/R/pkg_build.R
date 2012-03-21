@@ -614,14 +614,15 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
 ## of ALL packages.
 ## Additionally suggested packages are included, as they are probably needed when
 ## building package vignettes
-resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src){
+resolve_dependency_structure <- function(pkgs, repository_url, path_to_pkg_src, rforge_url = "http://download.r-forge.r-project.org"){
   ## look out for available packages
   avail_repos <- available.packages(contriburl =
                                    contrib.url(repository_url))
-  avail_rforge <- available.packages(contriburl = path_to_pkg_src)
-  avail <- rbind(avail_rforge, avail_repos)
+  avail_rforge <- available.packages(contriburl = contrib.url(rforge_url))
+  avail_batch <- available.packages(contriburl = path_to_pkg_src)
+  avail <- rbind(avail_batch, avail_rforge, avail_repos)
   ## What packages do we need from external repository
-  pkgs <- pkgs[pkgs %in% rownames(avail_rforge)]
+  pkgs <- pkgs[pkgs %in% rownames(avail_batch)]
   pkgs_suggested <- resolve_suggests(pkgs, avail)
   pkgs_suggested <- pkgs_suggested[pkgs_suggested %in% rownames(avail)]
   pkgs_to_resolve_deps <- unique(c(pkgs, pkgs_suggested))
