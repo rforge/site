@@ -128,7 +128,7 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   ## which pkgs pass R CMD check on major platforms
   ## leave out MacOSX for the moment
   ## check os type field
-  os_type <- unlist(lapply(pkg_status$outdated, function(x) x$description["OS_type"]))
+  os_type <- unlist(lapply(pkg_status$outdated[pkgs], function(x) x$description["OS_type"]))
   if( length(os_type) ){
     names(os_type) <- pkgs
     unix <- which(os_type == "unix")
@@ -138,8 +138,14 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
     if(length(windows))
       all_results[windows, c("Linux", "MacOSX")] <- "OK"
   }
-    
-  pkgs_ok <- apply(all_results[, c("Linux", "Windows"), drop = FALSE], 1, function(x){y <- na.omit(x)
+
+  ## FIXME: needs to be made generic
+  na.replace <- function(object, ...){
+    object[is.na(object)] <- FALSE
+    object
+  }
+  
+  pkgs_ok <- apply(all_results[, c("Linux", "Windows"), drop = FALSE], 1, function(x){y <- na.replace(x)
                                                                         if(length(y))
                                                                           all(y %in% c("OK", "WARN"))
                                                                         else
