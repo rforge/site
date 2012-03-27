@@ -169,8 +169,41 @@ rf_prepare_build <- function(rfc, rf_pkg_status){
   tobuild
 }
 
+## (2a) update pkg db for rebuilding packages (mark as 'scheduled for build')
+## rf_prepare_rebuild <- function(rfc, rf_pkg_status, offline_only = FALSE){
+##   ## for rebuild we consider only packages which are marked as 'Current'
+##   current <- names(rf_pkg_status$current)
+##   ## update the CRAN version for those only
+##   if( length(current) ){
+##     updated <- rf_update_cran_info( rfc, rf_pkg_status, current )
+##     if(length(updated)){
+##       writeLines("CRAN version info update for:")
+##       writeLines(paste(updated, collapse = ", "))
+##     }
+##   }
+##   ## rebuild (offline) pkgs which are not scheduled for build or building
+##   build_states <- if(offline_only){ 
+##     c(5)
+##   } else {
+##     c(0, 3, 4)
+##   }
+##   status <- rf_pkg_status$db[current, "status"]
+##   tobuild <- current[status %in% build_states]
+##   ## add brand new packages to DB
+##   ## update existing package rows and change build status in DB
+##   if( length(tobuild) ){
+##     rf_update_outdated_pkg( rfc, rf_pkg_status, tobuild )
+##     writeLines("Packages scheduled for build:")
+##     writeLines(paste(current, collapse = ", "))
+##   }
+##   tobuild
+## }
+
 ## (3) exports package sources and make them available for build
-rf_export_and_build_pkgs <- function(rfc, rf_pkg_status, pkgs){
+rf_export_and_build_pkgs <- function(rfc, rf_pkg_status, pkgs){ #, rebuild = FALSE){
+#  if(rebuild){
+#    rf_pkg_status$outdated <- rf_pkg_status$current[pkgs]
+#  }
   stmp <- .make_new_staging_area( rfc )
   status <- lapply( pkgs, function(pkg){
     desc <- rf_pkg_status$outdated[[pkg]]$description

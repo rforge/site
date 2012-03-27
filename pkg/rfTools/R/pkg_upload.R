@@ -21,8 +21,8 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   check_tgz <- function(btgz){
     ## if given submission is already being processed exit and return NULL
     out <- c( mac = FALSE, win = FALSE )
-    out["mac"] <- file.exists(file.path(stmp, gsub("SRC.", "MAC.", btgz)))
-    out["win"] <- file.exists(file.path(stmp, gsub("SRC.", "WIN.", btgz)))
+    out["mac"] <- file.exists(file.path(stmp, gsub("SRC.", "MAC.", btgz))) && !file.exists( file.path(stmp, sprintf("%s.processing.MAC", btgz)) ) 
+    out["win"] <- file.exists(file.path(stmp, gsub("SRC.", "WIN.", btgz))) && !file.exists( file.path(stmp, sprintf("%s.processing.WIN", btgz)) ) 
     out
     
     ptgz <- paste(btgz, "merging", sep = ".")
