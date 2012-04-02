@@ -150,6 +150,9 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
                                                                           all(y %in% c("OK", "WARN"))
                                                                         else
                                                                           FALSE})
+  ## Check binary release areas
+  .rf_check_package_binary_areas( release_dir )
+  
   ## remove pkgs which fail and flag as failed
   pkgs_fail <- pkgs[ !pkgs_ok ]
   .rf_remove_package_from_release( pkgs_fail, release_dir )
@@ -207,7 +210,25 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
     file.copy( installog, installout )
   invisible( TRUE )
 }
-    
+
+.rf_check_package_binary_areas <- function( release_dir ){
+  area_win <- contrib.url(sprintf("%s", release_dir), type = "win.binary")
+  area_mac <- contrib.url(sprintf("%s", release_dir), type = "mac.binary.leopard")
+
+  if(!file.exists(area_win)){
+    dir.create(area_win)
+    tools::write_PACKAGES( dir = area_win )
+    file.remove( file.path(dirname( area_win ), "latest") )
+    file.symlink( basename(area_win), file.path(dirname( area_win ), "latest")  )
+  }
+  if(!file.exists(area_mac)){
+    dir.create(area_mac)
+    tools::write_PACKAGES( dir = area_mac )
+    file.remove( file.path(dirname( area_mac ), "latest") )
+    file.symlink( basename(area_mac), file.path(dirname( area_mac ), "latest") )
+  }
+}
+
 .rf_remove_package_from_release <- function(pkgs, release_dir){
 
   ## further configuration
