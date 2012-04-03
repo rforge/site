@@ -10,7 +10,8 @@ rf_check_packages <- function( pkg_status,
                                omega_hat_url    = "http://www.omegahat.org/R",
                                global_check_arg = NULL,
                                check_time_limit = 600,
-                               control          = list()
+                               control          = list(),
+                               Ncpus             = 1L
                               ){
   if( !is.rf_build_control(control) )
     stop( "No R-Forge control object given" )
@@ -72,7 +73,7 @@ rf_check_packages <- function( pkg_status,
   ## FIXME: is it sufficient what we are doing here?
   update_package_library(pkgs, URL_pkg_sources,
                          c(cran_url, bioc_url, bioc_experiment, omega_hat_url),
-                         path_to_local_library, platform)
+                         path_to_local_library, platform, Ncpus)
 
   ## LAST PREPARATION BEFORE CHECKING - DIRECTORIES
 
@@ -119,47 +120,57 @@ rf_check_packages <- function( pkg_status,
     check_too_long <- get_packages_exceeding_check_time_limit( old_timings_file,
                                                                check_time_limit)
   }
-  ## obviously we want to collect new timings for each pkg checked
-  timings <- numeric( length(pkgs) )
-  names( timings ) <- pkgs
 
   ## And now the testing ... (only R-Forge pkg tarballs!)
-  for(pkg in pkgs){
-    ## Prolog
-    pkg_checklog <- paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
+  check_pkg <- function(pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources){
+      ## Prolog
+      pkg_checklog <- paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
                           architecture, "-checklog.txt", sep="")
-    write_prolog(pkg, pkg_checklog, pkg_status, type = "check",
+      write_prolog(pkg, pkg_checklog, pkg_status, type = "check",
                  what = "tarball", std.out = TRUE)
 
-    ## additional arguments to R CMD check (--no-vignettes, --no-tests, etc.)
-    check_arg <- get_check_args(pkg, check_args)
-    ## FIXME: global check args
-    ##        there should be a default check args for new packages
-    ##        should be checked only if the admins allow it
-    if( (!is.null(global_check_arg)) && (length(check_arg) == 0) )
-      check_arg <- global_check_arg
-    if( length(check_arg) )
-      cat( sprintf("Additional arguments to R CMD check: %s\n", check_arg),
+      ## additional arguments to R CMD check (--no-vignettes, --no-tests, etc.)
+      check_arg <- rfTools:::get_check_args(pkg, check_args)
+      ## FIXME: global check args
+      ##        there should be a default check args for new packages
+      ##        should be checked only if the admins allow it
+      if( (!is.null(global_check_arg)) && (length(check_arg) == 0) )
+          check_arg <- global_check_arg
+      if( length(check_arg) )
+          cat( sprintf("Additional arguments to R CMD check: %s\n", check_arg),
            file = pkg_checklog, append = TRUE )
-    else if( pkg %in% check_too_long ){
-      ## no run time checks if package check takes too long
-      check_arg <- "--no-examples --no-tests --no-vignettes"
-      cat( sprintf("Additional arguments to R CMD check: %s (reason: run time too long)\n", check_arg), file = pkg_checklog, append = TRUE )
-    }
-    toreplace <- ifelse( platform == "Windows", "file:///", "file://" )
-    pkg_url <- file.path( gsub(toreplace, "", URL_pkg_sources),
+      else if( pkg %in% check_too_long ){
+          ## no run time checks if package check takes too long
+          check_arg <- "--no-examples --no-tests --no-vignettes"
+          cat( sprintf("Additional arguments to R CMD check: %s (reason: run time too long)\n", check_arg), file = pkg_checklog, append = TRUE )
+      }
+      toreplace <- ifelse( platform == "Windows", "file:///", "file://" )
+      pkg_url <- file.path( gsub(toreplace, "", URL_pkg_sources),
                          sprintf("%s_%s.tar.gz", pkg,
                                  pkg_status$outdated[[pkg]]$description["Version"]) )
-    ## NOTE: On Windows we should use shell() instead of system()
-    ##       otherwise pipes and redirections fail (see also ?system)
-    timings[pkg] <- ifelse( platform == "Windows",
+      ## NOTE: On Windows we should use shell() or system2() instead of system()
+      ##       otherwise pipes and redirections fail (see also ?system)
+      timing <- ifelse( platform == "Windows",
       system.time(system2(R, args = paste("CMD check --as-cran", check_arg, pkg_url), stdout = pkg_checklog, stderr = pkg_checklog))["elapsed"],
                   system.time(system(paste(R, "CMD check --as-cran", check_arg, pkg_url,
                                            ">>", pkg_checklog, "2>&1"))
                               )["elapsed"] )
-    ## Epilog
-    write_epilog(pkg_checklog, timings[pkg], std.out = TRUE)
+      ## Epilog
+      write_epilog(pkg_checklog, timing, std.out = TRUE)
+      timing
   }
+  if(Ncpus > 1L){
+        timings <- parallel::mclapply(pkgs, FUN = check_pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources, mc.cores = Ncpus)
+        timings <- structure( unlist(timings), names = pkgs )
+    } else {
+        ## Initialize timings
+        timings <- numeric(length(pkgs))
+        names(timings) <- pkgs
+
+        for(pkg in pkgs)
+            timings[pkg] <- check_pkg(pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources)
+    }
+
   ## better implementation necessary:
   pkgs_checked <- " "
 

@@ -280,33 +280,43 @@ rf_build_packages <- function(pkg_status,
     ## We need a virtual framebuffer
     pid <- start_virtual_X11_fb()
 
-    ## Initialize timings
-    timings <- numeric(length(pkgs))
-    names(timings) <- pkgs
+    no_build_vignettes <- c(no_vignettes, no_install, fake_install)
 
-    ## Building ...
-    for(pkg in pkgs){
-      ## Prolog
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform,
-                                   architecture = "all")
-      write_prolog(pkg, pkg_buildlog, pkg_status, type = "build",
-                   what = "tarball", std.out = TRUE)
+    build_src <- function(pkg, architecture, avail_src_pkgs, no_build_vignettes, path_to_pkg_log, pkg_status, platform, R){
+        ## Prolog
+        pkg_buildlog <- rfTools:::get_buildlog(path_to_pkg_log, pkg, platform, architecture = "all")
+        rfTools:::write_prolog(pkg, pkg_buildlog, pkg_status,
+                    type = "build", what = "tarball", std.out = TRUE)
 
-      ## timer start
-      proc_start <- proc.time()
+        build_args <- if( pkg %in% no_build_vignettes)
+            "--no-vignettes"
+        else
+            ""
 
-      build_args <- if( pkg %in% c(no_vignettes, no_install, fake_install) )
-        "--no-vignettes"
-      else
-        ""
-      ## build tarball from sources
-      .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
+        ## build tarball from sources
+        .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
 
-      ## save timing
-      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
+        ## timer start
+        proc_start <- proc.time()
 
-      ## Epilog
-      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
+        ## now build the package from package tarball
+
+        ## Epilog and timings
+        timing <- c(proc.time() - proc_start)["elapsed"]
+
+        write_epilog(pkg_buildlog, timing, std.out = TRUE)
+        timing
+    }
+    if(Ncpus > 1L){
+        timings <- parallel::mclapply(pkgs, FUN = build_src, architecture, avail_src_pkgs,  no_build_vignettes, path_to_pkg_log, pkg_status, platform, R, mc.cores = Ncpus)
+        timings <- structure( unlist(timings), names = pkgs )
+    } else {
+        ## Initialize timings
+        timings <- numeric(length(pkgs))
+        names(timings) <- pkgs
+
+        for(pkg in pkgs)
+            timings[pkg] <- build_src(pkg, architecture, avail_src_pkgs, no_build_vignettes, path_to_pkg_log, pkg_status, platform, R)
     }
 
     ## Cleanup
@@ -356,37 +366,39 @@ rf_build_packages <- function(pkg_status,
     ## We need a virtual framebuffer
     pid <- start_virtual_X11_fb()
 
-    ## Initialize timings
-    timings <- numeric(length(pkgs))
-    names(timings) <- pkgs
-
     ## BUILDING FROM PKG TARBALLS
-    for(pkg in pkgs){
-      ## Prolog
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      write_prolog(pkg, pkg_buildlog, pkg_status,
-                   type = "build", what = "binary", std.out = TRUE)
+    build_bin_mac <- function(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R){
+        ## Prolog
+        pkg_buildlog <- rfTools:::get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+        rfTools:::write_prolog(pkg, pkg_buildlog, pkg_status,
+                    type = "build", what = "binary", std.out = TRUE)
 
-      ## timer start
-      proc_start <- proc.time()
-      ## path to pkg buildlog
+        ## timer start
+        proc_start <- proc.time()
 
-      ## get current package version (tarball, thus svn in pkg!)
-      pkg_version_src   <- avail_src_pkgs[pkg, "Version"]
+        ## now build the package from package tarball
+        rfTools:::.build_binary_from_tarball_mac( pkg,
+                                                  avail_src_pkgs[pkg, "Version"],
+                                                  path_to_pkg_root,
+                                                  R,
+                                                  pkg_buildlog )
 
-      ## now build the package from package tarball
-      .build_binary_from_tarball_mac( pkg,
-                                      pkg_version_src,
-                                      path_to_pkg_root,
-                                      R,
-                                      pkg_buildlog )
+        ## Epilog and timings
+        timing <- c(proc.time() - proc_start)["elapsed"]
+        write_epilog(pkg_buildlog, timing, std.out = TRUE)
+        timing
+    }
+    if(Ncpus > 1L){
+        timings <- parallel::mclapply(pkgs, FUN = build_bin_mac, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, mc.cores = Ncpus)
+        timings <- structure( unlist(timings), names = pkgs )
+    } else {
+        ## Initialize timings
+        timings <- numeric(length(pkgs))
+        names(timings) <- pkgs
 
-      ## save timing
-      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
-
-      ## Epilog
-      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
-    } #</FOR>
+        for(pkg in pkgs)
+            timings[pkg] <- build_bin_mac(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R)
+    }
 
     ## Cleanup: close framebuffer
     close_virtual_X11_fb(pid)
@@ -599,7 +611,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## FIXME: hard coded R-Forge tar.gz source dir
   if(length(pkgs_to_install_rforge)){
     writeLines("Install missing packages from R-Forge ...")
-    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = contrib.url("http://R-Forge.R-project.org", type = "source"), type = "source")
+    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = contrib.url("http://R-Forge.R-project.org", type = "source"), type = "source", ...)
     writeLines("Done.")
   }
   if((platform == "Linux") | (platform == "MacOSX")){
