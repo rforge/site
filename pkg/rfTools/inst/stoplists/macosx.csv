@@ -1,0 +1,45 @@
+Package,check_args
+ade4,--no-examples --no-tests --no-vignettes
+analogue,--no-examples --no-tests --no-vignettes
+animation,--no-examples --no-tests --no-vignettes
+BB,--no-examples --no-tests --no-vignettes
+BiplotGUI,--install=fake
+BTSPAS,--install=no
+brew,--no-examples --no-tests --no-vignettes
+caret,--no-vignettes
+caretLSF,--install=fake
+caretNWS,--no-examples --no-tests --no-vignettes
+CHAID,--no-examples --no-tests --no-vignettes
+CoxFlexBoost,--no-examples --no-tests --no-vignettes
+dismo,--no-vignettes
+EcoHydRology,--install=no
+fda,--no-examples --no-tests --no-vignettes
+GenABEL,--no-examples --no-tests --no-vignettes
+glmmBUGS,--install=no
+graphicsQC,--no-examples --no-tests --no-vignettes
+intervals,--no-vignettes
+IsoGene,--no-examples --no-tests --no-vignettes
+LeerFotos,--no-examples --no-tests --no-vignettes
+mboost,--no-examples --no-tests --no-vignettes
+NeuroSpatCo,--no-examples --no-tests --no-vignettes
+RBloomberg,--install=no
+Rcplex,--install=fake
+Rlsf,--install=fake
+Rmosek,--no-install
+RobRex,--no-examples --no-tests --no-vignettes
+RQuantLib,--install=fake
+Rsymphony,--no-examples --no-tests --no-vignettes
+rugarch,--no-vignettes
+RWinEdt,--install=fake
+sedarVegan,--no-examples --no-tests --no-vignettes
+splits,--no-examples --no-tests --no-vignettes
+STAR,--no-examples --no-tests --no-vignettes
+stpp,--no-examples --no-tests --no-vignettes
+surveillance,--no-examples --no-tests --no-vignettes
+tikzDevice,--no-vignettes
+TIMP,--no-examples --no-tests --no-vignettes
+TSfame,--no-vignettes
+TSMySQL,--no-vignettes
+TSodbc,--no-vignettes
+TSPostgreSQL,--no-vignettes
+TSSQLite,--no-vignettes

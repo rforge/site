@@ -2,7 +2,7 @@
 ## R-Forge package building
 ## just calls R and the R-Forge infrastructure package which includes
 ## all the necessary functions
-## theussl 2009-01
+## theussl 2012-04
 ##
 
 ## Environment variables indicating availability of services
@@ -13,6 +13,7 @@ export _R_CHECK_HAVE_MYSQL_=FALSE
 export _R_CHECK_HAVE_PADI_=FALSE
 export _R_CHECK_HAVE_POSTGRES_=FALSE
 export _R_CHECK_HAVE_SQLLITE_=FALSE
+
 ## as some packages open a lot of browser and ghostview windows'
 export R_BROWSER=FALSE
 export R_PDFVIEWER=FALSE
@@ -40,13 +41,27 @@ ulimit -t $cpu_time_limit
 
 ## Where is the package library?
 export R_LIBS="/Users/rforge/lib/R"
+
+## Language set to UTF-8
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+## some third party software
+export PATH=/Library/Frameworks/PROJ.framework/unix/bin:/Library/Frameworks/GDAL.framework/unix/bin:$PATH
+
+## tex distribution
+export PATH=/usr/texbin:$PATH
+export TEXMFLOCAL="/Users/rforge/lib/texmf"
+
 ## On MacOSX gfortran is an external package, where are the links to it
 export PATH=/usr/local/bin:$PATH
+
 ## on Leopard we have to export X11 bin directory
-export PATH=/usr/X11/bin:$PATH
+export PATH=/usr/X11/bin:/usr/X11R6/bin:$PATH
 
 ## Base R-Forge directory
 R_dir=/srv/R
+
 ## R build flavor
 R_flavor="R-$1"
 
@@ -87,7 +102,7 @@ date=`date +%y-%m-%d`
 BUILD=`find ${R_dir}/${R_MAC_OS_flavor}/${R_flavor} -mindepth 1 -maxdepth 1 | grep ./build. | sort | tail -n1`
 echo "trying to use $R_flavor in $BUILD" 
 
-R_FALLBACK=${R_VERSIONS_DIR}/2.14
+R_FALLBACK=${R_VERSIONS_DIR}/2.15
 
 R_installation_dir=${BUILD}
 
@@ -102,7 +117,7 @@ fi
 ## points always to Current in Versions
 R_bin="/Library/Frameworks/R.framework/Resources/bin/R"
 
-${R_bin} --vanilla --slave $R_exec_args < ~/bin/rf_build_packages
+${R_bin} --vanilla --slave $R_exec_args < $R_LIBS/rfTools/exec/rf_build_packages_mac >> /Users/rforge/rf_build_packages.log 2>&1
 
 (cd $R_VERSIONS_DIR && rm -f Current && ln -s ${R_FALLBACK} Current)
 echo "All builds generated. Setting 'Current' back to  ${R_FALLBACK}."

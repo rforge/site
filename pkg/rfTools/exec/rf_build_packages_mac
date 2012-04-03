@@ -2,7 +2,18 @@
 ## R-Forge build system tool chain
 ## update and print package status
 
-require( "rfTools", lib = "/home/rforge/lib/R/" )
+## from CRAN-package-list:
+
+## We really want to run in a UTF-8 locale ...
+lc_ctype <- Sys.setlocale("LC_CTYPE", "en_US.UTF-8")
+## We used to do:
+## But sort in the C locale.
+##   lc_collate <- Sys.setlocale("LC_COLLATE", "C")
+## But as package names must be unique *ignoring* case, it seems more
+## appropriate to also sort ignoring case.  Hence:
+lc_collate <- Sys.setlocale("LC_COLLATE", "en_US.UTF-8")
+
+require( "rfTools", lib = "/Users/rforge/lib/R/" )
 
 ################################################################################
 ## configuration:
@@ -43,7 +54,7 @@ control <- rf_build_control(path_to_pkg_src  = file.path(build_root, src_dir),  
                             path_to_check_dir = file.path(build_root, src_dir, "RF_PKG_CHECK"), ## path to check dir
                             stoplist = "/srv/R/lib/check_R_stoplist",      ## path to stoplist
                             cpu_time_limit = 600,                          ## CPU time limit
-                            mail_domain_name_of_sender = system("hostname", intern = TRUE), ## "xmorthanc.wu.ac.at" 
+                            mail_domain_name_of_sender = system("hostname", intern = TRUE), ## "xmorthanc.wu.ac.at"
                             mail_relay_server = "",                        ## only necessary with sendEmail
                             mail_programme = "mail")                       ## on Windows: sendEmail
 
@@ -54,7 +65,8 @@ rf_build_packages( rf_pkg_status,
                    bioc_url        = "http://bioconductor.statistik.tu-dortmund.de/packages/2.9/bioc",
                    bioc_data       = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/annotation",
                    bioc_experiment = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/experiment",
-                   control         = control )
+                   control         = control,
+                   Ncpus = 2L )
 
 rf_check_packages( rf_pkg_status,
                    platform        = "MacOSX",
@@ -62,12 +74,13 @@ rf_check_packages( rf_pkg_status,
                    bioc_url        = "http://bioconductor.statistik.tu-dortmund.de/packages/2.9/bioc",
                    bioc_data       = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/annotation",
                    bioc_experiment = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/experiment",
-                   control         = control )
+                   control         = control,
+		   global_check_arg = "--no-examples --no-tests --no-vignettes" )
 
 TAR <- Sys.getenv("TAR")
 WINDOWS <- .Platform$OS.type == "windows"
 if (!nzchar(TAR)) {
-  TAR <- if (WINDOWS) 
+  TAR <- if (WINDOWS)
     "tar --force-local"
   else "internal"
 }
@@ -76,6 +89,9 @@ files <- file.path(src_dir, c("RF_LOGS", "RF_PKG_CHECK", "RF_PKG_ROOT"))
 res <- utils::tar( file.path(stmp, paste("MAC", src_dir, "tar.gz", sep = ".")),
                   src_dir, compression = "gzip", compression_level = 9, tar = TAR,
                   extra_flags = sprintf("-C %s", build_root) )
+
+if( res )
+    stop("ERROR tarring build directory")
 
 ## cleanup build dir
 unlink( file.path(build_root, src_dir), recursive = TRUE )
