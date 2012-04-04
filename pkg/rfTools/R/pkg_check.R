@@ -69,12 +69,22 @@ rf_check_packages <- function( pkg_status,
   pkgs <- available.packages(contriburl = URL_pkg_sources)[, 1]
 
   ## PACKAGE DB UPDATE ##
+  ## only for R-devel
 
-  ## FIXME: is it sufficient what we are doing here?
-  update_package_library(pkgs, URL_pkg_sources,
-                         c(cran_url, bioc_url, bioc_experiment, omega_hat_url),
-                         path_to_local_library, platform, Ncpus)
-
+  if(length(grep("Under Development)", R.version$version.string, value = TRUE))){
+    ## FIXME: is it sufficient what we are doing here?
+    other_repositories <- NULL
+    
+    if(platform == "Windows"){
+      ## include Brian Ripley's Windows Repository
+      other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
+    }
+    
+    update_package_library(pkgs, URL_pkg_sources,
+                           c(cran_url, c(bioc_url, bioc_data, bioc_experiment),
+                             omega_hat_url, other_repositories),
+                           path_to_local_library, platform, Ncpus = Ncpus)
+  }
   ## LAST PREPARATION BEFORE CHECKING - DIRECTORIES
 
   ## prepare check results directories PKGS, save old check results in PKGS_pre
