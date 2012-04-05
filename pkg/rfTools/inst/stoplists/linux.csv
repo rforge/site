@@ -1,0 +1,36 @@
+Package,check_args
+ade4,--no-examples --no-tests --no-vignettes
+analogue,--no-examples --no-tests --no-vignettes
+animation,--no-examples --no-tests --no-vignettes
+brew,--no-examples --no-tests --no-vignettes
+caret,--no-vignettes
+caretLSF,--install=fake
+caretNWS,--no-examples --no-tests --no-vignettes
+dismo,--no-vignettes
+doSMP,--no-vignettes
+EcoHydRology,--install=no
+fda,--no-examples --no-tests --no-vignettes
+GenABEL,--no-examples --no-tests --no-vignettes
+glmmBUGS,--install=no
+graphicsQC,--no-examples --no-tests --no-vignettes
+intervals,--no-vignettes
+IsoGene,--no-examples --no-tests --no-vignettes
+LeerFotos,--no-examples --no-tests --no-vignettes
+mboost,--no-examples --no-tests --no-vignettes
+NeuroSpatCo,--no-examples --no-tests --no-vignettes
+RBloomberg,--install=no
+Rcplex,--install=fake
+Rmosek,--no-install
+RobRex,--no-examples --no-tests --no-vignettes
+RWinEdt,--install=fake
+sedarVegan,--no-examples --no-tests --no-vignettes
+splits,--no-examples --no-tests --no-vignettes
+STAR,--no-examples --no-tests --no-vignettes
+stpp,--no-examples --no-tests --no-vignettes
+surveillance,--no-examples --no-tests --no-vignettes
+tikzDevice,--no-vignettes
+TSfame,--no-vignettes
+TSMySQL,--no-vignettes
+TSodbc,--no-vignettes
+TSPostgreSQL,--no-vignettes
+TSSQLite,--no-vignettes

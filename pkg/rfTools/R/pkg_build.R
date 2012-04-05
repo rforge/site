@@ -293,13 +293,11 @@ rf_build_packages <- function(pkg_status,
         else
             ""
 
-        ## build tarball from sources
-        .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
-
         ## timer start
         proc_start <- proc.time()
 
-        ## now build the package from package tarball
+        ## build tarball from sources
+        .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
 
         ## Epilog and timings
         timing <- c(proc.time() - proc_start)["elapsed"]
