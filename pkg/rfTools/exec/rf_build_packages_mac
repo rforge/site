@@ -75,7 +75,8 @@ rf_check_packages( rf_pkg_status,
                    bioc_data       = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/annotation",
                    bioc_experiment = "http://bioconductor.statistik.tu-dortmund.de/packages/2.10/data/experiment",
                    control         = control,
-		   global_check_arg = "--no-examples --no-tests --no-vignettes" )
+		   global_check_arg = "--no-examples --no-tests --no-vignettes",
+                   Ncpus = 2L )
 
 TAR <- Sys.getenv("TAR")
 WINDOWS <- .Platform$OS.type == "windows"
