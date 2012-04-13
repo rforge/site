@@ -7,7 +7,7 @@ caret,--no-vignettes
 caretLSF,--install=fake
 caretNWS,--no-examples --no-tests --no-vignettes
 dismo,--no-vignettes
-doSMP,--no-vignettes
+doSMP,--no-examples --no-tests --no-vignettes
 EcoHydRology,--install=no
 fda,--no-examples --no-tests --no-vignettes
 GenABEL,--no-examples --no-tests --no-vignettes
