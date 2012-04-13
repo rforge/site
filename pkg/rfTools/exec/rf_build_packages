@@ -9,7 +9,7 @@ require( "rfTools", lib = "/home/rforge/lib/R/" )
 
 ## local library path (this is where the packages (and dependencies get installed to)
 maj.version <- paste(R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
-local_lib <- file.path(Sys.getenv("R_LIBS"), maj.version)
+local_lib <- file.path("/home/rforge/lib/R", maj.version)
 ## we have to set 'R_LIBS' again otherwise package dependencies are not found
 Sys.setenv("R_LIBS" = local_lib)
 
@@ -41,7 +41,7 @@ control <- rf_build_control(path_to_pkg_src  = file.path(build_root, src_dir),  
                             path_to_local_texmf = "/usr/local/share/texmf",## path to local texmf
                             path_to_local_library = local_lib,             ## path to local pkg library
                             path_to_check_dir = file.path(build_root, src_dir, "RF_PKG_CHECK"), ## path to check dir
-                            stoplist = "/srv/R/lib/check_R_stoplist",      ## path to stoplist
+                            stoplist = file.path(system.file("stoplists", package = "rfTools"), "linux.csv"),      ## path to stoplist
                             cpu_time_limit = 600,                          ## CPU time limit
                             mail_domain_name_of_sender = system("hostname -f", intern = TRUE), ## "xmorthanc.wu.ac.at" 
                             mail_relay_server = "",                        ## only necessary with sendEmail
@@ -54,7 +54,8 @@ rf_build_packages( rf_pkg_status,
                    bioc_url        = "file:///srv/R/Repositories/Bioconductor/release/bioc/",
                    bioc_data       = "file:///srv/R/Repositories/Bioconductor/release/data/annotation",
                    bioc_experiment = "file:///srv/R/Repositories/Bioconductor/release/data/experiment",
-                   control         = control )
+                   control         = control,
+                   Ncpus = 4L)
 
 ## check packages
 rf_check_packages( rf_pkg_status,
@@ -63,7 +64,8 @@ rf_check_packages( rf_pkg_status,
                    bioc_url        = "file:///srv/R/Repositories/Bioconductor/release/bioc/",
                    bioc_data       = "file:///srv/R/Repositories/Bioconductor/release/data/annotation",
                    bioc_experiment = "file:///srv/R/Repositories/Bioconductor/release/data/experiment",
-                   control         = control )
+                   control         = control,
+                   Ncpus           = 4L)
 
 TAR <- Sys.getenv("TAR")
 WINDOWS <- .Platform$OS.type == "windows"
