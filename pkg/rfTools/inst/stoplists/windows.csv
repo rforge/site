@@ -1,0 +1,39 @@
+Package,check_args
+ade4,--no-examples --no-tests --no-vignettes
+analogue,--no-examples --no-tests --no-vignettes
+BB,--no-examples --no-tests --no-vignettes
+benchmark,--install=no
+bit,--no-examples --no-tests --no-vignettes
+brew,--no-examples --no-tests --no-vignettes
+corrplot,--install=no
+earthmovdist,--no-examples --no-tests --no-vignettes
+fCopulae,--no-tests
+graphicsQC,--no-vignettes
+homals,--no-examples --no-tests --no-vignettes
+IsoGeneGUI,--no-examples --no-tests --no-vignettes
+LeerFotos,--no-examples --no-tests --no-vignettes
+MethComp,--no-examples --no-tests --no-vignettes
+mboost,--no-examples --no-tests --no-vignettes
+pedigreemm,--no-examples --no-tests --no-vignettes
+phylobase,--no-tests --no-vignettes
+Rbooks,--no-examples --no-tests --no-vignettes
+Rcplex,--install=fake
+RcppBDT,--install=no
+RcppModels,--install=no
+RemoteREngine.test,--install=no
+rgl,--no-examples --no-tests --no-vignettes
+RJEMM,--install=no
+RQDA,--install=no
+RQuantLib,--install=fake
+Rmosek,--install=no
+RSienaTest,--install=no
+SCiAn,--no-examples --no-tests --no-vignettes
+sedarVegan,--no-examples --no-tests --no-vignettes
+seriation,--no-examples --no-tests --no-vignettes
+stacomirtools,--install=no
+STAR,--install=no
+surveillance,--no-examples --no-tests --no-vignettes
+tikzDevice,--no-vignettes
+yags,--no-examples --no-tests --no-vignettes
+
+

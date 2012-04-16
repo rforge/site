@@ -74,12 +74,12 @@ rf_check_packages <- function( pkg_status,
   if(length(grep("Under Development)", R.version$version.string, value = TRUE))){
     ## FIXME: is it sufficient what we are doing here?
     other_repositories <- NULL
-    
+
     if(platform == "Windows"){
       ## include Brian Ripley's Windows Repository
       other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
     }
-    
+
     update_package_library(pkgs, URL_pkg_sources,
                            c(cran_url, c(bioc_url, bioc_data, bioc_experiment),
                              omega_hat_url, other_repositories),
@@ -136,7 +136,7 @@ rf_check_packages <- function( pkg_status,
       ## Prolog
       pkg_checklog <- paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
                           architecture, "-checklog.txt", sep="")
-      write_prolog(pkg, pkg_checklog, pkg_status, type = "check",
+      rfTools:::write_prolog(pkg, pkg_checklog, pkg_status, type = "check",
                  what = "tarball", std.out = TRUE)
 
       ## additional arguments to R CMD check (--no-vignettes, --no-tests, etc.)
@@ -166,12 +166,19 @@ rf_check_packages <- function( pkg_status,
                                            ">>", pkg_checklog, "2>&1"))
                               )["elapsed"] )
       ## Epilog
-      write_epilog(pkg_checklog, timing, std.out = TRUE)
+      rfTools:::write_epilog(pkg_checklog, timing, std.out = TRUE)
       timing
   }
   if(Ncpus > 1L){
-        timings <- parallel::mclapply(pkgs, FUN = check_pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources, mc.cores = Ncpus)
-        timings <- structure( unlist(timings), names = pkgs )
+      if( platform %in% c("Linux", "MacOSX") ){
+          timings <- parallel::mclapply(pkgs, FUN = check_pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources, mc.cores = Ncpus)
+          timings <- structure( unlist(timings), names = pkgs )
+      } else{
+          cl <- parallel::makeCluster( Ncpus )
+          timings <- parallel::parLapply(cl, X = pkgs, fun = check_pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources)
+          parallel::stopCluster(cl)
+          timings <- structure( unlist(timings), names = pkgs )
+      }
     } else {
         ## Initialize timings
         timings <- numeric(length(pkgs))
