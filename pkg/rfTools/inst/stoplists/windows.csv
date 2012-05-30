@@ -26,7 +26,6 @@ RJEMM,--install=no
 RQDA,--install=no
 RQuantLib,--install=fake
 Rmosek,--install=no
-RSienaTest,--install=no
 SCiAn,--no-examples --no-tests --no-vignettes
 sedarVegan,--no-examples --no-tests --no-vignettes
 seriation,--no-examples --no-tests --no-vignettes

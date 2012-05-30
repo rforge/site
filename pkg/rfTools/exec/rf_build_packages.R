@@ -3,14 +3,18 @@
 ## This script loads the R-Forge infrastructure package which includes
 ## all binary-building code
 ## In previous versions this file was called 'rforge_build_packages.R'
-## Licence GPL-3
+## Licence GPL-2
 ## Author: Stefan Theussl
-## Last Change: 2012-02-09
+## Last Change: 2012-05-30
 
 require( "rfTools", lib = "R:/lib/local" )
 ## local library path (this is where the packages get installed to)
 maj.version <- paste(R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep=".")
 local_lib <- file.path(Sys.getenv("R_LIBS"), maj.version)
+
+## environment variables from Kurt's check script
+Sys.setenv(R_BROWSER="false")
+Sys.setenv(R_PDFVIEWER="false")
 
 ## make bioc URLs
 R_flavor <- switch( R.version$status,
@@ -57,7 +61,7 @@ control <- rf_build_control(path_to_pkg_src  = file.path(build_root, src_dir),  
                             path_to_local_texmf = "",                      ## path to local texmf
                             path_to_local_library = local_lib,             ## path to local pkg library
                             path_to_check_dir = file.path(build_root, src_dir, "RF_PKG_CHECK"), ## path to check dir
-                            stoplist = "R:/lib/scripts/check_R_stoplist.txt",      ## path to stoplist
+                            stoplist = file.path(system.file("stoplists", package = "rfTools"), "windows.csv"),      ## path to stoplist
                             cpu_time_limit = 600,                          ## CPU time limit
                             mail_domain_name_of_sender = "stefan7th@r-forge.wu.ac.at", ## "xmorthanc.wu.ac.at"
                             mail_relay_server = "r-forge.wu.ac.at",                    ## only necessary with sendEmail
