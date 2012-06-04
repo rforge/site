@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/env /srv/R/bin/Rscript-patched
 ## R-Forge build system tool chain
 ## update and print package status
 

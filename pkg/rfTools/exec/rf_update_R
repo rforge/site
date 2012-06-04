@@ -1,0 +1,141 @@
+#!/bin/sh
+## a script for building various versions of R
+## based on kurt hornik's check-R
+## theussl 2012-06
+##
+ 
+## set debugging
+debug=1
+
+## R-flavors to build
+R_flavors='R-devel R-patched R-release'
+
+## local R directory
+R_dir=/srv/R
+
+## local CRAN mirror
+CRAN_rsync=${R_dir}/Repositories/CRAN
+
+## CRAN's src/contrib directory
+CRAN_dir=${CRAN_rsync}/src/contrib
+
+## Additional command line arguments to configure.
+configure_args="--with-blas=no --enable-R-shlib LIBnn=lib"
+
+## Set permissions right
+umask 022
+
+do_cleanup_and_exit () {
+  exit ${1-0}
+}
+
+build_R () {
+    ## delete old src dir
+    rm -rf src.save
+    ## Link recommended packages.
+    (cd src; \
+	CRAN_RSYNC="${CRAN_rsync}" ./tools/rsync-recommended)
+
+    ## Rebuild R.
+    date=`date +%y-%m-%d`
+    BUILD=build.$date
+    rm -rf $BUILD
+    ## we want only the latest release version
+    if [ $R_flavor == "R-release" ] ; then
+	rm -rf build*
+    fi
+    ## keep the 6 latest versions of devel
+    if [ $R_flavor == "R-devel" ]; then
+	count=`find .  -mindepth 1 -maxdepth 1 | grep ./build. | wc -l`
+	if [ $count > 4 ] ; then 
+	    let diff=${count}-4
+	    rm_dirs=`find .  -mindepth 1 -maxdepth 1 | grep ./build. | sort | head -n$diff`
+	    rm -rf $rm_dirs
+	fi
+    fi
+    ## keep the 3 latest versions of patched
+    if [ $R_flavor == "R-patched" ]; then
+	count=`find .  -mindepth 1 -maxdepth 1 | grep ./build. | wc -l`
+	if [ $count > 3 ] ; then 
+	    let diff=${count}-3
+	    rm_dirs=`find .  -mindepth 1 -maxdepth 1 | grep ./build. | sort | head -n$diff`
+	    rm -rf $rm_dirs
+	fi
+    fi
+    
+    mkdir $BUILD
+    (cd $BUILD && ../src/configure ${configure_args} ${compilers} \
+	&& make && make check && rm -f $R_dir/bin/$R_flavor && ln -s \
+	$R_dir/$R_flavor/$BUILD/bin/R $R_dir/bin/$R_flavor) || do_cleanup_and_exit 1
+    mkdir $BUILD/Packages
+}
+
+#(
+
+if [ ${debug} == 1 ] ; then
+echo "Start building R"
+date
+echo "--------------------------------------"
+fi
+
+## change to build dir
+test -d ${R_dir} || mkdir ${R_dir} || do_cleanup_and_exit 1
+
+
+for R_flavor in ${R_flavors}; do
+    if [ ${debug} == 1 ] ; then echo "$R_flavor ..." ; fi
+    cd ${R_dir}
+    test -d ${R_flavor} || mkdir ${R_flavor} || do_cleanup_and_exit 1
+    cd ${R_flavor}
+    test -d src || mkdir src || do_cleanup_and_exit 1
+    case "${R_flavor}" in
+	R-devel)
+	    url=ftp://ftp.stat.math.ethz.ch/Software/R/R-devel.tar.gz ;;
+	R-patched)
+      ## <NOTE>
+      ## Adjust as needed ...
+	    url=ftp://ftp.stat.math.ethz.ch/Software/R/R-patched.tar.gz
+      ## url=http://cran.at.r-project.org/src/base-prerelease/R-latest.tar.gz
+      ## </NOTE>
+	    ;;
+	R-release)
+	    url=http://cran.r-project.org/src/base/R-latest.tar.gz ;;
+    esac
+    mv src src.save
+    (mkdir tmp &&
+	cd tmp &&
+	touch stamp &&
+	wget -O - --retr-symlinks ${url} | tar zxmf - &&
+	entry=`find . -newer stamp -type d -mindepth 1 -maxdepth 1` &&
+	mv ${entry} ../src &&
+	cd .. &&
+	rm -rf tmp) || (rm -rf tmp; mv src.save src;
+	continue )
+    if [ -s src.save/SVN-REVISION ]; then
+	revision_new=`tail -n1 src/SVN-REVISION | cut -f2 -d ":"`
+	revision_old=`tail -n1 src.save/SVN-REVISION | cut -f2 -d ":"`
+	if [ ${debug} == 1 ] ; then echo "new: ${revision_new} old: ${revision_old}" ; fi
+	if [ ${revision_new} == ${revision_old} ] ; then
+	    rm -rf src
+	    mv src.save src
+	else
+	    build_R
+	fi
+    else
+        build_R
+    fi
+               
+    if [ ${debug} == 1 ] ; then  
+	echo "Building of $R_flavor finished"
+	date
+	echo .
+    fi
+
+done
+#) 
+
+if [ ${debug} == 1 ] ; then
+    echo "Updating R successfully finished"
+fi
+
+exit 0
