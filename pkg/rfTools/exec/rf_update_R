@@ -64,9 +64,11 @@ build_R () {
     fi
     
     mkdir $BUILD
+    FSHORT=`echo $R_flavor | cut -f2 -d"-"`
     (cd $BUILD && ../src/configure ${configure_args} ${compilers} \
 	&& make && make check && rm -f $R_dir/bin/$R_flavor && ln -s \
-	$R_dir/$R_flavor/$BUILD/bin/R $R_dir/bin/$R_flavor) || do_cleanup_and_exit 1
+	$R_dir/$R_flavor/$BUILD/bin/R $R_dir/bin/$R_flavor && rm -f $R_dir/bin/Rscript-$FSHORT && ln -s \
+	$R_dir/$R_flavor/$BUILD/bin/Rscript  $R_dir/bin/Rscript-$FSHORT) || do_cleanup_and_exit 1
     mkdir $BUILD/Packages
 }
 
