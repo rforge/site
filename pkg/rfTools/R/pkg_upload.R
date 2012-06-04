@@ -215,6 +215,7 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   area_win <- contrib.url(sprintf("%s", release_dir), type = "win.binary")
   area_mac <- contrib.url(sprintf("%s", release_dir), type = "mac.binary.leopard")
 
+  ## FIXME: we need to check symlink "latest" as well, must point to the latest minor release
   if(!file.exists(area_win)){
     dir.create(area_win)
     tools::write_PACKAGES( dir = area_win )

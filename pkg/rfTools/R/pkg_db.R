@@ -255,6 +255,19 @@ rf_update_outdated_pkg <- function( rfc, rf_pkg_status, pkgs){
   rfc <- rf_disconnect( rfc )
 }
 
+rf_remove_obsolete_pkg <- function( rfc, rf_pkg_status ){
+  obsolete <- rf_pkg_status$obsolete  
+  stopifnot( is.character(obsolete) )
+  if( length(obsolete) ){
+    ind <- which(obsolete %in%  rownames(rfTools:::rf_show_pkgs( rfc )))
+    if( length(ind) )
+      rf_delete_pkg( rfc, obsolete[ind] )
+    else
+      warning("No packages available for removal. (Already removed?)")
+  }
+  invisible(TRUE)
+}
+
 rf_update_cran_info <- function( rfc, rf_pkg_status, pkgs){
   tab <- .rf_get_base_table(rfc)
 
@@ -305,10 +318,8 @@ rf_insert_new_pkg <- function( rfc, rf_pkg_status, pkgs){
 }
 
 rf_delete_pkg <- function(rfc, pkg){
-  tab <- .rf_get_base_table(rfc)
-  sql <- lapply( rf_pkg_status$outdated[pkg], function(pkg){
-    desc <- pkg$description
-    .make_SQL_remove_pkg(tab, desc["Package"])
+  sql <- lapply( pkg, function(pkg){
+    .make_SQL_remove_pkg(.rf_get_base_table(rfc), pkg)
   } )
   rfc <- rfTools:::rf_connect( rfc )
   lapply(sql, function(x) DBI::dbSendQuery(rfTools:::rf_get_db_con(rfc), x) )

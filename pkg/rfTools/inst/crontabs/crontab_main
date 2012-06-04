@@ -1,0 +1,5 @@
+# m h  dom mon dow   command
+0 0,4,8,12,16,20 * * *  /home/rforge/bin/rf_update_pkg_status && /home/rforge/bin/rf_prepare_build 
+0,30 * * * *  /home/rforge/bin/rf_merge_and_release
+30 * * * * /home/rforge/bin/rf_show_pkg_status > /srv/rf/repo/STATUS
+

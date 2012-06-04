@@ -36,3 +36,10 @@ rf_export_and_build_pkgs( rfc, pkg_status, tobuild )
 
 writeLines("The following packages are scheduled for build:")
 tobuild
+
+## delete obsolete packages
+if( length(pkg_status$obsolete) ){
+  rf_remove_obsolete_pkg(rfc, pkg_status)
+  writeLines("The following packages have been removed from R-Forge:")
+  pkg_status$obsolete
+}
