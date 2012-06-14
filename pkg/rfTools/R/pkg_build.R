@@ -479,7 +479,10 @@ rf_build_packages <- function(pkg_status,
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
 .build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
-  shell(paste(R, "CMD", "INSTALL --build",
+    Rbuild <- paste(R, "CMD", "INSTALL --build")
+    if( pkg %in% c("rgl") )
+        Rbuild <- paste(R, "CMD", "INSTALL --build", "--merge-multiarch")
+  shell(paste(Rbuild,
                file.path(path_to_pkg_tarballs, "src", "contrib",
                          paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"), invisible = TRUE, shell = "cmd")
