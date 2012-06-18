@@ -182,7 +182,7 @@ rf_prepare_build <- function(rfc, rf_pkg_status){
 ##     }
 ##   }
 ##   ## rebuild (offline) pkgs which are not scheduled for build or building
-##   build_states <- if(offline_only){ 
+##   build_states <- if(offline_only){
 ##     c(5)
 ##   } else {
 ##     c(0, 3, 4)
@@ -256,7 +256,7 @@ rf_update_outdated_pkg <- function( rfc, rf_pkg_status, pkgs){
 }
 
 rf_remove_obsolete_pkg <- function( rfc, rf_pkg_status ){
-  obsolete <- rf_pkg_status$obsolete  
+  obsolete <- rf_pkg_status$obsolete
   stopifnot( is.character(obsolete) )
   if( length(obsolete) ){
     ind <- which(obsolete %in%  rownames(rfTools:::rf_show_pkgs( rfc )))
@@ -337,7 +337,7 @@ rf_delete_pkg <- function(rfc, pkg){
   maintainer <- gsub("\'","", maintainer)
   title <- gsub("\'","", title)
   description <- gsub("\'","", description)
-  pkg_date <- tryCatch( as.Date(pkg_date), error = function(x) NA )
+  pkg_date <- tryCatch( as.Date(pkg_date, format = "%y-%m-%d"), error = function(x) NA )
   if( is.na(pkg_date) ){
     sql <- sprintf("INSERT INTO %s (pkg_name, unix_group_name, version, title, description, author, license, last_change, rev, maintainer, cran_release, status) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", table, pkg_name, unix_group_name, version, gsub("\'","",title), gsub("\'","",description), author, license, last_change, rev, maintainer, cran_release, status )
   } else {
