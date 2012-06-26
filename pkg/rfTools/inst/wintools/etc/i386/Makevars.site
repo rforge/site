@@ -1,0 +1,14 @@
+BOOSTLIB=R:/base/boost
+CLP_PATH=R:/base/Clp/Clp32
+GDAL_HOME=R:/base/local215
+GGOBI_PATH=R:/base/ggobi/dev
+GLPK_HOME=R:/base/glpk/i386
+GTK_PATH=R:/base/gtk+/i386
+JAGS_ROOT=R:/base/jags/JAGS-3.2.0
+JAVA_HOME=C:/Program Files (x86)/Java/jdk1.6.0_22
+LOCAL_SOFT=R:/base/local215
+NLOPT_HOME=R:/base/nlopt
+QUANTLIB_ROOT=R:/base/QuantLib
+SYMPHONY_HOME=R:/base/SYMPHONY/i386
+UDUNITS2_HOME=R:/base/local215
+LIB_QT=R:/base/Qt/qt

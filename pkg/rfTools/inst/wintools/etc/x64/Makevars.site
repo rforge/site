@@ -1,0 +1,11 @@
+BOOSTLIB=R:/base/boost
+CLP_PATH=R:/base/Clp/Clp64
+GDAL_HOME=R:/base/local215
+GLPK_HOME=R:/base/glpk/x86_64
+GTK_PATH=R:/base/gtk+/x64
+JAGS_ROOT=R:/base/jags/JAGS-3.2.0
+JAVA_HOME=C:/Program Files/Java/jdk1.6.0_22
+LOCAL_SOFT=R:/base/local215
+NLOPT_HOME=R:/base/nlopt
+SYMPHONY_HOME=R:/base/SYMPHONY/x86_64
+UDUNITS2_HOME=R:/base/local215

@@ -1,0 +1,12 @@
+[Setup]
+Lang=en
+Dir=R:\lib\R\R-patched
+Group=R
+NoIcons=0
+SetupType=full
+Components=main,i386,x64,html,manuals,manuals\basic,manuals\technical,manuals\refman,manuals\libdocs,tcl,tcl\noarch,tcl\32,tcl\64,tcl\tzdata,tcl\chm,trans,tests
+Tasks=
+[R]
+MDISDI=MDI
+HelpStyle=HTML
+Internet=Standard

@@ -6,10 +6,18 @@ rem This script updates/installs the current (patched/devel) version of R
 rem In previous versions this file was called 'R_install.bat'
 rem Licence GPL-3
 rem Author: Stefan Theussl
-rem Last Change: 2010-10-28
+rem Last Change: 2012-06-26
+
+rem ##################################
+rem configuration
+rem ##################################
+
+SET RF_PATH_TO_WINTOOLS="R:\lib\local\rfTools\wintools"
+SET RF_PATH_TO_CYGWIN="R:\share\cygwin"
+SET RF_PATH_TO_R_INSTALL="R:\lib\R"
 
 rem Read environment variables from text file
-FOR /F "tokens=*" %%i in ('type R:\bin\environment_variables.txt') do SET %%i
+FOR /F "tokens=*" %%i in ('type %RF_PATH_TO_WINTOOLS%\environment_variables.txt') do SET %%i
 
 rem Install R for Windows and update sources
 
@@ -17,21 +25,21 @@ rem ##################################
 rem R-devel
 rem ##################################
 
-rem Download and refresh R
+rem Download and update R installation
 
-rm -rf R:\lib\R\R-devel
+rm -rf %RF_PATH_TO_R_INSTALL%\R-devel
 cd %TMPDIR%
-R:\share\cygwin\bin\wget.exe -O R-devel.exe http://cran.wu.ac.at/bin/windows/base/R-devel.exe
+%RF_PATH_TO_CYGWIN%\bin\wget.exe -O R-devel.exe http://cran.wu.ac.at/bin/windows/base/R-devel.exe
 chmod a+x R-devel.exe
-R-devel.exe /LOADINF="R:\lib\R\r-devel.inf" /SILENT
+R-devel.exe /LOADINF="%RF_PATH_TO_WINTOOLS%\r-devel.inf" /SILENT
 rm -f R-devel.exe
 
 rem copy over configs
 
-cp -f R:\lib\scripts\etc\i386\Makevars.site R:\lib\R\R-devel\etc\i386\
-cp -f R:\lib\scripts\etc\x64\Makevars.site R:\lib\R\R-devel\etc\x64\
-cp -f R:\lib\scripts\etc\i386\Renviron.site R:\lib\R\R-devel\etc\i386\
-cp -f R:\lib\scripts\etc\x64\Renviron.site R:\lib\R\R-devel\etc\x64\
+cp -f %RF_PATH_TO_WINTOOLS%\etc\i386\Makevars.site %RF_PATH_TO_R_INSTALL%\R-devel\etc\i386\
+cp -f %RF_PATH_TO_WINTOOLS%\etc\x64\Makevars.site %RF_PATH_TO_R_INSTALL%\R-devel\etc\x64\
+cp -f %RF_PATH_TO_WINTOOLS%\etc\i386\Renviron.site %RF_PATH_TO_R_INSTALL%\R-devel\etc\i386\
+cp -f %RF_PATH_TO_WINTOOLS%\etc\x64\Renviron.site %RF_PATH_TO_R_INSTALL%\R-devel\etc\x64\
 
 rem Update SVN
 rem svn up R:\R\svn\R-devel
@@ -40,25 +48,24 @@ rem ##################################
 rem R-patched
 rem ##################################
 
-rem Download and refresh R
+rem Download and update R installation
 
 rm -rf R:\lib\R\R-patched
 cd %TMPDIR%
 rem for the time being R prerelease instead of R-patched.exe 
-R:\share\cygwin\bin\wget.exe -O R-patched.exe http://cran.wu.ac.at/bin/windows/base/R-patched.exe
+%RF_PATH_TO_CYGWIN%\bin\wget.exe -O R-patched.exe http://cran.wu.ac.at/bin/windows/base/R-patched.exe
 rem R-patched.exe R-2.15.0alpha-win.exe
 
 chmod a+x R-patched.exe
-R-patched.exe /LOADINF="R:\lib\R\r-patched.inf" /SILENT
+R-patched.exe /LOADINF="%RF_PATH_TO_WINTOOLS%\r-patched.inf" /SILENT
 rm -f R-patched.exe
 
 rem copy over configs
 
-cp -f R:\lib\scripts\etc\i386\Makevars.site R:\lib\R\R-patched\etc\i386\
-cp -f R:\lib\scripts\etc\x64\Makevars.site R:\lib\R\R-patched\etc\x64\
-cp -f R:\lib\scripts\etc\i386\Renviron.site R:\lib\R\R-patched\etc\i386\
-cp -f R:\lib\scripts\etc\x64\Renviron.site R:\lib\R\R-patched\etc\x64\
-
+cp -f %RF_PATH_TO_WINTOOLS%\etc\i386\Makevars.site %RF_PATH_TO_R_INSTALL%\R-patched\etc\i386\
+cp -f %RF_PATH_TO_WINTOOLS%\etc\x64\Makevars.site %RF_PATH_TO_R_INSTALL%\R-patched\etc\x64\
+cp -f %RF_PATH_TO_WINTOOLS%\etc\i386\Renviron.site %RF_PATH_TO_R_INSTALL%\R-patched\etc\i386\
+cp -f %RF_PATH_TO_WINTOOLS%\etc\x64\Renviron.site %RF_PATH_TO_R_INSTALL%\R-patched\etc\x64\
 
 rem Get R base sources
 

@@ -1,0 +1,8 @@
+PATH="${PATH};R:\base\gtk+\i386\bin;R:\base\ggobi;R:\base\graphviz\i386\bin;R:\base\Java\i386\bin\client"
+
+GDAL_HOME=R:\base\local215
+JAGS_ROOT=R:\base\jags\JAGS-3.2.0
+JAVA_HOME=C:/Program Files (x86)/Java/jdk1.6.0_22
+UDUNITS2_HOME=R:\base\local215
+
+HAVE_PNG=yes
