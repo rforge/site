@@ -327,6 +327,21 @@ rf_build_packages <- function(pkg_status,
     timings <- numeric(length(pkgs))
     names(timings) <- pkgs
 
+    ## Get additional build flags based on Uwe's lists
+    mma_list <- character()
+    con <- tryCatch(url("http://developer.r-project.org/CRAN/QA/Uwe/make/config/MergeMultiarch", open = "r"), error = identity)
+    if(! inherits(con, "error")){
+        mma_list <- readLines(con)
+        close(con)
+    }
+
+    fb_list <- character()
+    con <- tryCatch(url("http://developer.r-project.org/CRAN/QA/Uwe/make/config/ForceBiarch", open = "r"), error = identity)
+    if(! inherits(con, "error")){
+        fb_list <- tryCatch( readLines(con), error = function(x) NA)
+        close(con)
+    }
+
     for( pkg in pkgs ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
@@ -340,12 +355,20 @@ rf_build_packages <- function(pkg_status,
       ## get current package version (tarball, thus svn in pkg!)
       pkg_version_src   <- avail_src_pkgs[pkg, "Version"]
 
+      mergemultiarch <- FALSE
+      forcebiarch <- FALSE
+      if(pkg %in% mma_list)
+          mergemultiarch <- TRUE
+      if(pkg %in% fb_list)
+          forcebiarch <- TRUE
       ## now build the package from package tarball
       .build_binary_from_tarball_win(pkg,
                                      pkg_version_src,
                                      path_to_pkg_root,
                                      R,
-                                     pkg_buildlog)
+                                     pkg_buildlog,
+                                     mergemultiarch = mergemultiarch,
+                                     forcebiarch = forcebiarch)
 
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
@@ -478,10 +501,12 @@ rf_build_packages <- function(pkg_status,
 ## input: package tarball (<package_name>_<version>.tar.gz)
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
+.build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog, mergemultiarch = FALSE, forcebiarch = FALSE){
     Rbuild <- paste(R, "CMD", "INSTALL --build")
-    if( pkg %in% c("rgl") )
-        Rbuild <- paste(R, "CMD", "INSTALL --build", "--merge-multiarch")
+    if( mergemultiarch )
+        Rbuild <- paste(Rbuild, "--merge-multiarch")
+    if( forcebiarch )
+        Rbuild <- paste(Rbuild, "--force-biarch")
   shell(paste(Rbuild,
                file.path(path_to_pkg_tarballs, "src", "contrib",
                          paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),
