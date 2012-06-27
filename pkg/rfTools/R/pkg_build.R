@@ -246,7 +246,7 @@ rf_build_packages <- function(pkg_status,
                                                      c(bioc_url, bioc_data, bioc_experiment),
                                                      omega_hat_url,
                                                      other_repositories),
-                         path_to_local_library, platform, Ncpus = Ncpus)
+                         path_to_local_library, platform, Ncpus = Ncpus, rforge_url = rforge_url)
 
   ##############################################################################
   ## LAST PREPARATION STEPS BEFORE PACKAGE BUILDING
@@ -603,7 +603,7 @@ rf_build_packages <- function(pkg_status,
 ## When using a binary distribution (Windows, Mac) we don't need to
 ## install every package from source, we keep a complete local CRAN-
 ## install updated
-update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, platform, ...){
+update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, platform, rforge_url = "http://R-Forge.R-project.org", ...){
   writeLines(sprintf("Updating package library %s ...", lib))
   if((platform == "Linux") | (platform == "MacOSX")){
     ## Start a virtual framebuffer X server and use this for DISPLAY so that
@@ -613,19 +613,29 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## first update all installed packages if necessary
   ## debug  cat(sprintf("Arguments to update.packages(): lib = %s, repos = %s, ask = FALSE, checkBuilt = TRUE", lib, paste(repository_url, collapse = ", ")))
   update.packages(lib.loc = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE, ...)
+  
   writeLines("Done.")
   writeLines("Resolve dependency structure ...")
   ## pkg list and dependency structure
   pkgs_dep <- resolve_dependency_structure(pkgs, repository_url, path_to_pkg_src)
 
-  ## install missing packages from standard repositories
+  ## packages installed in library
   pkgs_installed <- installed.packages(lib.loc = lib)
+
+  ## update packages installed from R-Forge and not available from the other standard repositories
+  avail_repos <- unique(available.packages(contriburl = contrib.url(repository_url))[,1])
+  avail_rforge <- available.packages( contriburl = contrib.url(rforge_url) )[,1]
+  if(nrow(avail_rforge)){
+    rf_only <- rownames(pkgs_installed)[rownames(pkgs_installed) %in% avail_rforge[!(avail_rforge %in% avail_repos)]]
+    if(length(rf_only))
+      update.packages(lib.loc = lib, repos = rforge_url, ask = FALSE, checkBuilt = TRUE, oldPkgs=rf_only, ...)
+  }
+
   ## Temporarily All packages are installed
   ## install those packages which are only available from R-Forge, the rest
   ## should be installed from CRAN or other repositories
   ## TODO: considering the install order
   pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], rownames(pkgs_installed))
-  avail_repos <- unique(available.packages(contriburl = contrib.url(repository_url))[,1])
   pkgs_to_install <- pkgs_to_install[pkgs_to_install %in% avail_repos]
   pkgs_to_install_rforge <- setdiff(pkgs_dep[["R_FORGE"]], unique(c(pkgs_to_install, rownames(pkgs_installed))))
   writeLines("Done.")
