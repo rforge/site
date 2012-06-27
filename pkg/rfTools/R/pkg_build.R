@@ -533,8 +533,8 @@ rf_build_packages <- function(pkg_status,
     system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir,
 	             pkg_tarball, ">>", pkg_buildlog, "2>&1"))
     ## compile a PPC binary
-    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
-	      	     pkg_tarball, ">>", pkg_buildlog, "2>&1"))
+    ##system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
+    ##	      	     pkg_tarball, ">>", pkg_buildlog, "2>&1"))
 
   }else {
     ## R only packages can be installed in one rush
@@ -570,11 +570,11 @@ rf_build_packages <- function(pkg_status,
                  file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
                  pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"))
-    ## compile a PPC binary
-    system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
-   	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                 pkg_version, ".tar.gz", sep = "")),
-                ">>", pkg_buildlog, "2>&1"))
+    ## compile a PPC binary (obsolete with R >= 2.15.1)
+    ##system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
+    ##	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+    ##              pkg_version, ".tar.gz", sep = "")),
+    ##             ">>", pkg_buildlog, "2>&1"))
   }else {
     ## R only packages can be installed in one rush
     system(paste(R, "CMD INSTALL -l", tmpdir,
@@ -613,7 +613,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## first update all installed packages if necessary
   ## debug  cat(sprintf("Arguments to update.packages(): lib = %s, repos = %s, ask = FALSE, checkBuilt = TRUE", lib, paste(repository_url, collapse = ", ")))
   update.packages(lib.loc = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE, ...)
-  
+
   writeLines("Done.")
   writeLines("Resolve dependency structure ...")
   ## pkg list and dependency structure
