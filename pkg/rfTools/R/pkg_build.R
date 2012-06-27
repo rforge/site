@@ -625,7 +625,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## update packages installed from R-Forge and not available from the other standard repositories
   avail_repos <- unique(available.packages(contriburl = contrib.url(repository_url))[,1])
   avail_rforge <- available.packages( contriburl = contrib.url(rforge_url) )[,1]
-  if(nrow(avail_rforge)){
+  if(length(avail_rforge)){
     rf_only <- rownames(pkgs_installed)[rownames(pkgs_installed) %in% avail_rforge[!(avail_rforge %in% avail_repos)]]
     if(length(rf_only))
       update.packages(lib.loc = lib, repos = rforge_url, ask = FALSE, checkBuilt = TRUE, oldPkgs=rf_only, ...)
