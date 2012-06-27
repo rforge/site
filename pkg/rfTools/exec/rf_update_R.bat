@@ -12,12 +12,19 @@ rem ##################################
 rem configuration
 rem ##################################
 
-SET RF_PATH_TO_WINTOOLS="R:\lib\local\rfTools\wintools"
-SET RF_PATH_TO_CYGWIN="R:\share\cygwin"
+SET RF_PATH_TO_WINTOOLS=R:\lib\local\rfTools\wintools
+SET RF_PATH_TO_CYGWIN=R:\share\cygwin
 SET RF_PATH_TO_R_INSTALL="R:\lib\R"
 
 rem Read environment variables from text file
 FOR /F "tokens=*" %%i in ('type %RF_PATH_TO_WINTOOLS%\environment_variables.txt') do SET %%i
+
+rem ##################################
+rem Change to R file system hierarchy
+rem ##################################
+
+R:
+
 
 rem Install R for Windows and update sources
 
