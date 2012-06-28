@@ -1,0 +1,51 @@
+base image: wucloud image emi-333E163D
+
+o attach R-Forge volume to instance as /dev/xvdb
+
+o format volume with ext4: mkfs.ext4 /dev/xvdb
+
+o mount /dev/xvdb to /srv
+
+o mount staging area to /srv/rf
+mkdir -p /srv/rf/staging
+chown -R rforge /srv/rf
+
+o repos
+mkdir -p /srv/R/Repositories/
+
+o add rforge account
+addgroup rforge --gid 2017
+adduser --uid 2017 --gid 2017 --gecos "R-Forge build account" --disabled-password rforge
+mkdir /srv/home
+cp -a /home/rforge /srv/home/rforge
+
+o bind mount rforge; added to fstab
+/dev/xvdb /srv  ext4    defaults 0 0
+/srv/home/rforge /home/rforge bind bind 0 0
+cloudnc2.wu.ac.at:/srv/nfs/rf/staging /srv/rf/staging nfs rw 0 0
+137.208.57.73:/srv/nfs/R/Repositories /srv/R/Repositories nfs ro 0 0
+
+o building area
+mkdir /mnt/building
+chown rforge /mnt/building
+ln -s /mnt/building /srv/rf/building
+
+o configure R-Forge account
+su rforge
+mkdir ~/.ssh
+chmod 700 ~/.ssh
+mkdir svn
+svn co svn+ssh://svn.r-forge.r-project.org/svnroot/site/pkg/rfTools svn/rfTools
+mkdir -p ~/lib/R
+
+o copy public key to ~/.ssh
+
+o add to ~/.bashrc
+export R_LIBS=/home/rforge/lib/R
+
+o provide build scripts
+mkdir ~/bin
+cp ~/svn/rfTools/exec/rf_build_packages ~/bin/
+
+o crontab
+
