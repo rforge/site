@@ -59,17 +59,18 @@ if( is.null(src_dir) ){
 load( file.path(build_root, src_dir, "PKG_STAT.rda") )
 
 ## setup control file
-control <- rf_build_control(path_to_pkg_src  = file.path(build_root, src_dir),            ## R-Forge uncompressed pkg source
-                            path_to_pkg_log  = file.path(build_root, src_dir, "RF_LOGS"), ## Log directory
+control <- rf_build_control(path_to_pkg_src  = file.path(build_root, src_dir),                ## R-Forge uncompressed pkg source
+                            path_to_pkg_log  = file.path(build_root, src_dir, "RF_LOGS"),     ## Log directory
                             path_to_pkg_root = file.path(build_root, src_dir, "RF_PKG_ROOT"), ## R-Forge root (contains /src ,/bin)
-                            path_to_local_texmf = "/usr/local/share/texmf",## path to local texmf
-                            path_to_local_library = local_lib,             ## path to local pkg library
+                            path_to_local_texmf = "/usr/local/share/texmf",                   ## path to local texmf
+                            path_to_local_library = local_lib,                                ## path to local pkg library
+			    path_to_local_pkg_libs = file.path(build_root, "PKG_LIBS"),       ## path to local per pkg libraries in case of R-Forge deps
                             path_to_check_dir = file.path(build_root, src_dir, "RF_PKG_CHECK"), ## path to check dir
-                            stoplist = file.path(system.file("stoplists", package = "rfTools"), "linux.csv"),      ## path to stoplist
-                            cpu_time_limit = 600,                          ## CPU time limit
-                            mail_domain_name_of_sender = system("hostname -f", intern = TRUE), ## "xmorthanc.wu.ac.at" 
-                            mail_relay_server = "",                        ## only necessary with sendEmail
-                            mail_programme = "mail")                       ## on Windows: sendEmail
+                            stoplist = file.path(system.file("stoplists", package = "rfTools"), "linux.csv"), ## path to stoplist
+                            cpu_time_limit = 600,                                             ## CPU time limit
+                            mail_domain_name_of_sender = system("hostname -f", intern = TRUE),## "xmorthanc.wu.ac.at" 
+                            mail_relay_server = "",                                           ## only necessary with sendEmail
+                            mail_programme = "mail")                                          ## on Windows: sendEmail
 
 ## start building ...
 rf_build_packages( rf_pkg_status,

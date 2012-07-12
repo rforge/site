@@ -4,7 +4,7 @@
 ## Constructor for R-Forge control files
 rf_build_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
                               path_to_local_texmf, path_to_local_library,
-                              stoplist,
+                              path_to_local_pkg_libs, stoplist,
                               mail_domain_name_of_sender, mail_relay_server,
                               mail_programme = "mail",
                               path_to_check_dir = "",
@@ -15,6 +15,7 @@ rf_build_control <- function(path_to_pkg_src, path_to_pkg_log, path_to_pkg_root,
                  mail_relay_server = mail_relay_server,
                  path_to_check_dir = path_to_check_dir,
                  path_to_local_library = path_to_local_library,
+                 path_to_local_pkg_libs = path_to_local_pkg_libs,
                  path_to_local_texmf = path_to_local_texmf,
                  path_to_pkg_log  = path_to_pkg_log,
                  path_to_pkg_root = path_to_pkg_root,
@@ -139,6 +140,7 @@ rf_build_packages <- function(pkg_status,
   path_to_pkg_log <- control$path_to_pkg_log
   path_to_pkg_root <- control$path_to_pkg_root
   path_to_local_library <- control$path_to_local_library
+  path_to_local_pkg_libs <- control$path_to_local_pkg_libs
   stoplist <- control$stoplist
   ## local package library
   if(!check_directory(path_to_local_library, fix=TRUE))
@@ -151,6 +153,9 @@ rf_build_packages <- function(pkg_status,
   ## check if package root directory (the directory containing
   ## the src/contrib or bin/windows/contrib) exists.
   if(!check_directory(path_to_pkg_root, fix=TRUE))
+    stop(paste("There is no directory", dir,"!"))
+  ## local pkg libraries for forced R-Forge depends
+  if(!check_directory( path_to_local_pkg_libs, fix=TRUE))
     stop(paste("There is no directory", dir,"!"))
   ## get current working directory -> set back at FINALIZATION step
   old_wd <- getwd()
@@ -218,7 +223,7 @@ rf_build_packages <- function(pkg_status,
     URL_pkg_sources <- contrib.url(sprintf("file:%s", path_to_pkg_root),
                                    type = "source")
 
-    avail_src_pkgs <- available.packages(URL_pkg_sources)
+    avail_src_pkgs <- utils::available.packages(URL_pkg_sources)
 
     pkgs <- remove_excluded_pkgs(rownames(avail_src_pkgs), donotcompile)
   } else {
@@ -246,7 +251,7 @@ rf_build_packages <- function(pkg_status,
                                                      c(bioc_url, bioc_data, bioc_experiment),
                                                      omega_hat_url,
                                                      other_repositories),
-                         path_to_local_library, platform, Ncpus = Ncpus, rforge_url = rforge_url)
+                         path_to_local_library, path_to_local_pkg_libs, platform, Ncpus = Ncpus, rforge_url = rforge_url)
 
   ##############################################################################
   ## LAST PREPARATION STEPS BEFORE PACKAGE BUILDING
@@ -603,7 +608,7 @@ rf_build_packages <- function(pkg_status,
 ## When using a binary distribution (Windows, Mac) we don't need to
 ## install every package from source, we keep a complete local CRAN-
 ## install updated
-update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, platform, rforge_url = "http://R-Forge.R-project.org", ...){
+update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, pkg_libs, platform, rforge_url = "http://R-Forge.R-project.org", ...){
   writeLines(sprintf("Updating package library %s ...", lib))
   if((platform == "Linux") | (platform == "MacOSX")){
     ## Start a virtual framebuffer X server and use this for DISPLAY so that
@@ -644,12 +649,22 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
     install.packages(pkgs = as.character(na.omit(pkgs_to_install)), lib = lib, contriburl = contrib.url(repository_url), ...)
     writeLines("Done.")
   }
-  ## FIXME: hard coded R-Forge tar.gz source dir
+
   if(length(pkgs_to_install_rforge)){
     writeLines("Install missing packages from R-Forge ...")
-    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = contrib.url("http://R-Forge.R-project.org", type = "source"), type = "source", ...)
+    install.packages(pkgs_to_install_rforge, lib = lib, contriburl = contrib.url(rforge_url, type = "source"), type = "source", ...)
     writeLines("Done.")
   }
+  
+  ## If dependencies on pkgs hosted on CRAN *and* on R-Forge are to be
+  ## resolved requiring a higher version number (flagged as >= in
+  ## Depends, Imports, or Suggests in the DESCRIPTION file) than what
+  ## is available on CRAN we create a new packages library including
+  ## the corresponding package(s) from R-Forge.
+
+  forced_deps <- .pkgs_forced_rforge_depends( available.packages(contriburl = path_to_pkg_src), avail_repos, avail_rforge )
+  .make_pkg_libs( forced_deps, pkg_libs, path_to_pkg_src, repository_url, rforge_url, lib  )
+  
   if((platform == "Linux") | (platform == "MacOSX")){
     ## Close the virtual framebuffer X server
     close_virtual_X11_fb(pid)
@@ -915,3 +930,48 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   setwd(old_dir)
   unique(packages)
 }
+
+## compute dependencies on packages double hosted on CRAN (primary
+## repository for resolving deps) and R-Forge. Returns those packages
+## in the batch of packages scheduled for building/checking which are
+## forced to be installed from R-Forge. The list elements are the
+## corresponding R-Forge dependencies.
+.pkgs_forced_rforge_depends <- function( avail_batch, avail_repos, avail_rforge,
+                                 fieldstocheck = c("Depends", "Imports", "Suggests") ){
+  pkg_info <- lapply( rownames(avail_batch),
+                      function(pkg) tools:::.split_description(na.omit(avail_batch[pkg,])) )
+  dep_info <- lapply( pkg_info, function(info) unlist(lapply(fieldstocheck, function(field)
+                                                             if(length(info[[field]]))
+                                                             lapply(info[[field]], function(x)
+                                                                    if(length(x$op))
+                                                                    if(x$op %in% c(">=", ">")) x$version)), recursive = FALSE) )
+  names(dep_info) <- rownames(avail_batch)
+  true_deps <- lapply(dep_info, .check_if_rforge_version_needed, avail_repos = avail_repos, avail_rforge = avail_rforge )
+  notnull <- unlist(lapply( true_deps, function(x) length(x) > 0 ))
+  
+  true_deps[notnull]
+}
+
+.check_if_rforge_version_needed <- function( x, avail_repos, avail_rforge ){
+  out <- unlist(lapply(names(x), function(dep) {if(length(x[[dep]])) return((x[[dep]] > avail_repos[dep, "Version"]) && (x[[dep]] <= avail_rforge[dep, "Version"])); FALSE}))
+  if(length(out))
+    return(names(x)[out])
+  NULL
+}
+
+
+.make_pkg_libs <- function( x, pkg_libs, path_to_pkg_src, repository_url, rforge_url, lib, ...){
+  lapply( names(x), function(pkg) {
+    dir.create(file.path(pkg_libs, pkg))
+    pkgs_dep <- resolve_dependency_structure( pkg, repository_url, path_to_pkg_src )
+    for(dep in pkgs_dep[["ALL"]])
+      file.symlink(file.path(pkg_libs, pkg, dep), file.path(lib, dep))
+    for(fdep in x[[pkg]]){
+      file.remove(file.path(pkg_libs, pkg, fdep))
+      install.packages(pkgs = fdep, lib = file.path(pkg_libs, pkg), contriburl = contrib.url(rforge_url), ...)
+    }
+  } )
+  invisible(TRUE)
+}
+
+  

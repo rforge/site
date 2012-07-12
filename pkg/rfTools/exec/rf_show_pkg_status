@@ -44,15 +44,22 @@ if( length(malformed) ){
   print(malformed)
 }
 
+if (length(pkg_status$conflicts)) {
+  writeLines("- Package name conflicts:")
+  print(unlist(lapply(pkg_status$conflicts, function(pkg) sprintf("%s: %s", 
+                                                                  pkg$repo, pkg$description["Package"]))))
+}
+
 writeLines("- Packages currently being built:")
 rownames(pkg_status$db)[pkg_status$db[, "status"] %in% c(1,2)]
 
 len_outdated <- length(rownames(pkg_status$db)[pkg_status$db[, "status"] == 5])
 if(len_outdated){
-  writeLines(sprintf("- %d packages are up-to-date and %d offline.", length(rownames(pkg_status$db)[pkg_status$db[, "status"] %in% c(0)]), len_outdated))
+  writeLines(sprintf("- %d out of %d packages are up-to-date and check OK; %d is offline.", length(rownames(pkg_status$db)[pkg_status$db[, "status"] %in% c(0)]), length(rownames(pkg_status$db)), len_outdated))
 } else {
-  writeLines(sprintf("- %d packages are up-to-date.", length(rownames(pkg_status$db)[pkg_status$db[, "status"] %in% c(0)])))
+  writeLines(sprintf("- %d out of %d packages are up-to-date and check OK.", length(rownames(pkg_status$db)[pkg_status$db[, "status"] %in% c(0)]), length(rownames(pkg_status$db))))
 }
+
 
 #writeLines("- Packages marked as 'Offline':")
 #rownames(pkg_status$db)[pkg_status$db[, "status"] == 5]
