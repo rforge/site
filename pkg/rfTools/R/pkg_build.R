@@ -628,10 +628,10 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   pkgs_installed <- installed.packages(lib.loc = lib)
 
   ## update packages installed from R-Forge and not available from the other standard repositories
-  avail_repos <- unique(available.packages(contriburl = contrib.url(repository_url))[,1])
-  avail_rforge <- available.packages( contriburl = contrib.url(rforge_url) )[,1]
+  avail_repos <- available.packages(contriburl = contrib.url(repository_url))
+  avail_rforge <- available.packages( contriburl = contrib.url(rforge_url) )
   if(length(avail_rforge)){
-    rf_only <- rownames(pkgs_installed)[rownames(pkgs_installed) %in% avail_rforge[!(avail_rforge %in% avail_repos)]]
+    rf_only <- rownames(pkgs_installed)[rownames(pkgs_installed) %in% avail_rforge[,1][!(avail_rforge[,1] %in% unique(avail_repos[,1]))]]
     if(length(rf_only))
       update.packages(lib.loc = lib, repos = rforge_url, ask = FALSE, checkBuilt = TRUE, oldPkgs=rf_only, ...)
   }
@@ -641,7 +641,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   ## should be installed from CRAN or other repositories
   ## TODO: considering the install order
   pkgs_to_install <- setdiff(pkgs_dep[["ALL"]], rownames(pkgs_installed))
-  pkgs_to_install <- pkgs_to_install[pkgs_to_install %in% avail_repos]
+  pkgs_to_install <- pkgs_to_install[pkgs_to_install %in% unique(avail_repos[,1])]
   pkgs_to_install_rforge <- setdiff(pkgs_dep[["R_FORGE"]], unique(c(pkgs_to_install, rownames(pkgs_installed))))
   writeLines("Done.")
   if(length(pkgs_to_install)){
@@ -953,7 +953,14 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
 }
 
 .check_if_rforge_version_needed <- function( x, avail_repos, avail_rforge ){
-  out <- unlist(lapply(names(x), function(dep) {if(length(x[[dep]])) return((x[[dep]] > avail_repos[dep, "Version"]) && (x[[dep]] <= avail_rforge[dep, "Version"])); FALSE}))
+  out <- unlist(lapply(names(x), function(dep) {
+    if(length(x[[dep]])){
+      if(dep %in% rownames(avail_repos))
+        return((x[[dep]] > avail_repos[dep, "Version"]) && (x[[dep]] <= avail_rforge[dep, "Version"]))
+      else 
+        FALSE
+   } else
+     FALSE }))
   if(length(out))
     return(names(x)[out])
   NULL
