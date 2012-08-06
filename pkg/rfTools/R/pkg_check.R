@@ -222,8 +222,8 @@ finalize_check_results <- function(check_results_dir,
   ## check_results_dir <- "/srv/rsync/R-Forge.check/R-devel"
   ## path_to_pkg_src <- "/srv/R/pkgs"
   PKGS <-  file.path(check_results_dir, "PKGS")
-  Rcheck <- dir(PKGS)
-  Rcheck <- Rcheck[grep(".Rcheck$", Rcheck)]
+  Rcheck <- dir(PKGS, patter="\\.Rcheck$")
+  #Rcheck <- Rcheck[grep(".Rcheck$", Rcheck)]
   ## successfully checked
   ##pkgs <- gsub(".Rcheck$", "", Rcheck)
   path_to_install_logs <- file.path(check_results_dir, "installout")
