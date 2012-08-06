@@ -1,15 +1,18 @@
 ## These functions are copied from Kurt Hornik's check.R script
 
 check_results_diff_db <-
-function(dir)
+function(dir, files = NULL)
 {
+    if(is.null(files)) {
+        ## Assume that both check.csv.prev and check.csv exist in dir.
+        files <- file.path(dir, c("check.csv.prev", "check.csv"))
+    }
+
     ## Assume that we know that both check.csv.prev and check.csv exist
     ## in dir.
-    x <- read.csv(file.path(dir, "check.csv.prev"),
-                  colClasses = "character")
+    x <- read.csv(files[1L], colClasses = "character")
     x <- x[names(x) != "Maintainer"]
-    y <- read.csv(file.path(dir, "check.csv"),
-                  colClasses = "character")
+    y <- read.csv(files[2L], colClasses = "character")
     y <- y[names(y) != "Maintainer"]
     z <- merge(x, y, by = 1, all = TRUE)
     row.names(z) <- z$Package
