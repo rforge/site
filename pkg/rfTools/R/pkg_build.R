@@ -347,6 +347,10 @@ rf_build_packages <- function(pkg_status,
         close(con)
     }
 
+    pkg_libs <- NULL
+    if( file.exists(path_to_local_pkg_libs) )
+      pkg_libs <- list.files(path_to_local_pkg_libs)
+    
     for( pkg in pkgs ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
@@ -362,18 +366,24 @@ rf_build_packages <- function(pkg_status,
 
       mergemultiarch <- FALSE
       forcebiarch <- FALSE
+      build_in_pkglib <- FALSE
       if(pkg %in% mma_list)
           mergemultiarch <- TRUE
       if(pkg %in% fb_list)
           forcebiarch <- TRUE
+      if(pkg %in% pkg_libs)
+        build_in_pkglib <- TRUE
       ## now build the package from package tarball
       .build_binary_from_tarball_win(pkg,
                                      pkg_version_src,
                                      path_to_pkg_root,
                                      R,
                                      pkg_buildlog,
+                                     pkg_libs = path_to_local_pkg_libs,
                                      mergemultiarch = mergemultiarch,
-                                     forcebiarch = forcebiarch)
+                                     forcebiarch = forcebiarch,
+                                     build_in_pkglib = build_in_pkglib
+                                     )
 
       ## save timing
       timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
@@ -506,12 +516,14 @@ rf_build_packages <- function(pkg_status,
 ## input: package tarball (<package_name>_<version>.tar.gz)
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog, mergemultiarch = FALSE, forcebiarch = FALSE){
+.build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog, pkg_libs,  mergemultiarch = FALSE, forcebiarch = FALSE, build_in_pkglib = FALSE){
     Rbuild <- paste(R, "CMD", "INSTALL --build")
     if( mergemultiarch )
         Rbuild <- paste(Rbuild, "--merge-multiarch")
     if( forcebiarch )
         Rbuild <- paste(Rbuild, "--force-biarch")
+    if( PKG_LIB )
+        Rbuild <- paste(Rbuild, sprintf("--library=%s", file.path(pkg_libs, pkg)))
   shell(paste(Rbuild,
                file.path(path_to_pkg_tarballs, "src", "contrib",
                          paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),

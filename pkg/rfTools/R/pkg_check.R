@@ -36,6 +36,7 @@ rf_check_packages <- function( pkg_status,
   print(path_to_check_dir)
   path_to_local_library <- control$path_to_local_library
   print(path_to_local_library)
+  path_to_local_pkg_libs <- control$path_to_local_pkg_libs
 
   stoplist <- control$stoplist
   ## local package library
@@ -53,6 +54,9 @@ rf_check_packages <- function( pkg_status,
   ## the src/contrib or bin/windows/contrib) exists.
   if(!check_directory(path_to_pkg_root, fix=TRUE))
     stop(paste("There is no directory", path_to_pkg_root,"!"))
+    ## local pkg libraries for forced R-Forge depends
+  if(!check_directory( path_to_local_pkg_libs, fix=TRUE))
+    stop(paste("There is no directory", dir,"!"))
   ## source tarballs
   URL_pkg_sources <- contrib.url(sprintf("file:///%s", path_to_pkg_root), type = "source")
   ## get current working directory -> set back at FINALIZATION step
@@ -131,8 +135,12 @@ rf_check_packages <- function( pkg_status,
                                                                check_time_limit)
   }
 
+  pkg_libs <- NULL
+  if( file.exists(path_to_local_pkg_libs) )
+    pkg_libs <- list.files(path_to_local_pkg_libs)
+  
   ## And now the testing ... (only R-Forge pkg tarballs!)
-  check_pkg <- function(pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources){
+  check_pkg <- function(pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, path_to_local_pkg_libs, pkg_status, platform, R, URL_pkg_sources, pkg_libs){
       ## Prolog
       pkg_checklog <- paste(file.path(path_to_pkg_log, pkg), "-", platform, "-",
                           architecture, "-checklog.txt", sep="")
@@ -158,6 +166,8 @@ rf_check_packages <- function( pkg_status,
       pkg_url <- file.path( gsub(toreplace, "", URL_pkg_sources),
                          sprintf("%s_%s.tar.gz", pkg,
                                  pkg_status$outdated[[pkg]]$description["Version"]) )
+      if(pkg %in% pkg_libs)
+        check_arg <- paste(check_arg, sprintf("--library=%s", file.path(pkg_libs, pkg)))
       ## NOTE: On Windows we should use shell() or system2() instead of system()
       ##       otherwise pipes and redirections fail (see also ?system)
       timing <- ifelse( platform == "Windows",
@@ -171,11 +181,11 @@ rf_check_packages <- function( pkg_status,
   }
   if(Ncpus > 1L){
       if( platform %in% c("Linux", "MacOSX") ){
-          timings <- parallel::mclapply(pkgs, FUN = check_pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources, mc.cores = Ncpus)
+          timings <- parallel::mclapply(pkgs, FUN = check_pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, path_to_local_pkg_libs, pkg_status, platform, R, URL_pkg_sources, pkg_libs, mc.cores = Ncpus)
           timings <- structure( unlist(timings), names = pkgs )
       } else{
           cl <- parallel::makeCluster( Ncpus )
-          timings <- parallel::parLapply(cl, X = pkgs, fun = check_pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources)
+          timings <- parallel::parLapply(cl, X = pkgs, fun = check_pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, path_to_local_pkg_libs, pkg_status, platform, R, URL_pkg_sources, pkg_libs)
           parallel::stopCluster(cl)
           timings <- structure( unlist(timings), names = pkgs )
       }
@@ -185,7 +195,7 @@ rf_check_packages <- function( pkg_status,
         names(timings) <- pkgs
 
         for(pkg in pkgs)
-            timings[pkg] <- check_pkg(pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, pkg_status, platform, R, URL_pkg_sources)
+            timings[pkg] <- check_pkg(pkg, architecture, check_args, check_too_long, global_check_arg, path_to_pkg_log, path_to_local_pkg_libs, pkg_status, platform, R, URL_pkg_sources, pkg_libs)
     }
 
   ## better implementation necessary:
