@@ -350,7 +350,7 @@ rf_build_packages <- function(pkg_status,
     pkg_libs <- NULL
     if( file.exists(path_to_local_pkg_libs) )
       pkg_libs <- list.files(path_to_local_pkg_libs)
-    
+
     for( pkg in pkgs ){
       ## Prolog
       pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
@@ -667,7 +667,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
     install.packages(pkgs_to_install_rforge, lib = lib, contriburl = contrib.url(rforge_url, type = "source"), type = "source", ...)
     writeLines("Done.")
   }
-  
+
   ## If dependencies on pkgs hosted on CRAN *and* on R-Forge are to be
   ## resolved requiring a higher version number (flagged as >= in
   ## Depends, Imports, or Suggests in the DESCRIPTION file) than what
@@ -676,7 +676,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
 
   forced_deps <- .pkgs_forced_rforge_depends( available.packages(contriburl = path_to_pkg_src), avail_repos, avail_rforge )
   .make_pkg_libs( forced_deps, pkg_libs, path_to_pkg_src, repository_url, rforge_url, lib  )
-  
+
   if((platform == "Linux") | (platform == "MacOSX")){
     ## Close the virtual framebuffer X server
     close_virtual_X11_fb(pid)
@@ -960,7 +960,7 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   names(dep_info) <- rownames(avail_batch)
   true_deps <- lapply(dep_info, .check_if_rforge_version_needed, avail_repos = avail_repos, avail_rforge = avail_rforge )
   notnull <- unlist(lapply( true_deps, function(x) length(x) > 0 ))
-  
+
   true_deps[notnull]
 }
 
@@ -968,8 +968,8 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   out <- unlist(lapply(names(x), function(dep) {
     if(length(x[[dep]])){
       if(dep %in% rownames(avail_repos))
-        return((x[[dep]] > avail_repos[dep, "Version"]) && (x[[dep]] <= avail_rforge[dep, "Version"]))
-      else 
+        return(tryCatch(x[[dep]] > avail_repos[dep, "Version"], error = function(x) TRUE) && tryCatch(x[[dep]] <= avail_rforge[dep, "Version"], error = function(x) FALSE))
+      else
         FALSE
    } else
      FALSE }))
@@ -993,4 +993,4 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   invisible(TRUE)
 }
 
-  
+
