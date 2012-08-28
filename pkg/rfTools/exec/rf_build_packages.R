@@ -60,6 +60,7 @@ control <- rf_build_control(path_to_pkg_src  = file.path(build_root, src_dir),  
                             path_to_pkg_root = file.path(build_root, src_dir, "RF_PKG_ROOT"), ## R-Forge root (contains /src ,/bin)
                             path_to_local_texmf = "",                      ## path to local texmf
                             path_to_local_library = local_lib,             ## path to local pkg library
+                            path_to_local_pkg_libs = file.path(build_root, "PKG_LIBS"),       ## path to local per pkg libraries in case of R-Forge deps
                             path_to_check_dir = file.path(build_root, src_dir, "RF_PKG_CHECK"), ## path to check dir
                             stoplist = file.path(system.file("stoplists", package = "rfTools"), "windows.csv"),      ## path to stoplist
                             cpu_time_limit = 600,                          ## CPU time limit

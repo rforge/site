@@ -6,6 +6,8 @@ benchmark,--install=no
 bit,--no-examples --no-tests --no-vignettes
 brew,--no-examples --no-tests --no-vignettes
 corrplot,--install=no
+cRacker,--no-examples --no-tests --no-vignettes
+cRacker.proteomics,--no-examples --no-tests --no-vignettes
 earthmovdist,--no-examples --no-tests --no-vignettes
 fCopulae,--no-tests
 graphicsQC,--no-vignettes

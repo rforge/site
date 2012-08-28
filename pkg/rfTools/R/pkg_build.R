@@ -522,7 +522,7 @@ rf_build_packages <- function(pkg_status,
         Rbuild <- paste(Rbuild, "--merge-multiarch")
     if( forcebiarch )
         Rbuild <- paste(Rbuild, "--force-biarch")
-    if( PKG_LIB )
+    if( build_in_pkglib )
         Rbuild <- paste(Rbuild, sprintf("--library=%s", file.path(pkg_libs, pkg)))
   shell(paste(Rbuild,
                file.path(path_to_pkg_tarballs, "src", "contrib",
