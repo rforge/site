@@ -403,7 +403,7 @@ rf_build_packages <- function(pkg_status,
     pid <- start_virtual_X11_fb()
 
     ## BUILDING FROM PKG TARBALLS
-    build_bin_mac <- function(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R){
+    build_bin_mac <- function(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, path_to_local_pkg_libs, pkg_libs){
         ## Prolog
         pkg_buildlog <- rfTools:::get_buildlog(path_to_pkg_log, pkg, platform, architecture)
         rfTools:::write_prolog(pkg, pkg_buildlog, pkg_status,
@@ -412,20 +412,31 @@ rf_build_packages <- function(pkg_status,
         ## timer start
         proc_start <- proc.time()
 
+        build_in_pkglib <- FALSE
+        if(pkg %in% pkg_libs)
+            build_in_pkglib <- TRUE
+
         ## now build the package from package tarball
         rfTools:::.build_binary_from_tarball_mac( pkg,
                                                   avail_src_pkgs[pkg, "Version"],
                                                   path_to_pkg_root,
                                                   R,
-                                                  pkg_buildlog )
+                                                  pkg_buildlog,
+                                                  pkg_libs = path_to_local_pkg_libs,
+                                                  build_in_pkglib = build_in_pkglib)
 
         ## Epilog and timings
         timing <- c(proc.time() - proc_start)["elapsed"]
         write_epilog(pkg_buildlog, timing, std.out = TRUE)
         timing
     }
+
+    pkg_libs <- NULL
+    if( file.exists(path_to_local_pkg_libs) )
+        pkg_libs <- list.files(path_to_local_pkg_libs)
+
     if(Ncpus > 1L){
-        timings <- parallel::mclapply(pkgs, FUN = build_bin_mac, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, mc.cores = Ncpus)
+        timings <- parallel::mclapply(pkgs, FUN = build_bin_mac, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, path_to_local_pkg_libs, pkg_libs, mc.cores = Ncpus)
         timings <- structure( unlist(timings), names = pkgs )
     } else {
         ## Initialize timings
@@ -433,7 +444,7 @@ rf_build_packages <- function(pkg_status,
         names(timings) <- pkgs
 
         for(pkg in pkgs)
-            timings[pkg] <- build_bin_mac(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R)
+            timings[pkg] <- build_bin_mac(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, path_to_local_pkg_libs, pkg_libs)
     }
 
     ## Cleanup: close framebuffer
@@ -575,44 +586,48 @@ rf_build_packages <- function(pkg_status,
 ## input: package tarball (<package_name>_<version>.tar.gz)
 ## output: compressed package binary <package_name>_<version>.tgz
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_tarball_mac <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog){
-  ## make temporary directory
-  tmpdir <- .make_tmp_directory()
+.build_binary_from_tarball_mac <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog, pkg_libs, build_in_pkglib = FALSE){
+    Rbuild <- paste(R, "CMD", "INSTALL")
+    if( build_in_pkglib )
+        Rbuild <- paste(Rbuild, sprintf("--library=%s", file.path(pkg_libs, pkg)))
 
- dirname <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")  ## first look if there is a src directory because then we know that we have
-  ## to compile something ...
-  if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
-    ## compile an x86_32 binary
-    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir,
+    ## make temporary directory
+    tmpdir <- .make_tmp_directory()
+
+    dirname <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")  ## first look if there is a src directory because then we know that we have
+    ## to compile something ...
+    if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
+        ## compile an x86_32 binary
+        system(paste("R_ARCH=/i386", Rbuild, "-l", tmpdir,
                  file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
                  pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"))
-    ## compile a PPC binary (obsolete with R >= 2.15.1)
-    ##system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
-    ##	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-    ##              pkg_version, ".tar.gz", sep = "")),
-    ##             ">>", pkg_buildlog, "2>&1"))
-  }else {
-    ## R only packages can be installed in one rush
-    system(paste(R, "CMD INSTALL -l", tmpdir,
+        ## compile a PPC binary (obsolete with R >= 2.15.1)
+        ##system(paste("R_ARCH=/ppc", Rbuild, "-l", tmpdir, "--libs-only",
+        ##	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
+        ##              pkg_version, ".tar.gz", sep = "")),
+        ##             ">>", pkg_buildlog, "2>&1"))
+    }else {
+        ## R only packages can be installed in one rush
+        system(paste(Rbuild, "-l", tmpdir,
                  file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
                  pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"))
-  }
+    }
 
-  ## re-link dynlibs (see http://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Building-universal-package)
-  minor_version <-  paste( R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep="." )
-  ## gfortran
-  system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgfortran.2.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgfortran.2.dylib $lib ; done", tmpdir, pkg, minor_version) )
-  ## gcc
-  system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgcc_s.1.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgcc_s.1.dylib $lib ; done", tmpdir, pkg, minor_version) )
+    ## re-link dynlibs (see http://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Building-universal-package)
+    minor_version <-  paste( R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep="." )
+    ## gfortran
+    system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgfortran.2.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgfortran.2.dylib $lib ; done", tmpdir, pkg, minor_version) )
+    ## gcc
+    system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgcc_s.1.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgcc_s.1.dylib $lib ; done", tmpdir, pkg, minor_version) )
 
-  pkg_binary <- .make_universal_mac_binary(pkg, pkg_version, pkg_buildlog, tmpdir)
+    pkg_binary <- .make_universal_mac_binary(pkg, pkg_version, pkg_buildlog, tmpdir)
 
-  ## Cleanup
-  .cleanup_mac(tmpdir)
+    ## Cleanup
+    .cleanup_mac(tmpdir)
 
-  invisible(pkg_binary)
+    invisible(pkg_binary)
 }
 
 ## update package repository
