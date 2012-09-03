@@ -333,10 +333,12 @@ rf_build_packages <- function(pkg_status,
     names(timings) <- pkgs
 
     ## Get additional build flags based on Uwe's lists
-    mma_list <- character()
+    ## mma_list <- character()
+    ## FIXME: for the time being hardcode packages in build code
+    mma_list <- c("tth")
     con <- tryCatch(url("http://developer.r-project.org/CRAN/QA/Uwe/make/config/MergeMultiarch", open = "r"), error = identity)
     if(! inherits(con, "error")){
-        mma_list <- readLines(con)
+        mma_list <- unique(c(mma_list, readLines(con)))
         close(con)
     }
 
