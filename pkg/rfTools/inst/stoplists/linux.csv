@@ -21,6 +21,7 @@ LeerFotos,--no-examples --no-tests --no-vignettes
 lme4,--no-examples --no-tests --no-vignettes
 mboost,--no-examples --no-tests --no-vignettes
 NeuroSpatCo,--no-examples --no-tests --no-vignettes
+phrapl,--no-vignettes
 RBloomberg,--install=no
 Rcplex,--install=fake
 RobRex,--no-examples --no-tests --no-vignettes

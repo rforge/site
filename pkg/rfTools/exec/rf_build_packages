@@ -45,6 +45,14 @@ Sys.setenv(LANG="en_US.UTF-8")
 ## But not for sorting ...
 Sys.setenv(LC_COLLATE="C")
 
+## Package specific environment variables
+
+## Package: Rmosek
+Sys.setenv(PATH=sprintf("%s:/opt/MOSEK/6/tools/platform/linux64x86/bin", Sys.getenv("PATH")))
+Sys.setenv(MOSEKLM_LICENSE_FILE="/opt/MOSEK/6/licenses/mosek.lic")
+Sys.setenv(PKG_MOSEKHOME="/opt/MOSEK/6/tools/platform/linux64x86")
+Sys.setenv(PKG_MOSEKLIB="mosek64")
+
 ################################################################################
 
 ## take a source build and uncompress
