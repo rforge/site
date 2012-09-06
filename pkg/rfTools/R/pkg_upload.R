@@ -236,7 +236,7 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   file_types <- c(Linux = ".tar.gz", MacOSX = ".tgz", Windows = ".zip")
   pkg_types <- c(Linux = "source", MacOSX = "mac.binary", Windows = "win.binary")
   ## R-Forge repository offers additional "Revision" field.
-  fields <- c(tools:::.get_standard_repository_db_fields(), "Repository", "Repository/Project", "Repository/R-Forge/Revision")
+  fields <- c(tools:::.get_standard_repository_db_fields(), "Repository", "Repository/Project", "Repository/R-Forge/Revision", "Repository/R-Forge/DateTimeStamp")
 
   ## remove SRC packages
   pkgs_rforge_avail <- available.packages(contrib.url(sprintf("file://%s", release_dir)), filters = "duplicates")
@@ -286,7 +286,7 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   file_types <- c(Linux = ".tar.gz", MacOSX = ".tgz", Windows = ".zip")
   pkg_types <- c(Linux = "source", MacOSX = "mac.binary", Windows = "win.binary")
   ## R-Forge repository offers additional "Revision" field.
-  fields <- c(tools:::.get_standard_repository_db_fields(), "Repository", "Repository/Project", "Repository/R-Forge/Revision")
+  fields <- c(tools:::.get_standard_repository_db_fields(), "Repository", "Repository/Project", "Repository/R-Forge/Revision", "Repository/R-Forge/DateTimeStamp")
 
   ## further configuration
   file_types <- c(Linux = ".tar.gz", MacOSX = ".tgz", Windows = ".zip")

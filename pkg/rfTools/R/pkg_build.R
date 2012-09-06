@@ -918,7 +918,7 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
   pkg_type <- pkg_types[platform]
   ## Hard coding fields (we are indexing by number, so hard-coding important here!)
   ## R-Forge repository offers additional "Revision" field.
-  fields <- c(tools:::.get_standard_repository_db_fields(), "Repository", "Repository/Project", "Repository/R-Forge/Revision")
+  fields <- c(tools:::.get_standard_repository_db_fields(), "Repository", "Repository/Project", "Repository/R-Forge/Revision", "Repository/R-Forge/DateTimeStamp")
   ## Remember old working directory
   old_dir <- file_path_as_absolute(getwd())
   setwd(build_dir)
