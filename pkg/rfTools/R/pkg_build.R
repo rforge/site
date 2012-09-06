@@ -275,6 +275,7 @@ rf_build_packages <- function(pkg_status,
   if(file.exists(path_to_local_texmf))
     Sys.setenv(TEXMFLOCAL=path_to_local_texmf)
 
+
   ##############################################################################
   ## PACKAGE BUILDING
   ##############################################################################
@@ -325,58 +326,63 @@ rf_build_packages <- function(pkg_status,
     ## Cleanup
     close_virtual_X11_fb(pid)
 
-    ## WINDOWS BUILDS ##########################################################
-  }else if(platform == "Windows"){
+  }else{
+      ## BINARIES ##########################################################
 
-    ## Initialize timings
-    timings <- numeric(length(pkgs))
-    names(timings) <- pkgs
+      ## Get additional build flags based on Uwe's lists
+      ## merge-multiarch
+      mma_list <- character()
+      con <- tryCatch(url("http://developer.r-project.org/CRAN/QA/Uwe/make/config/MergeMultiarch", open = "r"), error = identity)
+      if(! inherits(con, "error")){
+          mma_list <- unique(c(mma_list, readLines(con)))
+          close(con)
+      }
 
-    ## Get additional build flags based on Uwe's lists
-    ## mma_list <- character()
-    ## FIXME: for the time being hardcode packages in build code
-    mma_list <- c("tth")
-    con <- tryCatch(url("http://developer.r-project.org/CRAN/QA/Uwe/make/config/MergeMultiarch", open = "r"), error = identity)
-    if(! inherits(con, "error")){
-        mma_list <- unique(c(mma_list, readLines(con)))
-        close(con)
-    }
+      ## force-biarch
+      fb_list <- character()
+      con <- tryCatch(url("http://developer.r-project.org/CRAN/QA/Uwe/make/config/ForceBiarch", open = "r"), error = identity)
+      if(! inherits(con, "error")){
+          fb_list <- tryCatch( readLines(con), error = function(x) NA)
+          close(con)
+      }
 
-    fb_list <- character()
-    con <- tryCatch(url("http://developer.r-project.org/CRAN/QA/Uwe/make/config/ForceBiarch", open = "r"), error = identity)
-    if(! inherits(con, "error")){
-        fb_list <- tryCatch( readLines(con), error = function(x) NA)
-        close(con)
-    }
+      ## R-Forge (">=") dependencies installed to pkg_libs
+      pkg_libs <- NULL
+      if( file.exists(path_to_local_pkg_libs) )
+          pkg_libs <- list.files(path_to_local_pkg_libs)
 
-    pkg_libs <- NULL
-    if( file.exists(path_to_local_pkg_libs) )
-      pkg_libs <- list.files(path_to_local_pkg_libs)
 
-    for( pkg in pkgs ){
-      ## Prolog
-      pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-      write_prolog(pkg, pkg_buildlog, pkg_status,
+      ## WINDOWS BUILDS ##########################################################
+      if(platform == "Windows"){
+
+          ## Initialize timings
+          timings <- numeric(length(pkgs))
+          names(timings) <- pkgs
+
+          for( pkg in pkgs ){
+              ## Prolog
+              pkg_buildlog <- get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+              write_prolog(pkg, pkg_buildlog, pkg_status,
                    type = "build", what = "binary", std.out = TRUE)
 
-      ## BUILD
-      ## timer start
-      proc_start <- proc.time()
+              ## BUILD
+              ## timer start
+              proc_start <- proc.time()
 
-      ## get current package version (tarball, thus svn in pkg!)
-      pkg_version_src   <- avail_src_pkgs[pkg, "Version"]
+              ## get current package version (tarball, thus svn in pkg!)
+              pkg_version_src   <- avail_src_pkgs[pkg, "Version"]
 
-      mergemultiarch <- FALSE
-      forcebiarch <- FALSE
-      build_in_pkglib <- FALSE
-      if(pkg %in% mma_list)
-          mergemultiarch <- TRUE
-      if(pkg %in% fb_list)
-          forcebiarch <- TRUE
-      if(pkg %in% pkg_libs)
-        build_in_pkglib <- TRUE
-      ## now build the package from package tarball
-      .build_binary_from_tarball_win(pkg,
+              mergemultiarch <- FALSE
+              forcebiarch <- FALSE
+              build_in_pkglib <- FALSE
+              if(pkg %in% mma_list)
+                  mergemultiarch <- TRUE
+              if(pkg %in% fb_list)
+                  forcebiarch <- TRUE
+              if(pkg %in% pkg_libs)
+                  build_in_pkglib <- TRUE
+              ## now build the package from package tarball
+              .build_binary_from_tarball_win(pkg,
                                      pkg_version_src,
                                      path_to_pkg_root,
                                      R,
@@ -387,72 +393,77 @@ rf_build_packages <- function(pkg_status,
                                      build_in_pkglib = build_in_pkglib
                                      )
 
-      ## save timing
-      timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
+              ## save timing
+              timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
-      ## Epilog
-      write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
-    }
+              ## Epilog
+              write_epilog(pkg__buildlog, timings[pkg], std.out = TRUE)
+          }
 
-    ## Cleanup
-    ## delete 00LOCK, sometimes this interrupted the build process ...
-    check_local_library(path_to_local_library)
+          ## Cleanup
+          ## delete 00LOCK, sometimes this interrupted the build process ...
+          check_local_library(path_to_local_library)
 
-  ## MacOSX BUILDS ###########################################################
-  }else if(platform == "MacOSX"){
+          ## MacOSX BUILDS ###########################################################
+      }else if(platform == "MacOSX"){
 
-    ## We need a virtual framebuffer
-    pid <- start_virtual_X11_fb()
+          ## We need a virtual framebuffer
+          pid <- start_virtual_X11_fb()
 
-    ## BUILDING FROM PKG TARBALLS
-    build_bin_mac <- function(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, path_to_local_pkg_libs, pkg_libs){
-        ## Prolog
-        pkg_buildlog <- rfTools:::get_buildlog(path_to_pkg_log, pkg, platform, architecture)
-        rfTools:::write_prolog(pkg, pkg_buildlog, pkg_status,
+          ## BUILDING FROM PKG TARBALLS
+          build_bin_mac <- function(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, path_to_local_pkg_libs, pkg_libs){
+              ## Prolog
+              pkg_buildlog <- rfTools:::get_buildlog(path_to_pkg_log, pkg, platform, architecture)
+              rfTools:::write_prolog(pkg, pkg_buildlog, pkg_status,
                     type = "build", what = "binary", std.out = TRUE)
 
-        ## timer start
-        proc_start <- proc.time()
+              ## timer start
+              proc_start <- proc.time()
 
-        build_in_pkglib <- FALSE
-        if(pkg %in% pkg_libs)
-            build_in_pkglib <- TRUE
+              mergemultiarch <- FALSE
+              forcebiarch <- FALSE
+              build_in_pkglib <- FALSE
+              if(pkg %in% mma_list)
+                  mergemultiarch <- TRUE
+              if(pkg %in% fb_list)
+                  forcebiarch <- TRUE
+              if(pkg %in% pkg_libs)
+                  build_in_pkglib <- TRUE
 
-        ## now build the package from package tarball
-        rfTools:::.build_binary_from_tarball_mac( pkg,
+              ## now build the package from package tarball
+              rfTools:::.build_binary_from_tarball_mac( pkg,
                                                   avail_src_pkgs[pkg, "Version"],
                                                   path_to_pkg_root,
                                                   R,
                                                   pkg_buildlog,
                                                   pkg_libs = path_to_local_pkg_libs,
+                                                  mergemultiarch = mergemultiarch,
+                                                  forcebiarch = forcebiarch,
                                                   build_in_pkglib = build_in_pkglib)
 
-        ## Epilog and timings
-        timing <- c(proc.time() - proc_start)["elapsed"]
-        write_epilog(pkg_buildlog, timing, std.out = TRUE)
-        timing
-    }
+              ## Epilog and timings
+              timing <- c(proc.time() - proc_start)["elapsed"]
+              write_epilog(pkg_buildlog, timing, std.out = TRUE)
+              timing
+          }
 
-    pkg_libs <- NULL
-    if( file.exists(path_to_local_pkg_libs) )
-        pkg_libs <- list.files(path_to_local_pkg_libs)
+          if(Ncpus > 1L){
+              timings <- parallel::mclapply(pkgs, FUN = build_bin_mac, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, path_to_local_pkg_libs, pkg_libs, mc.cores = Ncpus)
+              timings <- structure( unlist(timings), names = pkgs )
+          } else {
+              ## Initialize timings
+              timings <- numeric(length(pkgs))
+              names(timings) <- pkgs
 
-    if(Ncpus > 1L){
-        timings <- parallel::mclapply(pkgs, FUN = build_bin_mac, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, path_to_local_pkg_libs, pkg_libs, mc.cores = Ncpus)
-        timings <- structure( unlist(timings), names = pkgs )
-    } else {
-        ## Initialize timings
-        timings <- numeric(length(pkgs))
-        names(timings) <- pkgs
+              for(pkg in pkgs)
+                  timings[pkg] <- build_bin_mac(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, path_to_local_pkg_libs, pkg_libs)
+          }
 
-        for(pkg in pkgs)
-            timings[pkg] <- build_bin_mac(pkg, architecture, avail_src_pkgs, path_to_pkg_log, path_to_pkg_root, pkg_status, platform, R, path_to_local_pkg_libs, pkg_libs)
-    }
-
-    ## Cleanup: close framebuffer
-    close_virtual_X11_fb(pid)
-  } else stop(paste("Strange platform: ", platform, "! I'm confused ...",
+          ## Cleanup: close framebuffer
+          close_virtual_X11_fb(pid)
+      } else stop(paste("Strange platform: ", platform, "! I'm confused ...",
                     sep = ""))
+  }
 
   ## FINAL STEPS
   writeLines("Send email to R-Forge maintainer and cleanup ...")
@@ -509,127 +520,64 @@ rf_build_packages <- function(pkg_status,
 }
 
 ## OS: Windows
-## input: uncompressed package sources (the exported pkg directories)
-## output: compressed package binary <package_name>_<version>.zip
-## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_sources_win <- function(pkg, pkg_version, R, pkg_buildlog, build_args = ""){
-  ## first we have to build the tarball (important for vignettes)
-  system(paste(R, "CMD", "build", build_args, pkg,
-                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
-  ## then build the binary
-  system(paste(R, "CMD", "INSTALL --build --pkglock",
-                   paste(pkg, "_", pkg_version, ".tar.gz", sep = ""),
-                   ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
-  ## and finally delete the tarball
-  file.remove(paste(pkg, "_", pkg_version, ".tar.gz", sep = ""))
-  invisible(paste(pkg, "_", pkg_version, ".zip", sep = ""))
-}
-
-## OS: Windows
 ## input: package tarball (<package_name>_<version>.tar.gz)
 ## output: compressed package binary <package_name>_<version>.zip
 ## FIXME: currently sources and resulting tarball are in the current working dir
 .build_binary_from_tarball_win <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog, pkg_libs,  mergemultiarch = FALSE, forcebiarch = FALSE, build_in_pkglib = FALSE){
     Rbuild <- paste(R, "CMD", "INSTALL --build")
+
     if( mergemultiarch )
         Rbuild <- paste(Rbuild, "--merge-multiarch")
     if( forcebiarch )
         Rbuild <- paste(Rbuild, "--force-biarch")
     if( build_in_pkglib )
         Rbuild <- paste(Rbuild, sprintf("--library=%s", file.path(pkg_libs, pkg)))
-  shell(paste(Rbuild,
+
+    shell(paste(Rbuild,
                file.path(path_to_pkg_tarballs, "src", "contrib",
                          paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),
                  ">>", pkg_buildlog, "2>&1"), invisible = TRUE, shell = "cmd")
-  ##               ">>", pkg_buildlog))#, invisible = TRUE)
-  invisible(paste(pkg, "_", pkg_version, ".zip", sep = ""))
+
+    invisible(paste(pkg, "_", pkg_version, ".zip", sep = ""))
 }
 
 ## OS: Mac OS X
-## input: uncompressed package sources (the exported pkg directories)
-## output: compressed package binary <package_name>_<version>.tgz
-## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_sources_mac <- function(pkg, pkg_version, R, pkg_buildlog, build_args = ""){
-  ## first we have to build the tarball (important for vignettes)
-  pkg_tarball <- .build_tarball_from_sources_linux(pkg, R, pkg_buildlog, build_args)
-
-  ## make temporary directory
-  tmpdir <- .make_tmp_directory()
-
-  ## first look if there is a src directory because then we know that we have
-  ## to compile something ...
-  if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
-    ## compile an x86_32 binary
-    system(paste("R_ARCH=/i386", R, "CMD INSTALL -l", tmpdir,
-	             pkg_tarball, ">>", pkg_buildlog, "2>&1"))
-    ## compile a PPC binary
-    ##system(paste("R_ARCH=/ppc", R, "CMD INSTALL -l", tmpdir, "--libs-only",
-    ##	      	     pkg_tarball, ">>", pkg_buildlog, "2>&1"))
-
-  }else {
-    ## R only packages can be installed in one rush
-    system(paste(R, "CMD INSTALL -l", tmpdir,
-                     pkg_tarball, ">>", pkg_buildlog, "2>&1"))
-  }
-
-  ## combine everything to universal binary
-  pkg_binary <- .make_universal_mac_binary(pkg, pkg_version,  pkg_buildlog, tmpdir)
-
-  ## remove temporary directory
-  .cleanup_mac(tmpdir)
-
-  ## and finally delete the tarball
-  file.remove(pkg_tarball)
-
-  invisible(pkg_binary)
-}
-
-## OS: Mac OSX
 ## input: package tarball (<package_name>_<version>.tar.gz)
 ## output: compressed package binary <package_name>_<version>.tgz
 ## FIXME: currently sources and resulting tarball are in the current working dir
-.build_binary_from_tarball_mac <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog, pkg_libs, build_in_pkglib = FALSE){
-    Rbuild <- paste(R, "CMD", "INSTALL")
+.build_binary_from_tarball_mac <- function(pkg, pkg_version, path_to_pkg_tarballs, R, pkg_buildlog, pkg_libs, mergemultiarch = FALSE, forcebiarch = FALSE, build_in_pkglib = FALSE){
+    Rbuild <- paste(R, "CMD", "INSTALL --build")
+
+    if( mergemultiarch )
+        Rbuild <- paste(Rbuild, "--merge-multiarch")
+    if( forcebiarch )
+        Rbuild <- paste(Rbuild, "--force-biarch")
     if( build_in_pkglib )
         Rbuild <- paste(Rbuild, sprintf("--library=%s", file.path(pkg_libs, pkg)))
 
-    ## make temporary directory
-    tmpdir <- .make_tmp_directory()
+    system(paste(Rbuild,
+               file.path(path_to_pkg_tarballs, "src", "contrib",
+                         paste(pkg, "_", pkg_version, ".tar.gz", sep = "")),
+                 ">>", pkg_buildlog, "2>&1"), invisible = TRUE)
 
-    dirname <- paste(sample(c(letters, 0:9), 10, replace = TRUE), collapse = "")  ## first look if there is a src directory because then we know that we have
-    ## to compile something ...
-    if(.check_whether_package_code_contains_makefile_or_configure(pkg)){
-        ## compile an x86_32 binary
-        system(paste("R_ARCH=/i386", Rbuild, "-l", tmpdir,
-                 file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                 pkg_version, ".tar.gz", sep = "")),
-                 ">>", pkg_buildlog, "2>&1"))
-        ## compile a PPC binary (obsolete with R >= 2.15.1)
-        ##system(paste("R_ARCH=/ppc", Rbuild, "-l", tmpdir, "--libs-only",
-        ##	         file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-        ##              pkg_version, ".tar.gz", sep = "")),
-        ##             ">>", pkg_buildlog, "2>&1"))
-    }else {
-        ## R only packages can be installed in one rush
-        system(paste(Rbuild, "-l", tmpdir,
-                 file.path(path_to_pkg_tarballs, "src", "contrib", paste(pkg, "_",
-                 pkg_version, ".tar.gz", sep = "")),
-                 ">>", pkg_buildlog, "2>&1"))
-    }
+    ## FIXME: still needed?
+    ## make temporary directory
+    ##  tmpdir <- .make <- tmp <- directory()
 
     ## re-link dynlibs (see http://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Building-universal-package)
-    minor_version <-  paste( R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep="." )
+    #minor_version <-  paste( R.Version()$maj, unlist(strsplit(R.Version()$min, "[.]"))[1], sep="." )
     ## gfortran
-    system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgfortran.2.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgfortran.2.dylib $lib ; done", tmpdir, pkg, minor_version) )
+    #system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgfortran.2.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgfortran.2.dylib $lib ; done", tmpdir, pkg, minor_version) )
     ## gcc
-    system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgcc_s.1.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgcc_s.1.dylib $lib ; done", tmpdir, pkg, minor_version) )
+    #system( sprintf("for lib in `ls %s/%s/libs/*/*.so`; do install_name_tool -change /usr/local/lib/libgcc_s.1.dylib /Library/Frameworks/R.framework/Versions/%s/Resources/lib/libgcc_s.1.dylib $lib ; done", tmpdir, pkg, minor_version) )
 
-    pkg_binary <- .make_universal_mac_binary(pkg, pkg_version, pkg_buildlog, tmpdir)
+    #pkg_binary <- .make_universal_mac_binary(pkg, pkg_version, pkg_buildlog, tmpdir)
 
     ## Cleanup
-    .cleanup_mac(tmpdir)
-
-    invisible(pkg_binary)
+    #.cleanup_mac(tmpdir)
+    ##
+    #invisible(pkg_binary)
+    invisible(paste(pkg, "_", pkg_version, ".tgz", sep = ""))
 }
 
 ## update package repository
