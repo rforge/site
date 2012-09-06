@@ -1,0 +1,141 @@
+## start recommendations to Kurt
+
+## short term plans
+- Kurt has to decide what to do with R-Forge
+- in particular there must be someone doing all the sysadmin stuff
+(apply patches, security update, maintain the FusionForge/R-Forge
+patch set, etc.)
+- backup is probably an issue
+- setup Linux check machine (at WU)
+- incoming platform (flag dependencies as devel or release, WU)
+- Mac Server (AT&T)
+- Win builder (Dortmund)
+
+## centralize the builds: Push service rather pull service
+
+## AT&T Mac builder (R Foundation)
+## Winbuilder TU Dortmund (R Foundation)
+
+
+## R-Forge stats
+1107 (active) Projects = #svn repositories
+Repo size (open projects) sum: 14GB
+
+1236 packages, 614 of them are in CRAN, 11 on bioc
+cran <- available.packages()
+rforge <- available.packages( contrib.url(
+"http://r-forge.r-project.org" ))
+bioc <- available.packages( contrib.url(
+"http://bioconductor.org/packages/2.8/bioc" ))
+biocdata <- available.packages( contrib.url(
+"http://bioconductor.org/packages/2.8/data/experiment" ))
+sum(rownames(rforge) %in% rownames(cran))
+sum(rownames(rforge) %in% rownames(rbind(bioc, biocdata)))
+
+## run on R-Forge
+pkgs_dir <- "/srv/rsync/pkgs"
+
+get_package_sizes <- function( repo ){
+  pkgs <- dir(repo)
+  sizes <- lapply( pkgs, function(x) system(sprintf("du -s -B KB %s",
+  file.path(repo, x)), intern = TRUE) )
+  sizes <- unlist(lapply( sizes, function(x) strsplit(x, "kB")[[1]][1]))
+  names(sizes) <- pkgs
+  sizes
+}
+
+sizes <- get_package_sizes( pkgs_dir )
+
+> summary(as.integer(sizes))
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      9     147     426    3098    1422  641400 
+
+## commit history
+> summary( head_rev)
+               Min.             1st Qu.              Median                Mean
+(02/27/07 15:39:49) (02/07/10 17:24:54) (01/20/11 20:43:01) (08/26/10 08:15:21)
+            3rd Qu.                Max.                NA's
+(07/06/11 15:52:57) (08/16/11 23:10:39)                  61
+
+number of packages changed in last 2 weeks:
+> sum( head_rev > "08/01/11", na.rm = TRUE)
+[1] 171
+last month
+> sum( head_rev > "07/01/11", na.rm = TRUE)
+[1] 279
+last two months
+> sum( head_rev > "06/01/11", na.rm = TRUE)
+[1] 342
+last half a year
+> sum( head_rev > "02/01/11", na.rm = TRUE)
+[1] 519
+
+> summary(unlist(lapply( commit_history, length )))
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+   1.00    2.00   11.00   67.19   45.00 5089.00
+
+only few commits per package:
+> head(table(unlist(lapply( commit_history, length ))))
+
+  1   2   3   4   5   6
+263  52  51  43  31  27
+
+## number of packages changed per day in Juli 2011
+> out
+ [1]  66  38  45  71  70  70  84  88  41  54  93  77  77  59  84  22  32  63  96
+[20]  42  70  93  39  73  70  76  64 122  74  43
+> summary( out )
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+  22.00   47.25   70.00   66.53   77.00  122.00
+
+## average size of changes to be considered
+average package size = 3100 KB
+average number of changes per day = 67
+> 67 * 3100/1024
+[1] 202.832
+
+
+## CRAN needs Hardware upgrade##
+
+## R-FORGE spam filter/ mailing lists (see Martin Maechler's mail)
+
+## Meielisalp NOTES ##
+
+* outsource to a separate build system
+
+* virtualization (Brian is not a fan of Windows Virtualization but
+  Linux/Federa is great)
+
+* Uwe may be not in Dortmund
+
+* Windows builds:
+
+  - either Uwe runs a second winbuilder in Dortmund
+  - or Vienna
+  - traffic
+
+* Mac builds
+
+  - Mac server hosted somewhere in Europe (R Foundation) where other
+  people have access to. (Simon Manages it but has not the only
+  account)
+  
+* Kurt has to guarantee that
+
+* Security issue
+
+* 15 months -> meet with Kurt and discuss what are the priorities for
+ finishing things: or other interested parties
+
+* Simon should supervisor that attempt to standardize . but for some
+  reaon no good idea  thus Brian has a colleague (expertise++)
+
+* should employ someone who help going from A -> B
+
+* discussion with kurt in August
+
+* backups: copy whole disk to a second system, use a specialized
+  system (costy)
+
+* R-Forge meeting with Uwe, Simon and Brian (possibly in Warwick)
+
