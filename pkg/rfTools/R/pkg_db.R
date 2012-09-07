@@ -212,7 +212,8 @@ rf_export_and_build_pkgs <- function(rfc, rf_pkg_status, pkgs){ #, rebuild = FAL
     desc["Repository"] <- "R-Forge"
     desc["Repository/R-Forge/Project"] <- rf_pkg_status$outdated[[pkg]]$repo
     desc["Repository/R-Forge/Revision"] <- attr(desc, "meta")["Last Changed Rev"]
-    desc["Repository/R-Forge/DateTimeStamp"] <- format(as.POSIXct(attr(desc, "meta")["Last Changed Date"]), "%FT%T")
+    desc["Repository/R-Forge/DateTimeStamp"] <- format(as.POSIXct(attr(desc, "meta")["Last Changed Date"]), tz = "GMT")
+    desc["Date/Publication"] <- desc["Repository/R-Forge/DateTimeStamp"]
     tools:::.write_description( desc, file.path(dest, "DESCRIPTION") )
   } )
   tools::write_PACKAGES( stmp, type = "source", unpacked = TRUE )
