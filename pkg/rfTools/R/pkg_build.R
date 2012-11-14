@@ -397,7 +397,7 @@ rf_build_packages <- function(pkg_status,
               timings[pkg] <- c(proc.time() - proc_start)["elapsed"]
 
               ## Epilog
-              write_epilog(pkg__buildlog, timings[pkg], std.out = TRUE)
+              write_epilog(pkg_buildlog, timings[pkg], std.out = TRUE)
           }
 
           ## Cleanup

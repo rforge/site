@@ -14,6 +14,7 @@ graphicsQC,--no-vignettes
 homals,--no-examples --no-tests --no-vignettes
 IsoGeneGUI,--no-examples --no-tests --no-vignettes
 LeerFotos,--no-examples --no-tests --no-vignettes
+lokern,--no-examples --no-tests --no-vignettes
 MethComp,--no-examples --no-tests --no-vignettes
 mboost,--no-examples --no-tests --no-vignettes
 pedigreemm,--no-examples --no-tests --no-vignettes
