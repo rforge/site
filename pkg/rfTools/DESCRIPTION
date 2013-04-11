@@ -1,6 +1,6 @@
 Package: rfTools
-Version: 0.5-8.3
-Date: 2012-11-26
+Version: 0.5-8.4
+Date: 2013-02-21
 Title: R-Forge Build and Check Tools
 Description: This package contains platform-independent code for building R packages and quality management. This package is used on the R-Forge servers. Furthermore, this package provides a set of tools for analyzing the R-Forge web logs.
 Author: Stefan Theussl

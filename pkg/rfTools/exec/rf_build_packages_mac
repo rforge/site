@@ -87,13 +87,16 @@ if (!nzchar(TAR)) {
   else "internal"
 }
 
-files <- file.path(src_dir, c("RF_LOGS", "RF_PKG_CHECK", "RF_PKG_ROOT"))
-res <- utils::tar( file.path(stmp, paste("MAC", src_dir, "tar.gz", sep = ".")),
-                  src_dir, compression = "gzip", compression_level = 9, tar = TAR,
-                  extra_flags = sprintf("-C %s", build_root) )
-
+## now compress results
+files <- file.path( src_dir, c("RF_LOGS", "RF_PKG_CHECK", "RF_PKG_ROOT") )
+tarball <- file.path( stmp, paste("MAC", src_dir, "tar.gz", sep = ".") )
+tarball_compressing <- sprintf( "%s_compressing", tarball )
+res <- utils::tar( tarball_compressing,
+                   src_dir, compression = "gzip", compression_level = 9, tar = TAR,
+                   extra_flags = sprintf("-C %s", build_root) )
 if( res )
-    stop("ERROR tarring build directory")
+    stop( "tarring build directory failed." )
+file.rename( tarball_compressing, tarball )
 
 ## cleanup build dir
 unlink( file.path(build_root, src_dir), recursive = TRUE )
