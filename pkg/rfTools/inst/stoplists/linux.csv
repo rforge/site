@@ -21,6 +21,7 @@ IsoGene,--no-examples --no-tests --no-vignettes
 LeerFotos,--no-examples --no-tests --no-vignettes
 lme4,--no-examples --no-tests --no-vignettes
 mboost,--no-examples --no-tests --no-vignettes
+mqqc,--no-examples --no-tests --no-vignettes
 NeuroSpatCo,--no-examples --no-tests --no-vignettes
 phrapl,--no-vignettes
 RBloomberg,--install=no
