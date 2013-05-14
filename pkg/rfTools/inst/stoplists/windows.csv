@@ -18,8 +18,10 @@ LeerFotos,--no-examples --no-tests --no-vignettes
 lokern,--no-examples --no-tests --no-vignettes
 MethComp,--no-examples --no-tests --no-vignettes
 mboost,--no-examples --no-tests --no-vignettes
+mqqc,--no-examples --no-tests --no-vignettes
 pedigreemm,--no-examples --no-tests --no-vignettes
 phylobase,--no-tests --no-vignettes
+qsarr,--no-examples --no-tests --no-vignettes
 Rbooks,--no-examples --no-tests --no-vignettes
 Rcplex,--install=fake
 RcppBDT,--install=no
