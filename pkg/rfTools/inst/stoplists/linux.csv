@@ -16,6 +16,7 @@ fda,--no-examples --no-tests --no-vignettes
 GenABEL,--no-examples --no-tests --no-vignettes
 glmmBUGS,--install=no
 graphicsQC,--no-examples --no-tests --no-vignettes
+gridSVG,--no-examples --no-tests --no-vignettes
 intervals,--no-vignettes
 IsoGene,--no-examples --no-tests --no-vignettes
 LeerFotos,--no-examples --no-tests --no-vignettes
