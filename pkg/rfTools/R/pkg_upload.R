@@ -20,8 +20,9 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
 
   check_tgz <- function(btgz){
     ## if given submission is already being processed exit and return NULL
-    out <- c( mac = FALSE, win = FALSE )
-    out["mac"] <- file.exists(file.path(stmp, gsub("SRC.", "MAC.", btgz))) && !file.exists( file.path(stmp, sprintf("%s.processing.MAC", btgz)) ) 
+    ##  sincethe release of R 3.0 Mac is not supported anymore for the time being (prebuild binnaries from r.resarch need OSX >= 10.6)
+    out <- c( mac = TRUE, win = FALSE )
+    #out["mac"] <- file.exists(file.path(stmp, gsub("SRC.", "MAC.", btgz))) && !file.exists( file.path(stmp, sprintf("%s.processing.MAC", btgz)) ) 
     out["win"] <- file.exists(file.path(stmp, gsub("SRC.", "WIN.", btgz))) && !file.exists( file.path(stmp, sprintf("%s.processing.WIN", btgz)) ) 
     out
     
@@ -78,22 +79,23 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   else
     NULL
   
-  ## MAC BINARIES
-  mac_build_file <- file.path( stmp, gsub("SRC.", "MAC.", btgz) )
-  res <- utils::untar( mac_build_file, compressed = "gzip", tar = TAR, exdir = stmp )
-  if (res) {
-    stop("unpackaging MAC builds failed.")
-  }
+  ## MAC BINARIES (not  supported see above)
+  #mac_build_file <- file.path( stmp, gsub("SRC.", "MAC.", btgz) )
+  #res <- utils::untar( mac_build_file, compressed = "gzip", tar = TAR, exdir = stmp )
+  #if (res) {
+  #  stop("unpackaging MAC builds failed.")
+  #}
 
   ## copy 00install.out, build, and check logs
-  lapply(pkgs, rf_copy_logs, log_dir = log_dir, build_root = file.path(stmp, src_dir), type = "MacOSX" )
+  #lapply(pkgs, rf_copy_logs, log_dir = log_dir, build_root = file.path(stmp, src_dir), type = "MacOSX" )
   ## read check results
-  file <- file.path(stmp, src_dir, "RF_PKG_CHECK", "check.csv")
-  results_mac <- if(file.exists(file))
-    read.csv(file)
-  else
-    NULL
-
+  #file <- file.path(stmp, src_dir, "RF_PKG_CHECK", "check.csv")
+  #results_mac <- if(file.exists(file))
+  #  read.csv(file)
+  #else
+  #  NULL
+  results_mac <- NULL
+  
   ## WIN BINARIES
   win_build_file <- file.path( stmp, gsub("SRC.", "WIN.", btgz) )
   res <- utils::untar( win_build_file, compressed = "gzip", tar = TAR, exdir = stmp )
@@ -166,7 +168,7 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   lapply( pkgs_ok, function(pkg) rf_set_pkg_status( rfc, pkg, status = 0L) )
   
   ## remove build tgz'
-  file.remove(mac_build_file)
+  #file.remove(mac_build_file)
   file.remove(win_build_file)
   file.remove(src_build_file)
 
@@ -265,17 +267,17 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   write_PACKAGES(dir = contrib.url(release_dir, pkg_type), fields = fields, type = pkg_type)
   
   ## remove MAC packages
-  pkgs_rforge_avail_mac <- available.packages(contrib.url(sprintf("file://%s", release_dir), type = "mac.binary.leopard"), filters = "duplicates")
-  toremove <- which( rownames(pkgs_rforge_avail_mac) %in% pkgs )
-  files <- file.path(contrib.url(release_dir, type = "mac.binary.leopard"), sprintf("%s_%s.tgz", pkgs_rforge_avail_mac[toremove, "Package"], pkgs_rforge_avail_mac[toremove, "Version"]))
-  lapply( files, function(file) {if(file.exists(file))
-                                   file.remove(file)
-                               } )
+  #pkgs_rforge_avail_mac <- available.packages(contrib.url(sprintf("file://%s", release_dir), type = "mac.binary.leopard"), filters = "duplicates")
+  #toremove <- which( rownames(pkgs_rforge_avail_mac) %in% pkgs )
+  #files <- file.path(contrib.url(release_dir, type = "mac.binary.leopard"), sprintf("%s_%s.tgz", pkgs_rforge_avail_mac[toremove, "Package"], pkgs_rforge_avail_mac[toremove, "Version"]))
+  #lapply( files, function(file) {if(file.exists(file))
+  #                                 file.remove(file)
+  #                             } )
   ## write PACKAGES file
-  platform <- "MacOSX"
-  file_type <- file_types[platform]
-  pkg_type <- pkg_types[platform]
-  write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
+  #platform <- "MacOSX"
+  #file_type <- file_types[platform]
+  #pkg_type <- pkg_types[platform]
+  #write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
 
   invisible(TRUE)
 }
@@ -319,17 +321,17 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
 
 
   ## MAC packages
-  pkgs_mac_avail <- available.packages(contrib.url(sprintf("file://%s", path), type = "mac.binary.leopard"), filters = "duplicates")
-  torelease <- which( rownames(pkgs_mac_avail) %in% pkgs )
-  files <- file.path(contrib.url(path, type = "mac.binary.leopard"), sprintf("%s_%s.tgz", pkgs_mac_avail[torelease, "Package"], pkgs_mac_avail[torelease, "Version"]))
-  lapply( files, function(file) {if(file.exists(file))
-                                   file.copy(file, contrib.url(release_dir, type = "mac.binary.leopard"), copy.mode = FALSE)
-                               } )
+  #pkgs_mac_avail <- available.packages(contrib.url(sprintf("file://%s", path), type = "mac.binary.leopard"), filters = "duplicates")
+  #torelease <- which( rownames(pkgs_mac_avail) %in% pkgs )
+  #files <- file.path(contrib.url(path, type = "mac.binary.leopard"), sprintf("%s_%s.tgz", pkgs_mac_avail[torelease, "Package"], pkgs_mac_avail[torelease, "Version"]))
+  #lapply( files, function(file) {if(file.exists(file))
+  #                                 file.copy(file, contrib.url(release_dir, type = "mac.binary.leopard"), copy.mode = FALSE)
+  #                             } )
   ## write PACKAGES file
-  platform <- "MacOSX"
-  file_type <- file_types[platform]
-  pkg_type <- pkg_types[platform]
-  write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
+  #platform <- "MacOSX"
+  #file_type <- file_types[platform]
+  #pkg_type <- pkg_types[platform]
+  #write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
 
   invisible(TRUE)
 }
