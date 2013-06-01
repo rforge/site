@@ -1,6 +1,7 @@
 Package,check_args
 ade4,--no-examples --no-tests --no-vignettes
 analogue,--no-examples --no-tests --no-vignettes
+batman,--no-examples --no-tests --no-vignettes
 BB,--no-examples --no-tests --no-vignettes
 benchmark,--install=no
 bit,--no-examples --no-tests --no-vignettes

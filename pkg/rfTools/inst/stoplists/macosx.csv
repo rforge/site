@@ -2,6 +2,7 @@ Package,check_args
 ade4,--no-examples --no-tests --no-vignettes
 analogue,--no-examples --no-tests --no-vignettes
 animation,--no-examples --no-tests --no-vignettes
+batman,--no-examples --no-tests --no-vignettes
 BB,--no-examples --no-tests --no-vignettes
 BiplotGUI,--install=fake
 BTSPAS,--install=no
