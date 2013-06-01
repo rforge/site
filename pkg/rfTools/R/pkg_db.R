@@ -23,25 +23,36 @@ rf_pkg_status <- function( rfc, rebuild = FALSE, verbose = FALSE ){
 
   ## check all DESCRIPTION files for sanity
   test <- unlist( lapply(names(descriptions), function(repo) lapply( descriptions[[repo]], function(desc){
-    if(inherits(desc, "error"))
-      ## we know that reading desc file failed
-      status <- desc
-    else
-      status <- .check_description_for_sanity(desc)
-    ## Authors@R handling
-    fields <- tryCatch( tools:::.expand_package_description_db_R_fields(desc), error = identity )
-    if( inherits(fields, "error") )
-      status <- fields
-    else
-      if (length(fields) ){
-        meta <- attr(desc, "meta")
-        desc <- c(desc, fields)
-        attr(desc, "meta") <- meta
+
+      if(inherits(desc, "error")) {
+          ## we know that reading desc file failed
+          status <- desc
+      } else {
+          ## FIXME: handle encoding outside of
+          ## .check_description_for_sanity? Thanks to Sebastian Meyer
+          ## for this hint (https://r-forge.r-project.org/tracker/?func=detail&atid=371&aid=2792&group_id=34).
+          desc <- if( !is.na(encoding <- desc["Encoding"]) ) {
+              if (encoding %in% c("latin1", "UTF-8")){
+                  Encoding(desc) <- encoding
+                  desc
+              } else iconv(desc, from = encoding, to = "", sub = "byte")
+          } else desc
+          status <- .check_description_for_sanity(desc)
       }
-    list(description = desc,
-         sanity_check = list(status = length(status) == 0,
+      ## Authors@R handling
+      fields <- tryCatch( tools:::.expand_package_description_db_R_fields(desc), error = identity )
+      if( inherits(fields, "error") )
+          status <- fields
+      else
+          if (length(fields) ){
+              meta <- attr(desc, "meta")
+              desc <- c(desc, fields)
+              attr(desc, "meta") <- meta
+          }
+      list(description = desc,
+           sanity_check = list(status = length(status) == 0,
            msg = status),
-         repo = repo)
+           repo = repo)
   })), recursive = FALSE )
 
   ## keep track of final results
