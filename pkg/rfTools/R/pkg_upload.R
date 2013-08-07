@@ -7,7 +7,7 @@
 ## (3) delete builds which failed and add successful builds
 
 ## (1) make pkg status info based on SVN; retrieves further info from pkg db and CRAN
-rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
+rf_release_packages <- function( rfc, release_dir, log_dir, backup_dir = NULL, verbose = FALSE, keep = FALSE ){
 
   stmp <- .rf_get_tmp(rfc)
   stopifnot( file.exists(stmp) )
@@ -168,12 +168,24 @@ rf_release_packages <- function( rfc, release_dir, log_dir, verbose = FALSE ){
   lapply( pkgs_ok, function(pkg) rf_set_pkg_status( rfc, pkg, status = 0L) )
   
   ## remove build tgz'
-  #file.remove(mac_build_file)
-  file.remove(win_build_file)
-  file.remove(src_build_file)
+  #file.remove( mac_build_file )
+  file.remove( win_build_file )
+
+  if( keep ){
+    stopifnot( file.info( backup_dir )$isdir )
+    ## keep the latest 72 build/check attempts (covers about 12 weeks) as backup
+    file.copy( src_build_file, backup_dir )
+    backup_builds <- grep( "^SRC.build_.*.tar.gz$", dir(backup_dir), value = TRUE )
+    to_remove <- tail(backup <- builds, n = -72)
+    if( length(to_remove) )
+      file.remove( file.path(backup_dir, backup_builds) )
+  }
+  
+  ## remove source builds
+  file.remove( src_build_file )
 
   ## remove merge area
-  unlink(file.path(stmp, src_dir), recursive = TRUE)
+  unlink( file.path(stmp, src_dir), recursive = TRUE )
   
   ## remove lock file
   file.remove(file.path(stmp, ptgz))

@@ -25,5 +25,6 @@ rfc <- rf_read_configuration( file = conf_file )
 ## the R-Forge repository and the log file archive
 release_dir <- "/srv/rf/repo"
 log_dir <- "/srv/rf/logs"
+backup_dir <- "/srv/rf/staging/backup"
 
-rf_release_packages( rfc, release_dir, log_dir )
+rf_release_packages( rfc, release_dir, log_dir, backup_dir, keep = TRUE )
