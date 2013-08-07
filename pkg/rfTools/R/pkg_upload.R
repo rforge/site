@@ -176,7 +176,7 @@ rf_release_packages <- function( rfc, release_dir, log_dir, backup_dir = NULL, v
     ## keep the latest 72 build/check attempts (covers about 12 weeks) as backup
     file.copy( src_build_file, backup_dir )
     backup_builds <- grep( "^SRC.build_.*.tar.gz$", dir(backup_dir), value = TRUE )
-    to_remove <- tail(backup <- builds, n = -72)
+    to_remove <- tail(backup_builds, n = -72)
     if( length(to_remove) )
       file.remove( file.path(backup_dir, backup_builds) )
   }
