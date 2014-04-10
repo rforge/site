@@ -22,6 +22,7 @@ mboost,--no-examples --no-tests --no-vignettes
 mqqc,--no-examples --no-tests --no-vignettes
 pedigreemm,--no-examples --no-tests --no-vignettes
 phylobase,--no-tests --no-vignettes
+PortfolioAnalytics,--no-vignettes
 qsarr,--no-examples --no-tests --no-vignettes
 Rbooks,--no-examples --no-tests --no-vignettes
 Rcplex,--install=fake

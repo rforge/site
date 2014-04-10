@@ -26,6 +26,7 @@ mboost,--no-examples --no-tests --no-vignettes
 mqqc,--no-examples --no-tests --no-vignettes
 NeuroSpatCo,--no-examples --no-tests --no-vignettes
 phrapl,--no-vignettes
+PortfolioAnalytics,--no-vignettes
 RBloomberg,--install=no
 Rcplex,--install=fake
 RobRex,--no-examples --no-tests --no-vignettes
