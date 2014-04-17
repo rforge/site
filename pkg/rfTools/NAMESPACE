@@ -15,6 +15,7 @@ export( "rf_build_control",
         "rf_remove_obsolete_pkg",
         "rf_takeover_prepared_build",
         "rf_set_build_offline",
+        "rf_update_repo",
         "rf_write_configuration" )
 
 S3method( "print", "rf" )

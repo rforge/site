@@ -1,0 +1,28 @@
+#!/usr/bin/env Rscript
+## R-Forge build system tool chain
+## update and print package status
+
+## from CRAN-package-list:
+
+## We really want to run in a UTF-8 locale ...
+lc_ctype <- Sys.setlocale("LC_CTYPE", "en_US.UTF-8")
+## We used to do:
+## But sort in the C locale.
+##   lc_collate <- Sys.setlocale("LC_COLLATE", "C")
+## But as package names must be unique *ignoring* case, it seems more
+## appropriate to also sort ignoring case.  Hence:
+lc_collate <- Sys.setlocale("LC_COLLATE", "en_US.UTF-8")
+
+.libPaths("/home/rforge/lib/R")
+
+require("rfTools")
+
+## read connection information
+conf_file <- "/home/rforge/conf/rf.conf"
+rfc <- rf_read_configuration( file = conf_file )
+
+## directory configuration
+## the R-Forge repository and the log file archive
+release_dir <- "/srv/rf/repo"
+
+rf_update_repo( rfc, release_dir )

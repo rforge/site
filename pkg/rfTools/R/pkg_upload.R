@@ -263,7 +263,8 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   platform <- "Linux"
   file_type <- file_types[platform]
   pkg_type <- pkg_types[platform]
-  write_PACKAGES(dir = contrib.url(release_dir), fields = fields, type = pkg_type)
+  ## st 2014-04-17: takes too long for many packages and fails in the worst case
+  ##write_PACKAGES(dir = contrib.url(release_dir), fields = fields, type = pkg_type)
 
   ## remove WIN packages
   pkgs_rforge_avail_win <- available.packages(contrib.url(sprintf("file://%s", release_dir), type = "win.binary"), filters = "duplicates")
@@ -276,7 +277,8 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   platform <- "Windows"
   file_type <- file_types[platform]
   pkg_type <- pkg_types[platform]
-  write_PACKAGES(dir = contrib.url(release_dir, pkg_type), fields = fields, type = pkg_type)
+  ## st 2014-04-17: takes too long for many packages and fails in the worst case
+  ##write_PACKAGES(dir = contrib.url(release_dir, pkg_type), fields = fields, type = pkg_type)
   
   ## remove MAC packages
   #pkgs_rforge_avail_mac <- available.packages(contrib.url(sprintf("file://%s", release_dir), type = "mac.binary.leopard"), filters = "duplicates")
@@ -289,7 +291,8 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   #platform <- "MacOSX"
   #file_type <- file_types[platform]
   #pkg_type <- pkg_types[platform]
-  #write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
+  ## st 2014-04-17: takes too long for many packages and fails in the worst case
+  ###write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
 
   invisible(TRUE)
 }
@@ -316,7 +319,8 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   platform <- "Linux"
   file_type <- file_types[platform]
   pkg_type <- pkg_types[platform]
-  write_PACKAGES(dir = contrib.url(release_dir), fields = fields, type = pkg_type)
+  ## st 2014-04-17: takes too long for many packages and fails in the worst case
+  ##write_PACKAGES(dir = contrib.url(release_dir), fields = fields, type = pkg_type)
 
   ## WIN packages
   pkgs_win_avail <- available.packages(contrib.url(sprintf("file://%s", path), type = "win.binary"), filters = "duplicates")
@@ -329,7 +333,8 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   platform <- "Windows"
   file_type <- file_types[platform]
   pkg_type <- pkg_types[platform]
-  write_PACKAGES(dir = contrib.url(release_dir, pkg_type), fields = fields, type = pkg_type)
+  ## st 2014-04-17: takes too long for many packages and fails in the worst case
+  ##write_PACKAGES(dir = contrib.url(release_dir, pkg_type), fields = fields, type = pkg_type)
 
 
   ## MAC packages
@@ -343,7 +348,8 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   #platform <- "MacOSX"
   #file_type <- file_types[platform]
   #pkg_type <- pkg_types[platform]
-  #write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
+  ## st 2014-04-17: takes too long for many packages and fails in the worst case
+  ###write_PACKAGES(dir = contrib.url(release_dir, "mac.binary.leopard"), fields = fields, type = pkg_type)
 
   invisible(TRUE)
 }
