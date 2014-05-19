@@ -295,7 +295,7 @@ rf_build_packages <- function(pkg_status,
                     type = "build", what = "tarball", std.out = TRUE)
 
         build_args <- if( pkg %in% no_build_vignettes)
-            "--no-vignettes"
+            "--no-build-vignettes"
         else
             ""
 
