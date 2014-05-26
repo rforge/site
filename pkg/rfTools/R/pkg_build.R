@@ -946,10 +946,10 @@ provide_packages_in_contrib <- function(build_dir, contrib_dir, platform){
 
 .make_pkg_libs <- function( x, pkg_libs, path_to_pkg_src, repository_url, rforge_url, lib, ...){
   lapply( names(x), function(pkg) {
-    dir.create(file.path(pkg_libs, pkg))
+    dir.create( file.path(pkg_libs, pkg), showWarnings = FALSE )
     pkgs_dep <- resolve_dependency_structure( pkg, repository_url, path_to_pkg_src )
     for(dep in pkgs_dep[["ALL"]])
-      file.symlink(file.path(pkg_libs, pkg, dep), file.path(lib, dep))
+      file.symlink( file.path(lib, dep), file.path(pkg_libs, pkg, dep) )
     for(fdep in x[[pkg]]){
       file.remove(file.path(pkg_libs, pkg, fdep))
       install.packages(pkgs = fdep, lib = file.path(pkg_libs, pkg), contriburl = contrib.url(rforge_url), ...)

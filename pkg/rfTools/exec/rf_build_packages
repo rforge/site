@@ -116,6 +116,9 @@ res <- utils::tar( file.path(stmp, paste("SRC", src_dir, "tar.gz", sep = ".")),
 ## cleanup build dir,
 unlink(file.path(build_root, src_dir), recursive = TRUE)
 
+## cleanup per-pkg lib dir,
+unlink(file.path(build_root, "PKG_LIBS"), recursive = TRUE)
+
 ## and remove uncompressed src submission
 file.remove( file.path(stmp, paste(src_dir, ".tar.gz.processing", sep = "")) )
 

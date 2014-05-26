@@ -166,8 +166,12 @@ rf_check_packages <- function( pkg_status,
       pkg_url <- file.path( gsub(toreplace, "", URL_pkg_sources),
                          sprintf("%s_%s.tar.gz", pkg,
                                  pkg_status$outdated[[pkg]]$description["Version"]) )
+
+      ## save path to global package library
+      pkg_lib_glob <- Sys.getenv( "R_LIBS" )
       if(pkg %in% pkg_libs)
-        check_arg <- paste(check_arg, sprintf("--library=%s", file.path(pkg_libs, pkg)))
+        ## use package-specific library
+        Sys.setenv( R_LIBS = file.path(path_to_local_pkg_libs, pkg) )
       ## NOTE: On Windows we should use shell() or system2() instead of system()
       ##       otherwise pipes and redirections fail (see also ?system)
       timing <- ifelse( platform == "Windows",
@@ -203,6 +207,8 @@ rf_check_packages <- function( pkg_status,
 
   ## FINALIZATION
 
+  ## go back to global package library
+  Sys.setenv( R_LIBS = pkg_lib_glob )
   if( platform %in% c("Linux", "MacOSX") ){
     ## Close the virtual framebuffer X server
     close_virtual_X11_fb( pid )
