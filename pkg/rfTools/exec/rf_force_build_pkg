@@ -1,0 +1,59 @@
+#!/usr/bin/env Rscript
+## R-Forge build system tool chain
+## update package status to force build of given package
+
+## from CRAN-package-list:
+
+## We really want to run in a UTF-8 locale ...
+lc_ctype <- Sys.setlocale("LC_CTYPE", "en_US.UTF-8")
+## We used to do:
+## But sort in the C locale.
+##   lc_collate <- Sys.setlocale("LC_COLLATE", "C")
+## But as package names must be unique *ignoring* case, it seems more
+## appropriate to also sort ignoring case.  Hence:
+lc_collate <- Sys.setlocale("LC_COLLATE", "en_US.UTF-8")
+
+.libPaths("/home/rforge/lib/R")
+
+require("rfTools")
+
+## FIXME: For the time being we provide the package here:
+pkg <- "tm.plugin.mail"
+
+
+
+
+## read connection information
+conf_file <- "/home/rforge/conf/rf.conf"
+rfc <- rf_read_configuration( file = conf_file )
+
+## we use some caching here
+pkg_status_cache <- file.path( rfTools:::.rf_get_tmp(rfc), "pkg_status_cache.rda" )
+#if( !file.exists(pkg_status_cache) ){
+#  pkg_status <- rf_pkg_status(rfc)
+#  save(pkg_status, file = pkg_status_cache)
+#}
+load( pkg_status_cache )
+
+
+rf_force_prepare_build <- function( rfc, rf_pkg_status, pkg ){
+  stopifnot( !is.null(rf_pkg_status$current[[ pkg ]]) )
+  rf_pkg_status$outdated[[ pkg ]] <- rf_pkg_status$current[[ pkg ]]
+  rfTools:::rf_update_outdated_pkg(rfc, rf_pkg_status, pkg)
+  writeLines("Packages scheduled for build:")
+  writeLines(pkg)
+  pkg
+}
+
+## update package db: outdated and brandnew packages => status 1 (scheduled for build)
+#tobuild <- rf_prepare_build(rfc, pkg_status)
+tobuild <- rf_force_prepare_build( rfc, pkg_status, pkg )
+
+## FIXME: Enable package in outdated section of status object should be done automagically elsewhere
+pkg_status$outdated[[ tobuild ]] <- pkg_status$current[[ tobuild ]]
+
+## export sources and make them available for build
+rf_export_and_build_pkgs( rfc, pkg_status, tobuild )
+
+writeLines("The following packages are scheduled for build:")
+tobuild
