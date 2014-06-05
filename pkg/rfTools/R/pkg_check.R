@@ -181,6 +181,10 @@ rf_check_packages <- function( pkg_status,
                               )["elapsed"] )
       ## Epilog
       rfTools:::write_epilog(pkg_checklog, timing, std.out = TRUE)
+
+      ## go back to global package library
+      Sys.setenv( R_LIBS = pkg_lib_glob )
+
       timing
   }
   if(Ncpus > 1L){
@@ -207,8 +211,6 @@ rf_check_packages <- function( pkg_status,
 
   ## FINALIZATION
 
-  ## go back to global package library
-  Sys.setenv( R_LIBS = pkg_lib_glob )
   if( platform %in% c("Linux", "MacOSX") ){
     ## Close the virtual framebuffer X server
     close_virtual_X11_fb( pid )
