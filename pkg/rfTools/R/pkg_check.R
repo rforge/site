@@ -398,10 +398,10 @@ write_check_diffs <- function(check_dir, files = "check.csv"){
   for(file in files){
     if(file.exists(sprintf("%s.prev", file))){
       ifelse( .Platform$OS.type == "windows",
-              shell(sprintf("diff %s.prev %s > %s.diff", file, file, file)),
+              shell(sprintf("diff %s.prev %s > %s.diff", file, file, file), shell = "cmd"),
               system(sprintf("diff %s.prev %s > %s.diff", file, file, file)) )
       ifelse( .Platform$OS.type == "windows",
-             shell(sprintf("test -s %s.diff || rm -f %s.diff", file, file)),
+             shell(sprintf("test -s %s.diff || rm -f %s.diff", file, file), shell = "cmd"),
              system(sprintf("test -s %s.diff || rm -f %s.diff", file, file)) )
     }
 
