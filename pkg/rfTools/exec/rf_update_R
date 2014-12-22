@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ## a script for building various versions of R
 ## based on kurt hornik's check-R
 ## theussl 2012-06
