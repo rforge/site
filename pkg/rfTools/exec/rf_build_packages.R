@@ -22,14 +22,14 @@ R_flavor <- switch( R.version$status,
                     "Under development (unstable)" = "R-devel",
                     "R-patched" )
 bioc_url <- ifelse( R_flavor == "R-devel",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.0/bioc",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/2.14/bioc")
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.1/bioc",
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.0/bioc")
 bioc_data <- ifelse( R_flavor == "R-devel",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.0/data/annotation",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/2.14/data/annotation")
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.1/data/annotation",
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.0/data/annotation")
 bioc_exp <- ifelse( R_flavor == "R-devel",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.0/data/experiment",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/2.14/data/experiment")
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.1/data/experiment",
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.0/data/experiment")
 
 ## we have to set 'R_LIBS' again otherwise package dependencies are not found
 Sys.setenv("R_LIBS" = local_lib)
