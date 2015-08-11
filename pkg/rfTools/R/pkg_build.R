@@ -621,11 +621,16 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   pkgs_to_install <- pkgs_to_install[pkgs_to_install %in% unique(avail_repos[,1])]
   pkgs_to_install_rforge <- setdiff(pkgs_dep[["R_FORGE"]], unique(c(pkgs_to_install, rownames(pkgs_installed))))
   writeLines("Done.")
+
   if(length(pkgs_to_install)){
     writeLines("Install missing packages from third party repositories ...")
-    install.packages(pkgs = as.character(na.omit(pkgs_to_install)), lib = lib, contriburl = contrib.url(repository_url), ...)
+    if(platform == "Windows"){
+        install.packages(pkgs = as.character(na.omit(pkgs_to_install)), lib = lib, contriburl = contrib.url(repository_url, type = "binary"), type = "binary", ...)
+    } else {
+        install.packages(pkgs = as.character(na.omit(pkgs_to_install)), lib = lib, contriburl = contrib.url(repository_url), ...)
+    }
     writeLines("Done.")
-  }
+  } 
 
   if(length(pkgs_to_install_rforge)){
     writeLines("Install missing packages from R-Forge ...")
