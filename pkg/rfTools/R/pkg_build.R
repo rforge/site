@@ -625,7 +625,7 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   if(length(pkgs_to_install)){
     writeLines("Install missing packages from third party repositories ...")
     if(platform == "Windows"){
-        install.packages(pkgs = as.character(na.omit(pkgs_to_install)), lib = lib, contriburl = contrib.url(repository_url, type = "binary"), type = "binary", ...)
+        install.packages(pkgs = as.character(na.omit(pkgs_to_install)), lib = lib, contriburl = contrib.url(repository_url, type = "binary"), ...)
     } else {
         install.packages(pkgs = as.character(na.omit(pkgs_to_install)), lib = lib, contriburl = contrib.url(repository_url), ...)
     }
