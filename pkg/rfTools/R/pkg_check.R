@@ -75,7 +75,7 @@ rf_check_packages <- function( pkg_status,
   ## PACKAGE DB UPDATE ##
   ## only for R-devel
 
-  if(length(grep("Under Development)", R.version$version.string, value = TRUE))){
+  if(length(grep("R Under development", R.version$version.string, value = TRUE))){
     ## FIXME: is it sufficient what we are doing here?
     other_repositories <- NULL
 
@@ -84,10 +84,11 @@ rf_check_packages <- function( pkg_status,
       other_repositories <- "http://www.stats.ox.ac.uk/pub/RWin"
     }
 
-    update_package_library(pkgs, URL_pkg_sources,
-                           c(cran_url, c(bioc_url, bioc_data, bioc_experiment),
-                             omega_hat_url, other_repositories),
-                           path_to_local_library, platform, Ncpus = Ncpus)
+    update_package_library(c(pkgs), URL_pkg_sources, c(cran_url,
+                                                     c(bioc_url, bioc_data, bioc_experiment),
+                                                     omega_hat_url,
+                                                     other_repositories),
+                         path_to_local_library, path_to_local_pkg_libs, platform, Ncpus = Ncpus, rforge_url = rforge_url)
   }
   ## LAST PREPARATION BEFORE CHECKING - DIRECTORIES
 
