@@ -92,16 +92,16 @@ for R_flavor in ${R_flavors}; do
     test -d src || mkdir src || do_cleanup_and_exit 1
     case "${R_flavor}" in
 	R-devel)
-	    url=ftp://ftp.stat.math.ethz.ch/Software/R/R-devel.tar.gz ;;
+	    url=https://stat.ethz.ch/R/daily/R-devel.tar.gz ;;
 	R-patched)
       ## <NOTE>
       ## Adjust as needed ...
-	    url=ftp://ftp.stat.math.ethz.ch/Software/R/R-patched.tar.gz
+	    url=https://stat.ethz.ch/R/daily/R-patched.tar.gz
       ## url=http://cran.at.r-project.org/src/base-prerelease/R-latest.tar.gz
       ## </NOTE>
 	    ;;
 	R-release)
-	    url=http://cran.r-project.org/src/base/R-latest.tar.gz ;;
+	    url=https://cran.r-project.org/src/base/R-latest.tar.gz ;;
     esac
     mv src src.save
     (mkdir tmp &&
