@@ -117,7 +117,7 @@ rf_build_packages <- function(pkg_status,
                               "http://bioconductor.org/packages/release/data/annotation",
                               bioc_experiment=
                               "http://bioconductor.org/packages/release/data/experiment",
-                              omega_hat_url  = "http://www.omegahat.org/R",
+                              omega_hat_url  = "http://www.omegahat.net/R",
                               control        = list(),
                               Ncpus = 1L){
 

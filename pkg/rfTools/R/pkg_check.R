@@ -7,7 +7,7 @@ rf_check_packages <- function( pkg_status,
                                bioc_data        = "http://bioconductor.org/packages/release/data/annotation",
                                bioc_experiment  =
                               "http://bioconductor.org/packages/release/data/experiment",
-                               omega_hat_url    = "http://www.omegahat.org/R",
+                               omega_hat_url    = "http://www.omegahat.net/R",
                                global_check_arg = NULL,
                                check_time_limit = 600,
                                control          = list(),
