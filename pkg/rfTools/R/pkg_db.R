@@ -237,9 +237,14 @@ rf_export_and_build_pkgs <- function(rfc, rf_pkg_status, pkgs){ #, rebuild = FAL
       "tar --force-local"
     else "internal"
   }
-  res <- utils::tar( file.path(.rf_get_tmp(rfc), paste(basename(stmp), "tar.gz", sep = ".")),
-                     basename(stmp), compression = "gzip", compression_level = 9, tar = TAR,
-                     extra_flags = sprintf("-C %s", dirname(stmp)) )
+  #res <- utils::tar( file.path(.rf_get_tmp(rfc), paste(basename(stmp), "tar.gz", sep = ".")),
+  #                   basename(stmp), compression = "gzip", compression_level = 9, tar = TAR,
+  #                   extra_flags = sprintf("-C %s", dirname(stmp)) )
+  sys_cmd=paste("tar -C", dirname(stmp), "-zcf",
+                   file.path(.rf_get_tmp(rfc), paste(basename(stmp), "tar.gz", sep = ".")),
+                   basename(stmp))
+  system(sys_cmd)
+  res = FALSE
   if (res) {
     stop("packaging staging area into .tar.gz failed.")
   }

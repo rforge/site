@@ -168,10 +168,15 @@ if (!nzchar(TAR)) {
 }
 
 files <- file.path(src_dir, c("RF_LOGS", "RF_PKG_CHECK", "RF_PKG_ROOT"))
-res <- utils::tar( file.path(stmp, paste("WIN", src_dir, "tar.gz", sep = ".")),
-                  files = files, compression = "gzip", compression_level = 9, tar = TAR,
-                  extra_flags = sprintf("-C %s", build_root) )
-
+#res <- utils::tar( file.path(stmp, paste("WIN", src_dir, "tar.gz", sep = ".")),
+#                  files = files, compression = "gzip", compression_level = 9, tar = TAR,
+#                  extra_flags = sprintf("-C %s", build_root) )
+#temporary tar fix
+shell_cmd=file.path("R:","lib","local", "rfTools", "exec", "rf_open_cmdshell.bat")
+sys_cmd=paste("tar -C", build_root, "-zcf",
+        file.path(stmp, paste("WIN", src_dir, "tar.gz", sep = ".")),
+        paste(files, sep = "" , collapse=" "))
+system(shell_cmd, input = sys_cmd)
 ## cleanup build dir
 unlink(file.path(build_root, src_dir), recursive = TRUE)
 
