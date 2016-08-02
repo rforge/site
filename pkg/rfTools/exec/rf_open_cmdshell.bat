@@ -17,6 +17,7 @@ FOR /F "tokens=*" %%i in ('type %rf_lib_dir%\rfTools\wintools\environment_variab
 
 rem Which default R installation should we use?
 set PATH=%rf_R_base%\bin;%rf_R_base%\bin\x64;%PATH%
+set R_LIBS=R:/lib/local/3.3
 
 cd R:\
 

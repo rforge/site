@@ -1,4 +1,4 @@
-PATH=R:\base\Rtools\gcc-4.6.3\bin;R:\base\Rtools\bin;R:\base\OpenBUGS\OpenBUGS321;R:\base\ImageMagick-6.6.3\bin;R:\lib\Rextras\Tcl\bin;C:\WINDOWS\system32;C:\WINDOWS\;C:\WINDOWS\System32\Wbem;R:\base\texlive\2010\bin\win32;R:\base\gs\gs9.10\bin;R:\base\Qt\bin;R:\base\Qt\qt\bin;R:\share\GNU Emacs 23.2\bin;R:\base\texlive\install-tl-20100929;R:\base\qpdf\qpdf-2.3.1\bin;R:\share\cygwin\bin
+PATH=R:\base\Rtools\gcc-4.6.3\bin;R:\base\Rtools\bin;R:\base\Rtools\mingw_32\bin;R:\base\OpenBUGS\OpenBUGS321;R:\base\ImageMagick-6.6.3\bin;R:\lib\Rextras\Tcl\bin;C:\WINDOWS\system32;C:\WINDOWS\;C:\WINDOWS\System32\Wbem;R:\base\texlive\2016\bin\win32;R:\base\gs\gs9.10\bin;R:\base\Qt\bin;R:\base\Qt\qt\bin;R:\share\GNU Emacs 23.2\bin;R:\base\texlive\install-tl-20160609;R:\base\qpdf\qpdf-2.3.1\bin;R:\share\cygwin\bin
 CYGWIN=nodosfilewarning
 
 TMPDIR=R:\tmp
@@ -26,4 +26,3 @@ _R_CHECK_HAVE_PADI_=FALSE
 _R_CHECK_HAVE_POSTGRES_=FALSE
 _R_CHECK_HAVE_SQLLITE_=FALSE
 _R_CHECK_HAVE_PERL_=FALSE
-

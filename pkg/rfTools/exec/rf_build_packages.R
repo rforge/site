@@ -51,14 +51,14 @@ R_flavor <- switch( R.version$status,
                     "Under development (unstable)" = "R-devel",
                     "R-patched" )
 bioc_url <- ifelse( R_flavor == "R-devel",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.3/bioc",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.2/bioc")
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.4/bioc",
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.3/bioc")
 bioc_data <- ifelse( R_flavor == "R-devel",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.3/data/annotation",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.2/data/annotation")
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.4/data/annotation",
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.3/data/annotation")
 bioc_exp <- ifelse( R_flavor == "R-devel",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.3/data/experiment",
-                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.2/data/experiment")
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.4/data/experiment",
+                    "http://bioconductor.statistik.tu-dortmund.de/packages/3.3/data/experiment")
 
 ## we have to set 'R_LIBS' again otherwise package dependencies are not found
 Sys.setenv("R_LIBS" = local_lib)
@@ -124,10 +124,10 @@ rf_check_packages( rf_pkg_status,
                    control         = control )
 
 ## now devel
-Sys.setenv( "RF_SRC_DIR" = src_dir )
+#Sys.setenv( "RF_SRC_DIR" = src_dir )
 
 ## call R-devel here, will go then to else path
-system( sprintf( "%s --vanilla < %s", R_DEVEL, system.file(file.path("exec", "rf_build_packages"), package = "rfTools") ))
+#system( sprintf( "%s --vanilla < %s", R_DEVEL, system.file(file.path("exec", "rf_build_packages"), package = "rfTools") ))
 
 } else {
 
@@ -182,7 +182,7 @@ unlink(file.path(build_root, src_dir), recursive = TRUE)
 
 ## and remove uncompressed src submission
 file.remove( file.path(stmp, paste("SRC.", src_dir, ".tar.gz.processing.WIN", sep = "")) )
-
+#print(file.path(stmp, paste("SRC.", src_dir, ".tar.gz.processing.WIN", sep = "")))
 system("umount -f T:")
 }
 

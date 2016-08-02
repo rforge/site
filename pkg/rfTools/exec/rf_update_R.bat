@@ -36,7 +36,7 @@ rem Download and update R installation
 
 rm -rf %RF_PATH_TO_R_INSTALL%\R-devel
 cd %TMPDIR%
-%RF_PATH_TO_CYGWIN%\bin\wget.exe -O R-devel.exe http://cran.wu.ac.at/bin/windows/base/R-devel.exe
+%RF_PATH_TO_CYGWIN%\bin\wget.exe -O R-devel.exe https://cran.r-project.org/bin/windows/base/R-devel.exe
 chmod a+x R-devel.exe
 R-devel.exe /LOADINF="%RF_PATH_TO_WINTOOLS%\r-devel.inf" /SILENT
 rm -f R-devel.exe
@@ -60,7 +60,7 @@ rem Download and update R installation
 rm -rf R:\lib\R\R-patched
 cd %TMPDIR%
 rem for the time being R prerelease instead of R-patched.exe 
-%RF_PATH_TO_CYGWIN%\bin\wget.exe -O R-patched.exe http://cran.wu.ac.at/bin/windows/base/R-patched.exe
+%RF_PATH_TO_CYGWIN%\bin\wget.exe -O R-patched.exe https://cran.r-project.org/bin/windows/base/R-patched.exe
 rem R-patched.exe R-2.15.0alpha-win.exe
 
 chmod a+x R-patched.exe

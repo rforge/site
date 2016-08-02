@@ -1,5 +1,5 @@
 @cls
-@echo off
+rem @echo off
 
 rem rf Windows Toolchain: rf_build_pkgs_patched.bat
 rem R-Forge Windows build/check system script initiating R-Forge package building
@@ -18,6 +18,7 @@ FOR /F "tokens=*" %%i in ('type %rf_lib_dir%\rfTools\wintools\environment_variab
 
 rem logs are written to  (.Rout stuff)
 IF NOT EXIST %rf_run_dir% mkdir %rf_run_dir%
+R:
 cd %rf_run_dir%
 
 rem copy current build script to run directory

@@ -1,9 +1,9 @@
-PATH="${PATH};R:\base\gtk+\x64\bin;R:\base\graphviz\x64\bin;R:\base\Java\x64\bin\server;d:\msys\system64\bin"
+PATH="${PATH};R:\base\gtk+\x64\bin;R:\base\graphviz\x64\bin;R:\base\JavaRE\x64\jre1.8.0_92\bin\server;d:\msys\system64\bin"
 
 GDAL_HOME=R:\base\local215
 LOCAL_SOFT=R:\base\local215
 JAGS_ROOT=R:\base\jags\JAGS-3.2.0
-JAVA_HOME=C:/Program Files/Java/jdk1.6.0_22
+JAVA_HOME=R:/base/JavaJDK/x64/jdk1.8.0_92
 UDUNITS2_HOME=R:\base\local215
 
 HAVE_PNG=yes
