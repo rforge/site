@@ -594,7 +594,11 @@ update_package_library <- function(pkgs, path_to_pkg_src, repository_url, lib, p
   }
   ## first update all installed packages if necessary
   ## debug  cat(sprintf("Arguments to update.packages(): lib = %s, repos = %s, ask = FALSE, checkBuilt = TRUE", lib, paste(repository_url, collapse = ", ")))
-  update.packages(lib.loc = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE, ...)
+  if(platform == "Windows"){
+	update.packages(lib.loc = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE, type="win.binary", ...)
+  }else{
+	update.packages(lib.loc = lib, repos = repository_url, ask = FALSE, checkBuilt = TRUE, ...)
+  }
 
   writeLines("Done.")
   writeLines("Resolve dependency structure ...")
