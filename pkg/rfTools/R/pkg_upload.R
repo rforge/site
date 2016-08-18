@@ -111,7 +111,7 @@ rf_release_packages <- function( rfc, release_dir, log_dir, backup_dir = NULL, v
     read.csv(file)
   else
     NULL
-  
+
   all_results <- matrix(NA, ncol = 3, nrow = length(pkgs), dimnames = list(pkgs, c("Linux", "MacOSX", "Windows")))
 
   if( !is.null(results_lin) ){
@@ -227,7 +227,7 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
 
 .rf_check_package_binary_areas <- function( release_dir ){
   area_win <- contrib.url(sprintf("%s", release_dir), type = "win.binary")
-  area_mac <- contrib.url(sprintf("%s", release_dir), type = "mac.binary.leopard")
+  #area_mac <- contrib.url(sprintf("%s", release_dir), type = "mac.binary.leopard")
 
   ## FIXME: we need to check symlink "latest" as well, must point to the latest minor release
   if(!file.exists(area_win)){
@@ -236,12 +236,12 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
     file.remove( file.path(dirname( area_win ), "latest") )
     file.symlink( basename(area_win), file.path(dirname( area_win ), "latest")  )
   }
-  if(!file.exists(area_mac)){
-    dir.create(area_mac)
-    tools::write_PACKAGES( dir = area_mac )
-    file.remove( file.path(dirname( area_mac ), "latest") )
-    file.symlink( basename(area_mac), file.path(dirname( area_mac ), "latest") )
-  }
+  #if(!file.exists(area_mac)){
+  #  dir.create(area_mac)
+  #  tools::write_PACKAGES( dir = area_mac )
+  #  file.remove( file.path(dirname( area_mac ), "latest") )
+  #  file.symlink( basename(area_mac), file.path(dirname( area_mac ), "latest") )
+  #}
 }
 
 .rf_remove_package_from_release <- function(pkgs, release_dir){
@@ -308,8 +308,8 @@ rf_copy_logs <- function(pkg, log_dir, build_root, type = c("Linux", "MacOSX", "
   #file_types <- c(Linux = ".tar.gz", MacOSX = ".tgz", Windows = ".zip")
   #pkg_types <- c(Linux = "source", MacOSX = "mac.binary", Windows = "win.binary")
   
-  #file_types <- c(Linux = ".tar.gz", Windows = ".zip")
-  #pkg_types <- c(Linux = "source", Windows = "win.binary")
+  file_types <- c(Linux = ".tar.gz", Windows = ".zip")
+  pkg_types <- c(Linux = "source", Windows = "win.binary")
   
   
   ## R-Forge repository offers additional "Revision" field.
